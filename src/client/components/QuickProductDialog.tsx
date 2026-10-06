@@ -16,17 +16,22 @@ export function QuickProductDialog({
   barcode,
   onClose,
   onCreated,
+  defaultStock = "1",
+  stockHint,
 }: {
   barcode: string;
   onClose: () => void;
   onCreated: (item: CatalogItem) => void;
+  /** Kasada 1 (satılacak ürün elde); mal girişinde 0 (stok girişle eklenecek). */
+  defaultStock?: string;
+  stockHint?: string;
 }) {
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [cost, setCost] = useState("");
   const [vat, setVat] = useState<1 | 10 | 20>(20);
-  const [stock, setStock] = useState("1");
+  const [stock, setStock] = useState(defaultStock);
   const [minStock, setMinStock] = useState("0");
   const [categories, setCategories] = useState<Category[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -126,6 +131,7 @@ export function QuickProductDialog({
         <label>
           <span className="text-sm font-medium text-slate-700">Mevcut stok (adet)</span>
           <input inputMode="numeric" value={stock} onChange={(e) => setStock(e.target.value)} className={field} />
+          {stockHint && <span className="mt-1 block text-xs text-slate-500">{stockHint}</span>}
         </label>
         <label>
           <span className="text-sm font-medium text-slate-700">Min. stok</span>

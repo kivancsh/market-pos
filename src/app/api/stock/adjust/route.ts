@@ -1,4 +1,9 @@
 import { apiRoute, readJson } from "@/server/http/api";
-import { adjustStock } from "@/server/services/stock";
+import { adjustStock, adjustStockBatch } from "@/server/services/stock";
 
-export const POST = apiRoute(["owner"], async ({ req, ctx }) => adjustStock(ctx, (await readJson(req)) as never));
+/** Tek ürün ({productId, countedQty, note}) veya sayım listesi ({items: [...]}, tek transaction). */
+export const POST = apiRoute(["owner"], async ({ req, ctx }) => {
+  const body = (await readJson(req)) as { items?: unknown };
+  if (body && typeof body === "object" && "items" in body) return { results: adjustStockBatch(ctx, body as never) };
+  return adjustStock(ctx, body as never);
+});

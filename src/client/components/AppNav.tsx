@@ -15,6 +15,10 @@ interface NavItem {
 /** Menü. Yeni ekranlar eklendikçe buraya eklenir. */
 const ITEMS: NavItem[] = [
   { href: "/kasa", label: "Kasa" },
+  { href: "/urunler", label: "Ürünler", owner: true },
+  { href: "/mal-girisi", label: "Mal Girişi", owner: true },
+  { href: "/stok-sayim", label: "Stok Sayımı", owner: true },
+  { href: "/etiketler", label: "Etiketler", owner: true },
   { href: "/kasa?sim=1", label: "Simülatör", owner: true },
 ];
 
@@ -39,7 +43,8 @@ export function AppNav({ role, businessName }: { role: Role; businessName: strin
       <span className="mr-2 text-lg font-bold">{businessName}</span>
       <nav className="flex flex-wrap gap-1" aria-label="Ana menü">
         {items.map((i) => {
-          const active = pathname === i.href.split("?")[0] && !i.href.includes("?");
+          const base = i.href.split("?")[0]!;
+          const active = !i.href.includes("?") && (pathname === base || pathname.startsWith(base + "/"));
           return (
             <Link
               key={i.href}

@@ -164,3 +164,17 @@ export function incrementalShare(
     proportionalShare(lineAmountKurus, qty, alreadyReturned)
   );
 }
+
+export interface UnitEconomics {
+  netPriceKurus: number;
+  netCostKurus: number;
+  /** Birim brüt kâr (KDV hariç). */
+  profitKurus: number;
+}
+
+/** Ürün listesi için birim kâr: KDV hariç satış fiyatı − KDV hariç ortalama maliyet. */
+export function unitEconomics(salePriceKurus: number, avgCostKurus: number, vatRate: number): UnitEconomics {
+  const netPriceKurus = netOfVat(salePriceKurus, vatRate);
+  const netCostKurus = netOfVat(avgCostKurus, vatRate);
+  return { netPriceKurus, netCostKurus, profitKurus: netPriceKurus - netCostKurus };
+}

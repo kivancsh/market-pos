@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { useMounted } from "@/client/hooks/useMounted";
 import { formatTRY, parseTRYToKurus } from "@/lib/money";
 import { api } from "@/client/api";
 import { cartReducer, cartTotals, emptyCart, parseStoredCart, type CartState } from "@/client/cart";
@@ -12,7 +13,7 @@ import type { CatalogItem, KasaSettings, Role } from "@/client/types";
 import { uuidv4 } from "@/client/uuid";
 import { CartTable } from "./CartTable";
 import { PaymentDialog, type SaleResponse } from "./PaymentDialog";
-import { QuickProductDialog } from "./QuickProductDialog";
+import { QuickProductDialog } from "@/client/components/QuickProductDialog";
 import { SimulatorPanel } from "./SimulatorPanel";
 import { SuccessOverlay } from "./SuccessOverlay";
 import { Modal } from "@/client/components/Modal";
@@ -28,13 +29,6 @@ interface TodayStats {
   date: string;
   saleCount: number;
   revenueKurus?: number;
-}
-
-const subscribeNoop = () => () => {};
-
-/** Sunucuda ve hidrasyonda false, tarayıcıda yüklendikten sonra true. */
-function useMounted(): boolean {
-  return useSyncExternalStore(subscribeNoop, () => true, () => false);
 }
 
 export function KasaScreen(props: { role: Role; settings: KasaSettings; simulator: boolean }) {

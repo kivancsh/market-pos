@@ -91,3 +91,19 @@ export function adjustStock(ctx: Ctx, input: z.input<typeof adjustStockSchema>):
     })
     .immediate();
 }
+
+export const adjustStockBatchSchema = z.object({
+  items: z.array(adjustStockSchema).min(1, "Listeye en az bir ürün ekleyin.").max(1000),
+});
+
+/**
+ * Stok sayımı listesi: tüm satırlar TEK transaction'da uygulanır (biri hatalıysa hiçbiri yazılmaz).
+ * Aynı ürün listede birden çok kez varsa son sayım geçerlidir.
+ */
+export function adjustStockBatch(ctx: Ctx, input: z.input<typeof adjustStockBatchSchema>): AdjustStockResult[] {
+  const data = parseInput(adjustStockBatchSchema, input);
+  const lastByProduct = new Map(data.items.map((i) => [i.productId, i]));
+  return ctx.db
+    .transaction(() => [...lastByProduct.values()].map((item) => adjustStock(ctx, item)))
+    .immediate();
+}

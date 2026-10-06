@@ -18,3 +18,20 @@ export function getDayQuickStats(db: DB, businessDate: string): TodayStats {
     .get(businessDate) as { refunds: number };
   return { saleCount: s.n, revenueKurus: s.total - r.refunds };
 }
+
+/** Ürünün günlük satılan adedi (iptaller hariç, iadeler düşülmez — satış günü bazında). */
+export function getProductDailySales(
+  db: DB,
+  productId: number,
+  from: string,
+  to: string,
+): { businessDate: string; qty: number; revenueKurus: number }[] {
+  return db
+    .prepare(
+      `SELECT s.business_date AS businessDate, SUM(i.qty) AS qty, SUM(i.line_total_kurus) AS revenueKurus
+         FROM sale_items i JOIN sales s ON s.id = i.sale_id
+        WHERE i.product_id = ? AND s.status = 'completed' AND s.business_date BETWEEN ? AND ?
+        GROUP BY s.business_date ORDER BY s.business_date`,
+    )
+    .all(productId, from, to) as { businessDate: string; qty: number; revenueKurus: number }[];
+}

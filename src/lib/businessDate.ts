@@ -129,3 +129,24 @@ export function istanbulLocalToUtc(businessDate: string, hour: number, minute = 
   if (corrected !== t) t = corrected;
   return new Date(t);
 }
+
+const dateTimeFmt = new Intl.DateTimeFormat("tr-TR", {
+  timeZone: BUSINESS_TIME_ZONE,
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+/** "06.10.2026 14:05" (İstanbul saati). */
+export function formatIstanbulDateTime(date: Date | string): string {
+  return dateTimeFmt.format(typeof date === "string" ? new Date(date) : date).replace(",", "");
+}
+
+/** "2026-10-06" → "06.10.2026" */
+export function formatBusinessDate(businessDate: string): string {
+  const [y, m, d] = businessDate.split("-");
+  return `${d}.${m}.${y}`;
+}
