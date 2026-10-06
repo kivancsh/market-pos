@@ -39,3 +39,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# market-pos
+!.env.example
+/data/
+/backups/
+/test-results/
+/playwright-report/
+/playwright/.cache/

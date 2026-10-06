@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  cacheComponents: true,
-  partialPrefetching: true,
+  // Cache Components bilinçli olarak KAPALI: stok ve para verisi her istekte
+  // veritabanından taze okunmalı. Önbellek kullanılmıyor.
+  serverExternalPackages: ["better-sqlite3"],
   turbopack: {
     rules: {
       "*.css": {
