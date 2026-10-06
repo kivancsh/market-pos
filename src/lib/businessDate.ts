@@ -101,3 +101,31 @@ export function presetRange(preset: RangePreset, today: string): { from: string;
     }
   }
 }
+
+const partsFmt = new Intl.DateTimeFormat("en-US", {
+  timeZone: BUSINESS_TIME_ZONE,
+  hourCycle: "h23",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+});
+
+/** İstanbul'un o andaki UTC farkı (ms). */
+function istanbulOffsetMs(date: Date): number {
+  const p = Object.fromEntries(partsFmt.formatToParts(date).map((x) => [x.type, x.value]));
+  const asUtc = Date.UTC(+p.year!, +p.month! - 1, +p.day!, +p.hour!, +p.minute!, +p.second!);
+  return asUtc - Math.floor(date.getTime() / 1000) * 1000;
+}
+
+/** İstanbul yerel tarih + saatini UTC ana çevirir (ör. "2026-10-06", 12, 30 → 09:30Z). */
+export function istanbulLocalToUtc(businessDate: string, hour: number, minute = 0, second = 0): Date {
+  const [y, m, d] = businessDate.split("-").map(Number) as [number, number, number];
+  const naive = Date.UTC(y, m - 1, d, hour, minute, second);
+  let t = naive - istanbulOffsetMs(new Date(naive));
+  const corrected = naive - istanbulOffsetMs(new Date(t));
+  if (corrected !== t) t = corrected;
+  return new Date(t);
+}

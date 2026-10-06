@@ -52,3 +52,14 @@ describe("tarih aralıkları", () => {
     expect(presetRange("last_month", "2026-01-15")).toEqual({ from: "2025-12-01", to: "2025-12-31" });
   });
 });
+
+describe("istanbulLocalToUtc", () => {
+  it("İstanbul yerel saatini UTC'ye çevirir ve geri dönüş tutarlıdır", async () => {
+    const { istanbulLocalToUtc } = await import("@/lib/businessDate");
+    expect(istanbulLocalToUtc("2026-10-06", 12, 30).toISOString()).toBe("2026-10-06T09:30:00.000Z");
+    expect(istanbulLocalToUtc("2026-10-07", 0, 1).toISOString()).toBe("2026-10-06T21:01:00.000Z");
+    const t = istanbulLocalToUtc("2026-03-29", 23, 59, 59);
+    expect(getBusinessDate(t)).toBe("2026-03-29");
+    expect(getIstanbulHour(t)).toBe(23);
+  });
+});
