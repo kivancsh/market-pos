@@ -171,8 +171,8 @@ export interface CatalogItem {
   primaryBarcode: string | null;
 }
 
-export function getCatalog(ctx: Ctx): CatalogItem[] {
-  return listProductsWithBarcodes(ctx, { activeOnly: true }).map((p) => ({
+export function toCatalogItem(p: ProductWithBarcodes): CatalogItem {
+  return {
     id: p.id,
     name: p.name,
     salePriceKurus: p.salePriceKurus,
@@ -181,5 +181,9 @@ export function getCatalog(ctx: Ctx): CatalogItem[] {
     minStock: p.minStock,
     barcodes: p.barcodes.map((b) => b.barcode),
     primaryBarcode: p.barcodes.find((b) => b.isPrimary)?.barcode ?? null,
-  }));
+  };
+}
+
+export function getCatalog(ctx: Ctx): CatalogItem[] {
+  return listProductsWithBarcodes(ctx, { activeOnly: true }).map(toCatalogItem);
 }
