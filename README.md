@@ -27,20 +27,24 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 ## Kolay kurulum: masaüstü simgesi (Mac)
 
 1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, PIN dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
-2. Bundan sonra programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program kapalıysa başlar ve tarayıcı açılır; zaten açıksa sadece tarayıcı açılır. Simgeyi Dock'a da sürükleyebilirsiniz.
-3. Açılan siyah Terminal penceresi programın kendisidir: **açık kaldığı sürece program çalışır**, kapatınca durur. Telefondan panel adresi de bu pencerede yazar.
+2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **arka planda, pencere açmadan** çalışır ve tarayıcı açılır. Simgeyi Dock'a da sürükleyebilirsiniz.
+3. Program açıkken simgeye tekrar tıklarsanız küçük bir pencere çıkar:
+   - **Tarayıcıda aç** — kasa/panel sayfasını açar,
+   - **Programı kapat** — onay sorduktan sonra programı durdurur.
+   Bu pencerede telefondan panel adresi de yazar.
+4. Tarayıcı sekmesini kapatmak programı kapatmaz. Program; simgeden "Programı kapat" denene ya da bilgisayar kapanana/yeniden başlayana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
 
 Klasördeki diğer çift tıklanabilir dosyalar:
 
 | Dosya | Ne yapar |
 |---|---|
-| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip (⌘ + S) programı yeniden başlatın. |
+| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip (⌘ + S) programı yeniden başlatın (simge → Programı kapat → simge). |
 | **Yedek Al** | Anlık yedek alır ve `backups` klasörünü açar. |
-| **Market Kasa Başlat** | Masaüstü simgesiyle aynı işi yapar. |
 
-- İlk açılışta Mac "Terminal, Masaüstü klasöründeki dosyalara erişmek istiyor" veya "gelen bağlantılara izin verilsin mi?" diye sorarsa **İzin Ver** deyin.
+- Bir sorun olursa program kayıtları `data/logs/` klasöründedir (`server.log`, `build.log`).
+- Programı görünür bir Terminal penceresinde çalıştırmak (sorun ararken) için: `scripts/market-kasa.command`.
 - `market-pos` klasörünü başka bir yere taşırsanız **Kurulum**'a tekrar çift tıklayın (simge yeni yeri öğrenir).
-- Kodda güncelleme olduğunda (ör. GitHub'dan yeni sürüm) programı kapatıp **Kurulum**'u tekrar çalıştırmanız yeterlidir.
+- Kodda güncelleme olduğunda (ör. GitHub'dan yeni sürüm) programı kapatın; simgeye tekrar tıkladığınızda gerekiyorsa kendisi yeniden derler (ya da **Kurulum**'u çalıştırın).
 
 Aşağıdaki Terminal adımları, bu dosyaların yaptığı işin elle yapılışıdır; kısayolları kullanıyorsanız gerekmez.
 

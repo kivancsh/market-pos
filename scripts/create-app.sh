@@ -1,5 +1,5 @@
 #!/bin/bash
-# Masaüstüne "Market Kasa" uygulama simgesini oluşturur.
+# Masaüstüne "Market Kasa" uygulama simgesini oluşturur (program arka planda, pencere açmadan çalışır).
 # Kullanım: scripts/create-app.sh [proje klasörü] [uygulama yolu]
 set -euo pipefail
 
@@ -19,23 +19,51 @@ if [ -e "$APP" ]; then
 fi
 
 cat > "$TMP/app.applescript" <<'APPLESCRIPT'
+-- Market Kasa: programı arka planda (pencere açmadan) başlatır / durdurur.
 on run
+	set appIcon to path to resource "applet.icns"
 	set pathFile to POSIX path of (path to resource "project-path.txt")
 	set projectDir to do shell script "cat " & quoted form of pathFile
-	set launcher to projectDir & "/scripts/market-kasa.command"
+	set svc to quoted form of (projectDir & "/scripts/service.sh")
 	try
-		do shell script "test -x " & quoted form of launcher
+		do shell script "test -f " & svc
 	on error
-		display dialog "Market Kasa klasörü bulunamadı:" & return & projectDir & return & return & "Klasörü taşıdıysanız, klasördeki 'Kurulum' dosyasına tekrar çift tıklayın." buttons {"Tamam"} default button 1 with icon stop
+		display dialog "Market Kasa klasörü bulunamadı:" & return & projectDir & return & return & "Klasörü taşıdıysanız, klasördeki 'Kurulum' dosyasına tekrar çift tıklayın." buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
 		return
 	end try
-	set isRunning to do shell script "/usr/sbin/lsof -nP -iTCP:3000 -sTCP:LISTEN >/dev/null 2>&1 && echo yes || echo no"
-	if isRunning is "yes" then
-		-- Program zaten açık: sadece tarayıcıyı aç
-		open location "http://localhost:3000"
+
+	set svcState to do shell script "/bin/bash " & svc & " status"
+	if svcState is "running" then
+		set ipAddr to do shell script "/bin/bash " & svc & " ip"
+		set msg to "Market Kasa açık ve çalışıyor." & return & return & "Bu bilgisayarda:  http://localhost:3000"
+		if ipAddr is not "" then set msg to msg & return & "Telefondan panel:  http://" & ipAddr & ":3000/panel"
+		set r to display dialog msg buttons {"Programı kapat", "Tarayıcıda aç"} default button "Tarayıcıda aç" with title "Market Kasa" with icon appIcon
+		if button returned of r is "Tarayıcıda aç" then
+			open location "http://localhost:3000"
+		else
+			display dialog "Program kapatılsın mı?" & return & return & "Kapatınca kasa ve panel çalışmaz; tekrar açmak için simgeye çift tıklayın." buttons {"Vazgeç", "Kapat"} default button "Vazgeç" cancel button "Vazgeç" with title "Market Kasa" with icon caution
+			do shell script "/bin/bash " & svc & " stop"
+			display notification "Program kapatıldı." with title "Market Kasa"
+		end if
 	else
-		-- Programı Terminal penceresinde başlat; hazır olunca tarayıcı kendiliğinden açılır
-		do shell script "open -a Terminal " & quoted form of launcher
+		display notification "Başlatılıyor… (ilk seferde birkaç dakika sürebilir)" with title "Market Kasa"
+		try
+			do shell script "/bin/bash " & svc & " start"
+		on error errMsg number errNum
+			if errNum is 10 then
+				display dialog "Node.js bulunamadı." & return & return & "Açılacak sayfadan LTS sürümünü kurun, sonra klasördeki 'Kurulum' dosyasına çift tıklayın." buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
+				open location "https://nodejs.org"
+			else
+				set failReason to "bilinmeyen bir hata"
+				if errNum is 11 then set failReason to "paketler kurulamadı (internet bağlantısını kontrol edin)"
+				if errNum is 12 then set failReason to "program derlenemedi"
+				if errNum is 13 then set failReason to "program açılırken kapandı"
+				if errNum is 14 then set failReason to "program zamanında yanıt vermedi"
+				display dialog "Market Kasa başlatılamadı: " & failReason & "." & return & return & "Ayrıntılar: " & projectDir & "/data/logs" buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
+			end if
+			return
+		end try
+		open location "http://localhost:3000"
 	end if
 end run
 APPLESCRIPT

@@ -53,7 +53,7 @@ else
 fi
 
 # 5) Masaüstü simgesi
-chmod +x scripts/market-kasa.command scripts/create-app.sh *.command 2>/dev/null
+chmod +x scripts/market-kasa.command scripts/create-app.sh scripts/service.sh *.command 2>/dev/null
 if bash scripts/create-app.sh "$(pwd)" "$HOME/Desktop/Market Kasa.app"; then
   echo "✓ Masaüstüne 'Market Kasa' simgesi kondu."
 else
@@ -65,8 +65,9 @@ echo "=============================================="
 echo "  KURULUM TAMAM"
 echo
 echo "  • Programı açmak için masaüstündeki 'Market Kasa' simgesine çift tıklayın."
+echo "    Program arka planda çalışır (pencere açılmaz) ve tarayıcı açılır."
+echo "  • Program açıkken simgeye tekrar tıklarsanız: 'Tarayıcıda aç' veya 'Programı kapat'."
 echo "  • Dock'a eklemek için simgeyi Dock'a sürükleyin."
-echo "  • Açılan siyah pencere programın kendisidir; kapatınca program durur."
 if [ "$NEW_ENV" = 1 ]; then
   echo
   echo "  ⚠️  PIN'ler şimdilik varsayılan: yönetici 1234, kasiyer 0000."
