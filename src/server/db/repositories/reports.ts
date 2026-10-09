@@ -289,3 +289,91 @@ export function listDaySales(db: DB, businessDate: string): DaySaleRow[] {
     )
     .all(businessDate) as DaySaleRow[];
 }
+
+export interface DailyRow {
+  businessDate: string;
+  saleCount: number;
+  returnCount: number;
+  revenueGrossKurus: number;
+  revenueNetKurus: number;
+  grossProfitKurus: number;
+  marginPermille: number | null;
+  refundsKurus: number;
+}
+
+/** Gün gün özet (satışsız günler 0 ile). */
+export function getDailyRows(db: DB, days: string[]): DailyRow[] {
+  if (days.length === 0) return [];
+  const from = days[0]!;
+  const to = days[days.length - 1]!;
+  const sales = new Map(
+    (
+      db
+        .prepare(
+          `SELECT business_date AS d, COUNT(*) AS n, SUM(total_kurus) AS gross, SUM(net_total_kurus) AS net,
+                  SUM(gross_profit_kurus) AS profit
+             FROM sales WHERE status='completed' AND business_date BETWEEN ? AND ? GROUP BY business_date`,
+        )
+        .all(from, to) as { d: string; n: number; gross: number; net: number; profit: number }[]
+    ).map((r) => [r.d, r]),
+  );
+  const rets = new Map(
+    (
+      db
+        .prepare(
+          `SELECT business_date AS d, COUNT(*) AS n, SUM(refund_total_kurus) AS gross, SUM(net_total_kurus) AS net,
+                  SUM(profit_reversal_kurus) AS profit
+             FROM returns WHERE business_date BETWEEN ? AND ? GROUP BY business_date`,
+        )
+        .all(from, to) as { d: string; n: number; gross: number; net: number; profit: number }[]
+    ).map((r) => [r.d, r]),
+  );
+  return days.map((d) => {
+    const s = sales.get(d);
+    const r = rets.get(d);
+    const net = (s?.net ?? 0) - (r?.net ?? 0);
+    const profit = (s?.profit ?? 0) - (r?.profit ?? 0);
+    return {
+      businessDate: d,
+      saleCount: s?.n ?? 0,
+      returnCount: r?.n ?? 0,
+      revenueGrossKurus: (s?.gross ?? 0) - (r?.gross ?? 0),
+      revenueNetKurus: net,
+      grossProfitKurus: profit,
+      marginPermille: marginPermille(profit, net),
+      refundsKurus: r?.gross ?? 0,
+    };
+  });
+}
+
+export interface ActiveProductRow {
+  id: number;
+  name: string;
+  categoryName: string | null;
+  salePriceKurus: number;
+  avgCostKurus: number;
+  vatRate: number;
+  stockQty: number;
+}
+
+export function listActiveProductRows(db: DB): ActiveProductRow[] {
+  return db
+    .prepare(
+      `SELECT p.id, p.name, c.name AS categoryName, p.sale_price_kurus AS salePriceKurus, p.avg_cost_kurus AS avgCostKurus,
+              p.vat_rate AS vatRate, p.stock_qty AS stockQty
+         FROM products p LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.is_active = 1 ORDER BY p.name COLLATE NOCASE`,
+    )
+    .all() as ActiveProductRow[];
+}
+
+/** Ürün başına son (iptal edilmemiş) satış günü. */
+export function getLastSaleDates(db: DB): Map<number, string> {
+  const rows = db
+    .prepare(
+      `SELECT i.product_id AS productId, MAX(s.business_date) AS last
+         FROM sale_items i JOIN sales s ON s.id = i.sale_id WHERE s.status='completed' GROUP BY i.product_id`,
+    )
+    .all() as { productId: number; last: string }[];
+  return new Map(rows.map((r) => [r.productId, r.last]));
+}

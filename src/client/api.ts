@@ -10,13 +10,18 @@ export class ApiError extends Error {
   }
 }
 
-export async function api<T>(path: string, init: { method?: string; body?: unknown; signal?: AbortSignal } = {}): Promise<T> {
+export async function api<T>(
+  path: string,
+  init: { method?: string; body?: unknown; form?: FormData; signal?: AbortSignal } = {},
+): Promise<T> {
   let res: Response;
+  const hasBody = init.body !== undefined || init.form !== undefined;
   try {
     res = await fetch(path, {
-      method: init.method ?? (init.body === undefined ? "GET" : "POST"),
+      method: init.method ?? (hasBody ? "POST" : "GET"),
+      // FormData'da Content-Type'ı tarayıcı (sınır bilgisiyle) kendisi koyar
       headers: init.body === undefined ? undefined : { "Content-Type": "application/json" },
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      body: init.form ?? (init.body === undefined ? undefined : JSON.stringify(init.body)),
       cache: "no-store",
       signal: init.signal,
     });

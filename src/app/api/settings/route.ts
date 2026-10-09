@@ -1,5 +1,6 @@
 import { getSettings } from "@/server/db/repositories/settings";
-import { apiRoute } from "@/server/http/api";
+import { apiRoute, readJson } from "@/server/http/api";
+import { updateSettings } from "@/server/services/settings";
 
 /** Ayarlar. Kasiyer sadece kasa için gerekenleri görür. */
 export const GET = apiRoute(["owner", "cashier"], ({ ctx, role }) => {
@@ -14,3 +15,5 @@ export const GET = apiRoute(["owner", "cashier"], ({ ctx, role }) => {
     soundEnabled: s.soundEnabled,
   };
 });
+
+export const PATCH = apiRoute(["owner"], async ({ req, ctx }) => updateSettings(ctx, (await readJson(req)) as never));

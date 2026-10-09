@@ -21,6 +21,8 @@ const ITEMS: NavItem[] = [
   { href: "/mal-girisi", label: "Mal Girişi", owner: true },
   { href: "/stok-sayim", label: "Stok Sayımı", owner: true },
   { href: "/etiketler", label: "Etiketler", owner: true },
+  { href: "/raporlar", label: "Raporlar", owner: true },
+  { href: "/ayarlar", label: "Ayarlar", owner: true },
   { href: "/kasa?sim=1", label: "Simülatör", owner: true },
 ];
 

@@ -26,3 +26,12 @@ describe("birim kâr", () => {
     expect(unitEconomics(5000, 3200, 20)).toEqual({ netPriceKurus: 4167, netCostKurus: 2667, profitKurus: 1500 });
   });
 });
+
+describe("dosya adı", async () => {
+  const { asciiSlug } = await import("@/server/excel");
+  it("Türkçe harfler ASCII'ye çevrilir", () => {
+    expect(asciiSlug("Ürün bazında kârlılık")).toBe("urun-bazinda-karlilik");
+    expect(asciiSlug("Son 30 günde hiç satmayan ürünler")).toBe("son-30-gunde-hic-satmayan-urunler");
+    expect(asciiSlug("İÇECEK ŞİŞE Ğ")).toBe("icecek-sise-g");
+  });
+});
