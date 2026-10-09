@@ -76,3 +76,5 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Raporlar tek tanımdan (`src/server/services/reports.ts`) hem ekran hem Excel üretir.
 - Excel'e TL/yüzde yazarken metin üzerinden sayıya çevrilir (`kurusToExcelNumber`), float aritmetiği yok.
 - Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).
+- `docs/kilavuz/` (kullanma kılavuzu PDF'i) ve `promo/` (tanıtım videosu) üreticileri ayrı demo veritabanıyla çalışır
+  (`data/guide`, `data/promo`; port 3300/3200). Ekranlar değişirse yeniden üretilir; adımlar klasörlerdeki README'lerde.

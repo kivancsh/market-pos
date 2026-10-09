@@ -10,6 +10,9 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## İçindekiler
 
+- [Kullanma kılavuzu (PDF)](#kullanma-kılavuzu-pdf)
+- [Tanıtım videosu](#tanıtım-videosu)
+- [Kolay kurulum: masaüstü simgesi (Mac)](#kolay-kurulum-masaüstü-simgesi-mac)
 1. [İlk kurulum](#1-ilk-kurulum)
 2. [Dükkânda çalıştırma ve telefondan erişim](#2-dükkânda-çalıştırma-ve-telefondan-erişim)
 3. [Barkod okuyucuyu bağlama](#3-barkod-okuyucuyu-bağlama)
@@ -21,6 +24,31 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 9. [Gerçek kullanıma geçiş (örnek verileri silme)](#9-gerçek-kullanıma-geçiş-örnek-verileri-silme)
 10. [Bilinen sınırlar ve sonraki adımlar](#10-bilinen-sınırlar-ve-sonraki-adımlar)
 11. [Teknik bilgiler (geliştirici için)](#11-teknik-bilgiler-geliştirici-için)
+
+---
+
+## Kullanma kılavuzu (PDF)
+
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 43 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+
+Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
+
+- Kurulum, programı açıp kapatma, ilk yönetici hesabı, giriş
+- **Satış:** okutma, adet, adla arama, nakit/kart, para üstü, bilgi fişi, indirim, bilinmeyen barkod, kısayollar, kasa mesajları
+- Ürün ekleme, Excel'den aktarma, fiyat değiştirme (tek ürün ve toplu), kategoriler, barkod etiketi
+- Mal girişi, stok sayımı, iade ve iptal, panel, gün sonu, raporlar, telefondan takip
+- Kasiyer hesapları, şifreler, işlem geçmişi, ayarlar, barkod okuyucu, yedekleme
+- Sorun çözme tablosu, kelimelerin anlamı ve kasanın yanına asılacak **günlük kullanım özeti**
+
+Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](docs/kilavuz/README.md).
+
+## Tanıtım videosu
+
+🎬 **[Market Kasa tanıtım videosu (40 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
+
+Lansman tarzı, "nasıl kullanılır" videosu: giriş → barkod okutma → nakit ödeme ve para üstü → panelde kâr (telefondan da) → Yönetim Paneli'nden toplu fiyat → etiket, raporlar, işlem geçmişi, kasiyer hesapları. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
+
+Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 
 ---
 
@@ -264,4 +292,5 @@ Next.js 16 (App Router) · TypeScript · Tailwind · SQLite (better-sqlite3) · 
 | `npm run seed` | Örnek veri (veritabanını sıfırlar, önce yedek alır) |
 | `npm run backup` | Anlık yedek |
 | `npm run check:integrity` | Her ürün için stok = stok hareketleri toplamı kontrolü |
+| `docs/kilavuz/` · `promo/` | Kullanma kılavuzu PDF'ini ve tanıtım videosunu yeniden üreten betikler (açıklamalar klasörlerdeki README'lerde) |
 | `npm run users -- reset-password` · `create-owner <kullanıcı> <şifre> [ad]` · `create-cashier <ad> <pin>` · `list` | Hesap işlemleri (bilgisayardan) |
