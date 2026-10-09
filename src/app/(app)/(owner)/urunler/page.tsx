@@ -3,6 +3,7 @@ import { ProductsScreen } from "./ProductsScreen";
 
 export const metadata = { title: "Ürünler · Market Kasa" };
 
-export default function ProductsPage() {
-  return <ProductsScreen settings={getClientSettings()} />;
+export default async function ProductsPage({ searchParams }: PageProps<"/urunler">) {
+  const { kategori } = await searchParams;
+  return <ProductsScreen settings={getClientSettings()} initialCategory={typeof kategori === "string" && kategori ? kategori : "all"} />;
 }

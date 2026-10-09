@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { E2E, api, cart, login, openKasa, rescanPause, scan, seedBarcodes, todaySaleCount } from "./helpers";
+import { api, cart, loginOwner, openKasa, rescanPause, scan, seedBarcodes, todaySaleCount } from "./helpers";
 
 interface Dash {
   summary: { revenueGrossKurus: number; grossProfitKurus: number; saleCount: number };
@@ -9,7 +9,7 @@ interface Products {
 }
 
 test("nakit satış: para üstü doğru; panel ciro/kâr ve stok güncel (sayfa yenilemeden)", async ({ page, context }) => {
-  await login(page, E2E.ownerPin);
+  await loginOwner(page, /\/(panel|kasa)/);
   const before = await api<Dash>(page, "/api/dashboard");
   const kolaStock = (await api<Products>(page, "/api/products")).items.find((p) => p.name === "Kola 1 L")!.stockQty;
 
@@ -48,7 +48,7 @@ test("nakit satış: para üstü doğru; panel ciro/kâr ve stok güncel (sayfa 
 });
 
 test("'Satışı tamamla'ya hızlı çift tıklama → tek satış", async ({ page }) => {
-  await login(page, E2E.ownerPin);
+  await loginOwner(page, /\/(panel|kasa)/);
   await openKasa(page);
   const before = await todaySaleCount(page);
   await scan(page, seedBarcodes()[0]!.barcode);
@@ -61,7 +61,7 @@ test("'Satışı tamamla'ya hızlı çift tıklama → tek satış", async ({ pa
 });
 
 test("aynı sepet iki kez gönderilse de (ağ tekrarı) tek satış", async ({ page }) => {
-  await login(page, E2E.ownerPin);
+  await loginOwner(page, /\/(panel|kasa)/);
   const before = await todaySaleCount(page);
   const body = { clientRequestId: "7b0e2f3c-0d1a-4c55-9e7e-1f2a3b4c5d6e", items: [{ productId: 1, qty: 1 }], paymentMethod: "card" };
   const [a, b] = await Promise.all([page.request.post("/api/sales", { data: body }), page.request.post("/api/sales", { data: body })]);

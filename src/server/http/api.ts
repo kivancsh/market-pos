@@ -2,7 +2,8 @@ import type { IronSession } from "iron-session";
 import type { Ctx } from "../context";
 import { getDb } from "../db/connection";
 import type { Role } from "../db/repositories/sales";
-import { getRequestSession, type SessionData } from "../auth/session";
+import { getRequestSession, resolveSessionUser, type SessionData } from "../auth/session";
+import type { User } from "../db/repositories/users";
 import { AppError } from "../errors";
 import { z } from "../validation/zod";
 
@@ -13,6 +14,8 @@ export interface ApiArgs<P> {
   session: IronSession<SessionData>;
   /** Oturumdaki rol (public uçlarda null olabilir). */
   role: Role | null;
+  /** Oturumdaki geçerli kullanıcı (public uçlarda null olabilir). */
+  user: User | null;
 }
 
 type Access = "public" | Role[];
@@ -61,13 +64,17 @@ export function apiRoute<P = Record<string, never>>(
     try {
       checkOrigin(req);
       const session = await getRequestSession(req, resHeaders);
-      const role = session.role === "owner" || session.role === "cashier" ? session.role : null;
+      const base = makeCtx();
+      // Oturum her istekte veritabanından doğrulanır (hesap pasife alındıysa / şifre değiştiyse geçersiz).
+      const user = resolveSessionUser(base.db, session);
+      const role = user?.role ?? null;
       if (access !== "public") {
         if (!role) throw new AppError("UNAUTHORIZED", "Oturum süresi doldu. Lütfen tekrar giriş yapın.", 401);
         if (!access.includes(role)) throw new AppError("FORBIDDEN", "Bu işlem için yetkiniz yok.", 403);
       }
+      const ctx: Ctx = user ? { ...base, actor: { userId: user.id, name: user.name, role: user.role } } : base;
       const params = (routeCtx ? await routeCtx.params : {}) as P;
-      const result = await handler({ req, params, ctx: makeCtx(), session, role });
+      const result = await handler({ req, params, ctx, session, role, user });
       if (result instanceof Response) {
         resHeaders.forEach((v, k) => result.headers.set(k, v));
         return result;

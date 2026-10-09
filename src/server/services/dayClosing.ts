@@ -6,6 +6,9 @@ import { getSettings } from "../db/repositories/settings";
 import { badRequest, conflict } from "../errors";
 import { kurusSchema, optionalText } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
+import { formatBusinessDate } from "@/lib/businessDate";
+import { formatTRY } from "@/lib/money";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 
 export interface ClosingHistoryEntry {
@@ -131,6 +134,11 @@ export function closeDay(ctx: Ctx, input: z.input<typeof closeDaySchema>): DayCl
         cashDifferenceKurus: counted === null ? null : counted - expected,
         note: data.note,
       });
+      audit(
+        ctx,
+        "day.close",
+        `${formatBusinessDate(date)} kapatıldı. Beklenen kasa ${formatTRY(expected)}${counted === null ? "" : `, sayılan ${formatTRY(counted)}, fark ${formatTRY(counted - expected)}`}`,
+      );
       return getDayClosingView(ctx, date);
     })
     .immediate();
@@ -147,6 +155,7 @@ export function reopenDay(ctx: Ctx, businessDate: string, input: z.input<typeof 
     .transaction((): DayClosingView => {
       if (!isDayClosed(ctx.db, businessDate)) throw conflict("NOT_CLOSED", "Bu gün kapalı değil.");
       markReopened(ctx.db, businessDate, time.nowIso, data.reason);
+      audit(ctx, "day.reopen", `${formatBusinessDate(businessDate)} yeniden açıldı: ${data.reason}`);
       return getDayClosingView(ctx, businessDate);
     })
     .immediate();

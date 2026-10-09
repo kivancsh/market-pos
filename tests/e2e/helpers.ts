@@ -4,12 +4,23 @@ import { E2E } from "../../playwright.config";
 
 export { E2E };
 
-/** PIN tuş takımına klavyeden PIN girer. */
-export async function login(page: Page, pin: string, expectPath: RegExp = /\/(panel|kasa)/) {
+/** Kasiyer girişi: PIN tuş takımına klavyeden PIN girer. */
+export async function loginCashier(page: Page, pin: string = E2E.cashierPin, expectPath: RegExp = /\/kasa/) {
   await page.goto("/login");
-  await expect(page.getByRole("button", { name: "Giriş" })).toBeVisible();
+  await page.getByTestId("login-tab-cashier").click();
+  await expect(page.getByRole("button", { name: "Giriş", exact: true })).toBeVisible();
   for (const d of pin) await page.keyboard.press(d);
   await page.keyboard.press("Enter");
+  await page.waitForURL(expectPath);
+}
+
+/** Yönetici girişi: "Yönetici" sekmesinde kullanıcı adı + şifre. */
+export async function loginOwner(page: Page, expectPath: RegExp = /\/panel/) {
+  await page.goto("/login");
+  await page.getByTestId("login-tab-owner").click();
+  await page.getByTestId("login-username").fill(E2E.owner.username);
+  await page.getByTestId("login-password").fill(E2E.owner.password);
+  await page.getByTestId("login-owner-submit").click();
   await page.waitForURL(expectPath);
 }
 

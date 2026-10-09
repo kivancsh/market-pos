@@ -5,6 +5,7 @@ import { insertMovement, type MovementType } from "../db/repositories/stockMovem
 import { notFound } from "../errors";
 import { idSchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 
 export interface StockChange {
@@ -86,6 +87,10 @@ export function adjustStock(ctx: Ctx, input: z.input<typeof adjustStockSchema>):
         refType: null,
         refId: null,
         note: data.note,
+      });
+      audit(ctx, "stock.adjust", `${product.name}: stok ${r.stockBefore} → ${r.stockAfter} (${data.note})`, {
+        entityType: "product",
+        entityId: product.id,
       });
       return { productId: product.id, ...r, difference, changed: true };
     })

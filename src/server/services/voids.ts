@@ -4,6 +4,8 @@ import { countReturnsForSale } from "../db/repositories/returns";
 import { getSaleById, getSaleItems, markSaleVoided, type Sale } from "../db/repositories/sales";
 import { conflict, notFound } from "../errors";
 import { parseInput, z } from "../validation/zod";
+import { formatTRY } from "@/lib/money";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 import { applyStockChange } from "./stock";
 
@@ -48,6 +50,10 @@ export function voidSale(ctx: Ctx, saleId: number, input: z.input<typeof voidSal
         });
       }
       markSaleVoided(db, sale.id, time.nowIso, data.reason);
+      audit(ctx, "sale.void", `Fiş ${sale.receiptNo} iptal edildi (${formatTRY(sale.totalKurus)}): ${data.reason}`, {
+        entityType: "sale",
+        entityId: sale.id,
+      });
       return getSaleById(db, sale.id)!;
     })
     .immediate();

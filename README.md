@@ -17,7 +17,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 5. [Barkod etiketi yazdırma](#5-barkod-etiketi-yazdırma)
 6. [Bilgi fişi yazdırma](#6-bilgi-fişi-yazdırma)
 7. [Yedekleme ve geri yükleme](#7-yedekleme-ve-geri-yükleme)
-8. [PIN değiştirme](#8-pin-değiştirme)
+8. [Hesaplar: yönetici, kasiyerler, şifre sıfırlama](#8-hesaplar-yönetici-kasiyerler-şifre-sıfırlama)
 9. [Gerçek kullanıma geçiş (örnek verileri silme)](#9-gerçek-kullanıma-geçiş-örnek-verileri-silme)
 10. [Bilinen sınırlar ve sonraki adımlar](#10-bilinen-sınırlar-ve-sonraki-adımlar)
 11. [Teknik bilgiler (geliştirici için)](#11-teknik-bilgiler-geliştirici-için)
@@ -26,19 +26,20 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kolay kurulum: masaüstü simgesi (Mac)
 
-1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, PIN dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
+1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
 2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **arka planda, pencere açmadan** çalışır ve tarayıcı açılır. Simgeyi Dock'a da sürükleyebilirsiniz.
 3. Program açıkken simgeye tekrar tıklarsanız küçük bir pencere çıkar:
    - **Tarayıcıda aç** — kasa/panel sayfasını açar,
    - **Programı kapat** — onay sorduktan sonra programı durdurur.
    Bu pencerede telefondan panel adresi de yazar.
-4. Tarayıcı sekmesini kapatmak programı kapatmaz. Program; simgeden "Programı kapat" denene ya da bilgisayar kapanana/yeniden başlayana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
+4. **İlk açılışta** "Yönetici hesabı oluştur" ekranı gelir: adınızı, bir kullanıcı adı ve en az 8 karakterlik bir şifre belirleyin. Sonra **Yönetim Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin.
+5. Tarayıcı sekmesini kapatmak programı kapatmaz. Program; simgeden "Programı kapat" denene ya da bilgisayar kapanana/yeniden başlayana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
 
 Klasördeki diğer çift tıklanabilir dosyalar:
 
 | Dosya | Ne yapar |
 |---|---|
-| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip (⌘ + S) programı yeniden başlatın (simge → Programı kapat → simge). |
+| **Yönetici Şifresi Sıfırla** | Yönetici şifresini unuttuysanız yeni şifre belirler (yazarken ekranda görünmez). Program açıkken de çalışır. |
 | **Yedek Al** | Anlık yedek alır ve `backups` klasörünü açar. |
 
 - Bir sorun olursa program kayıtları `data/logs/` klasöründedir (`server.log`, `build.log`).
@@ -75,8 +76,7 @@ npm install
 cp .env.example .env
 ```
 
-Ardından `.env` dosyasını bir metin düzenleyiciyle açıp PIN'leri değiştirin (bkz. [PIN değiştirme](#8-pin-değiştirme)).
-`.env` hiç oluşturulmazsa varsayılan PIN'ler kullanılır (yönetici **1234**, kasiyer **0000**) ve ekranda uyarı görünür.
+Bu dosyada şifre/PIN **yoktur**; hesaplar programın içinde tutulur (bkz. [Hesaplar](#8-hesaplar-yönetici-kasiyerler-şifre-sıfırlama)).
 
 ### 1.4 Örnek veriler (isteğe bağlı, denemek için)
 
@@ -86,7 +86,7 @@ npm run seed
 
 27 örnek ürün, barkodları ve son 14 günün satışları oluşur. Barkod listesi `data/seed-barcodes.csv` dosyasına yazılır (Excel'de açılabilir).
 
-> ⚠️ `npm run seed` veritabanını **sıfırlar**. İçinde satış varsa silmeden önce `backups/` klasörüne otomatik yedek alır.
+> ⚠️ `npm run seed` veritabanını **sıfırlar**. İçinde satış varsa silmeden önce `backups/` klasörüne otomatik yedek alır. Hesaplar da silinir; sonraki açılışta yönetici hesabı yeniden oluşturulur.
 
 ### 1.5 Deneme amaçlı çalıştırma
 
@@ -119,7 +119,7 @@ npm run start:shop
      ipconfig getifaddr en0
      ```
      (Kablolu bağlantıda `en1` deneyin.) Örneğin `192.168.1.34`.
-  2. Telefonun tarayıcısında **http://192.168.1.34:3000/panel** adresini açın, yönetici PIN'iyle girin.
+  2. Telefonun tarayıcısında **http://192.168.1.34:3000/panel** adresini açın, **Yönetici** sekmesinden kullanıcı adı ve şifrenizle girin.
   3. Mac "gelen bağlantılara izin verilsin mi?" diye sorarsa **İzin Ver** deyin.
 - Aynı şekilde ikinci bir bilgisayar/tablet de kasa olarak kullanılabilir (aynı adresle `/kasa`).
 - Bilgisayarın uyku moduna girmemesi için **Sistem Ayarları → Kilit Ekranı / Enerji** ayarlarını düzenleyin.
@@ -148,14 +148,19 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | Ekran | Ne işe yarar | Kim |
 |---|---|---|
 | **Kasa** | Okut → sepete ekle → NAKİT (F8) / KART (F9) → tamamla. Ürün adıyla arama da yapılabilir. | Herkes |
-| **Panel** | Günün cirosu, kârı, satışları, kritik stok, saatlik grafik. Satışa tıklayınca iptal/iade. **Günü Kapat**. | Yönetici |
+| **Panel** | Günün cirosu, kârı, satışları (kimin yaptığıyla), kritik stok, saatlik grafik. Satışa tıklayınca iptal/iade. **Günü Kapat**. | Yönetici |
 | **İade** | Fiş numarasıyla eski bir satışı bulup kısmi/tam iade. | Yönetici |
-| **Ürünler** | Ürün ekle/düzenle, barkodlar, pasife alma, stok geçmişi. | Yönetici |
+| **Yönetim Paneli** | Aşağıdaki tüm yönetim ekranlarının toplandığı sayfa. | Yönetici |
+| **Ürünler** | Ürün ekle/düzenle, barkodlar, pasife alma, stok geçmişi. **Satış fiyatına tıklayıp** fiyatı listede hızlıca değiştirme. | Yönetici |
+| **Toplu fiyat güncelleme** | Bir kategoriye, seçili ürünlere veya hepsine % ya da ₺ zam/indirim; yuvarlama (0,50 / 1 ₺ / x,90); önce önizleme, maliyetin altına düşenler uyarılı. | Yönetici |
+| **Kategoriler** | Kategori ekle, adını değiştir, boş kategoriyi sil. | Yönetici |
 | **Mal Girişi** | Gelen malı okut → adet ve alış fiyatı → kaydet (ortalama maliyet güncellenir). | Yönetici |
 | **Stok Sayımı** | Rafta sayılan adedi girin; fark gerekçesiyle kaydedilir. | Yönetici |
 | **Etiketler** | A4 etiket kâğıdına barkod etiketi basma. | Yönetici |
 | **Raporlar** | Günlük özet, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
 | **Ayarlar** | İşletme adı, açılış kasası, okuyucu, ses, etiket düzeni, Excel'den ürün içe aktarma, yedekler. | Yönetici |
+| **İşlem geçmişi** | Kim, ne zaman, ne yaptı: fiyat değişiklikleri, iptal/iade, mal girişi, sayım, ayarlar, girişler ve hatalı giriş denemeleri. | Yönetici |
+| **Kullanıcılar / Hesabım** | Kasiyer ekle/pasife al, PIN değiştir, başka yönetici ekle; kendi adınız ve şifreniz. | Yönetici |
 
 **Kasa kısayolları:** `F2` son satırın adedi · `F8` nakit · `F9` kart · `Delete` seçili satırı sil · `Esc` sepeti temizle.
 
@@ -208,17 +213,15 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 ---
 
-## 8. PIN değiştirme
+## 8. Hesaplar: yönetici, kasiyerler, şifre sıfırlama
 
-1. Programı durdurun.
-2. `.env` dosyasını açın ve değiştirin (4–8 rakam, ikisi farklı olmalı):
-   ```
-   OWNER_PIN=7391
-   CASHIER_PIN=2846
-   ```
-3. Programı tekrar başlatın. Varsayılan PIN uyarısı kaybolur.
+- **Yönetici** kullanıcı adı + şifreyle girer (giriş ekranında **Yönetici** sekmesi). İlk yönetici, programın ilk açılışında oluşturulur. Başka yönetici eklemek için: Yönetim Paneli → Kullanıcılar.
+- **Kasiyerler** sadece PIN'le girer (4–8 rakam, her kasiyerin PIN'i farklı). Yönetim Paneli → **Kullanıcılar**'dan eklenir, PIN'i değiştirilir veya **pasife alınır** (işten ayrılan kasiyer artık giremez; eski satışlarında adı kalır).
+- Kendi şifrenizi değiştirmek: Yönetim Paneli → **Hesabım**.
+- Bir hesabın şifresi/PIN'i değişince ya da hesap pasife alınınca o hesabın açık oturumları kapanır.
+- **Yönetici şifresini unuttuysanız:** klasördeki **Yönetici Şifresi Sıfırla** dosyasına çift tıklayın (ya da Terminal'de `npm run users -- reset-password`). Bu yalnızca bilgisayarın başından yapılabilir.
 
-5 kez yanlış PIN girilirse giriş **5 dakika** kilitlenir (tahmin edilmesini zorlaştırmak için).
+5 kez yanlış PIN veya şifre girilirse giriş **5 dakika** kilitlenir (tahmin edilmesini zorlaştırmak için). Şifreler ve PIN'ler veritabanında açık halde değil, geri çözülemeyen şekilde (scrypt) saklanır.
 
 ---
 
@@ -226,7 +229,7 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 1. Programı durdurun ve isterseniz bir yedek alın (`npm run backup`).
 2. `data` klasöründeki `store.db`, `store.db-wal`, `store.db-shm` dosyalarını silin.
-3. Programı başlatın: boş bir veritabanı otomatik oluşur.
+3. Programı başlatın: boş bir veritabanı otomatik oluşur ve **yönetici hesabı oluşturma** ekranı gelir (kasiyerleri yeniden eklemeniz gerekir).
 4. **Ayarlar**'dan işletme adını ve açılış kasasını girin; ürünleri **Ayarlar → Excel'den içe aktar** ile veya **Ürünler → Yeni ürün** ile ekleyin. Barkodu olmayan ürünlere **Etiketler**'den barkod basın.
 
 ---
@@ -237,12 +240,12 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 **Bilinmesi gerekenler:**
 - Program tek bilgisayarda çalışır; diğer cihazlar (telefon, ikinci kasa) aynı Wi-Fi'den bu bilgisayara bağlanır. Bilgisayar kapalıyken sistem kapalıdır.
-- Kimlik doğrulama yalnızca PIN'dir; dükkân dışı ağlara açmayın.
+- Program yerel ağda http ile çalışır; dükkân dışı ağlara (internete) açmayın.
 - Okuyucu hızı eşiği (varsayılan 50 ms) çok yavaş okuyucularda artırılmalıdır (bkz. Bölüm 3).
 
 **Önerilen sonraki adımlar:**
 - **Buluta taşıma (Supabase / PostgreSQL):** Tüm veritabanı sorguları tek katmanda (`src/server/db/repositories/`) toplandı. Taşırken bu katman ve servis fonksiyonlarının asenkron hale getirilmesi gerekir; hesap kuralları değişmez. Böylece dükkân dışından da panel görülebilir.
-- Birden fazla kasa için kasa/kullanıcı adı kaydı, tartılı ürün (terazi barkodu), otomatik bulut yedeği.
+- Tartılı ürün (terazi barkodu), otomatik bulut yedeği.
 
 ---
 
@@ -261,3 +264,4 @@ Next.js 16 (App Router) · TypeScript · Tailwind · SQLite (better-sqlite3) · 
 | `npm run seed` | Örnek veri (veritabanını sıfırlar, önce yedek alır) |
 | `npm run backup` | Anlık yedek |
 | `npm run check:integrity` | Her ürün için stok = stok hareketleri toplamı kontrolü |
+| `npm run users -- reset-password` · `create-owner <kullanıcı> <şifre> [ad]` · `create-cashier <ad> <pin>` · `list` | Hesap işlemleri (bilgisayardan) |

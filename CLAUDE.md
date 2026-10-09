@@ -52,7 +52,12 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 ## Roller
 - `owner`: her şey. `cashier`: sadece kasa; maliyet/kâr alanları API yanıtlarında **hiç olmaz**; void/iade/mal girişi yok.
 - Kasiyer indirimi `cashier_can_discount` ayarına bağlı (varsayılan kapalı).
-- Rol kontrolü her zaman sunucuda. PIN'ler `.env`; 5 hatalı denemede 5 dk kilit.
+- Rol kontrolü her zaman sunucuda. 5 hatalı denemede 5 dk kilit (kasiyer PIN'i ve yönetici şifresi ayrı sayılır).
+- Hesaplar `users` tablosunda (Aşama 9 kararı, kullanıcı onaylı): yönetici = kullanıcı adı + şifre (≥ 8), kasiyer = ad + PIN (4–8 rakam, aktif kasiyerler arasında tekil).
+  Sır'lar scrypt ile hash'lenir; `.env`'de PIN yok. İlk açılışta `/kurulum` ilk yöneticiyi oluşturur; şifre unutulursa `npm run users -- reset-password`.
+- Oturum her istekte DB'den doğrulanır (aktif mi, rol, `session_version`); şifre/PIN değişimi ve pasife alma eski oturumları düşürür.
+- Kendini veya son aktif yöneticiyi pasife alamazsın. Kullanıcılar silinmez, pasife alınır.
+- Yönetim işlemleri `audit_log`'a (işlem geçmişi) servis transaction'ı içinde yazılır; satışlar `user_id`/`user_name` taşır.
 
 ## Kararlaştırılmış varsayımlar
 - İadeli satış iptal edilemez; iptal satıştan iade olmaz; iptal sadece aynı iş günü + gün açık.
@@ -63,7 +68,8 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 ## Test ve teknik notlar
 - `npm test`: Vitest (tests/unit, tests/integration; bellek içi SQLite; API uçları Request ile doğrudan çağrılır,
   `setTestCtxFactory`). `npm run test:e2e`: önce `next build`, sonra Playwright `next start -p 3100`
-  AYRI veritabanıyla (`data/e2e/`, PIN 4321/8765). Gerçek veriye dokunulmaz.
+  AYRI veritabanıyla (`data/e2e/`; seed + `users-cli` ile yönetici `e2e-admin`, kasiyer PIN 8765). Gerçek veriye dokunulmaz.
+- Oturum çerezi okumayan sayfalar (`/login`, `/kurulum`) DB okumadan önce `await connection()` çağırır; yoksa derlemede statik sabitlenir.
 - Okuyucu: `ScannerDetector` saf mantık; hook zamanı `event.timeStamp` ile ölçer (işlenme anı değil).
   Tuş yolunda ağır iş yapma (ör. AudioContext ilk tuşta oluşturulunca ilk karakter düşüyordu; sayfa açılışında hazırlanır).
 - Kasiyer görünümleri izin listesiyle (`src/server/views.ts`); yeni alan eklerken kasiyere sızmasın.

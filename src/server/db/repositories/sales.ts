@@ -23,6 +23,8 @@ export interface Sale {
   cashReceivedKurus: number | null;
   changeKurus: number | null;
   createdByRole: Role;
+  userId: number | null;
+  userName: string | null;
   voidedAt: string | null;
   voidReason: string | null;
 }
@@ -54,7 +56,7 @@ const SELECT_SALE = `
          net_total_kurus AS netTotalKurus, vat_total_kurus AS vatTotalKurus,
          cost_total_kurus AS costTotalKurus, cost_net_total_kurus AS costNetTotalKurus,
          gross_profit_kurus AS grossProfitKurus, cash_received_kurus AS cashReceivedKurus,
-         change_kurus AS changeKurus, created_by_role AS createdByRole,
+         change_kurus AS changeKurus, created_by_role AS createdByRole, user_id AS userId, user_name AS userName,
          voided_at AS voidedAt, void_reason AS voidReason
     FROM sales`;
 
@@ -111,14 +113,14 @@ export function insertSale(db: DB, s: NewSale): number {
         `INSERT INTO sales (receipt_no, client_request_id, created_at, business_date, status, payment_method,
                             subtotal_kurus, discount_kurus, total_kurus, net_total_kurus, vat_total_kurus,
                             cost_total_kurus, cost_net_total_kurus, gross_profit_kurus,
-                            cash_received_kurus, change_kurus, created_by_role)
-         VALUES (?, ?, ?, ?, 'completed', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                            cash_received_kurus, change_kurus, created_by_role, user_id, user_name)
+         VALUES (?, ?, ?, ?, 'completed', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         s.receiptNo, s.clientRequestId, s.createdAt, s.businessDate, s.paymentMethod,
         s.subtotalKurus, s.discountKurus, s.totalKurus, s.netTotalKurus, s.vatTotalKurus,
         s.costTotalKurus, s.costNetTotalKurus, s.grossProfitKurus,
-        s.cashReceivedKurus, s.changeKurus, s.createdByRole,
+        s.cashReceivedKurus, s.changeKurus, s.createdByRole, s.userId, s.userName,
       ).lastInsertRowid,
   );
 }

@@ -9,6 +9,7 @@ import { findBarcode } from "../db/repositories/barcodes";
 import { listCategories } from "../db/repositories/categories";
 import { getProductById, listProducts } from "../db/repositories/products";
 import type { RawCell, RawImportRow } from "../excel";
+import { audit } from "./audit";
 import { createProduct } from "./products";
 
 export interface ImportPreviewRow {
@@ -176,6 +177,7 @@ export function commitImport(ctx: Ctx, raw: RawImportRow[]): ImportResult {
         });
         return { rowNumber: r.rowNumber, productId: p.id, name: p.name, barcode: p.barcodes.find((b) => b.isPrimary)?.barcode ?? null };
       });
+      audit(ctx, "product.import", `Excel'den ${created.length} ürün eklendi${preview.errorCount ? `, ${preview.errorCount} hatalı satır atlandı` : ""}`);
       return { created, skipped: preview.errorCount };
     })
     .immediate();

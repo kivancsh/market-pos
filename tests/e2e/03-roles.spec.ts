@@ -1,15 +1,15 @@
 import { expect, test } from "@playwright/test";
-import { E2E, login } from "./helpers";
+import { loginCashier, loginOwner } from "./helpers";
 
 test("kasiyer: yönetici menüleri yok, adres çubuğundan da açılamıyor, API 403", async ({ page }) => {
-  await login(page, E2E.cashierPin, /\/kasa/);
+  await loginCashier(page);
   const nav = page.getByRole("navigation", { name: "Ana menü" });
   await expect(nav.getByRole("link")).toHaveText(["Kasa"]);
-  for (const path of ["/panel", "/raporlar", "/urunler", "/urunler/1", "/ayarlar", "/mal-girisi", "/stok-sayim", "/etiketler", "/iade", "/simulator"]) {
+  for (const path of ["/panel", "/raporlar", "/urunler", "/urunler/1", "/ayarlar", "/mal-girisi", "/stok-sayim", "/etiketler", "/iade", "/simulator", "/yonetim", "/yonetim/kullanicilar", "/yonetim/toplu-fiyat"]) {
     await page.goto(path);
     await expect(page, path).toHaveURL(/\/kasa$/);
   }
-  for (const path of ["/api/dashboard", "/api/products", "/api/reports/daily", "/api/sales/1"]) {
+  for (const path of ["/api/dashboard", "/api/products", "/api/reports/daily", "/api/sales/1", "/api/users", "/api/audit"]) {
     expect((await page.request.get(path)).status(), path).toBe(403);
   }
   const catalog = await (await page.request.get("/api/catalog")).text();
@@ -24,9 +24,9 @@ test("oturumsuz kullanıcı girişe yönlenir", async ({ page }) => {
 });
 
 test("yönetici: tüm menüler görünür ve panel açılır", async ({ page }) => {
-  await login(page, E2E.ownerPin, /\/panel/);
+  await loginOwner(page, /\/panel/);
   const nav = page.getByRole("navigation", { name: "Ana menü" });
-  for (const label of ["Panel", "Kasa", "İade", "Ürünler", "Mal Girişi", "Stok Sayımı", "Etiketler", "Raporlar", "Ayarlar"]) {
+  for (const label of ["Panel", "Kasa", "İade", "Yönetim Paneli"]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
   }
 });

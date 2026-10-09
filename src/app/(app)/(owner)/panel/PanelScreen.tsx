@@ -396,6 +396,7 @@ export function PanelScreen({ initialDate }: { initialDate: string | null }) {
                       </td>
                       <td className="py-2">
                         {formatIstanbulTime(new Date(x.createdAt))} <span className="text-xs">{x.paymentMethod === "cash" ? "nakit" : "kart"}</span>
+                        {x.userName && <div className="text-xs text-slate-500">{x.userName}</div>}
                       </td>
                       <td className="py-2 text-right tabular-nums">{formatTRY(x.totalKurus)}</td>
                       <td className="py-2 text-right tabular-nums">{formatTRY(x.grossProfitKurus)}</td>

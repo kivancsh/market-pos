@@ -10,7 +10,7 @@ export const GET = apiRoute(["owner"], ({ req, ctx }) => {
   return { date, items: listDaySales(ctx.db, date) };
 });
 
-export const POST = apiRoute(["owner", "cashier"], async ({ req, ctx, role }) => {
-  const result = completeSale(ctx, (await readJson(req)) as never, { role: role! });
+export const POST = apiRoute(["owner", "cashier"], async ({ req, ctx, role, user }) => {
+  const result = completeSale(ctx, (await readJson(req)) as never, { role: role!, userId: user!.id, name: user!.name });
   return saleResultView(result, role!);
 });

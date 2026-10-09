@@ -14,6 +14,7 @@
     "seed": "tsx scripts/seed.ts",
     "backup": "tsx scripts/backup.ts",
     "check:integrity": "tsx scripts/check-integrity.ts",
+    "users": "tsx scripts/users-cli.ts",
     "start:shop": "next start -H 0.0.0.0 -p 3000"
   },
   "dependencies": {

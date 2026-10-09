@@ -1,8 +1,8 @@
 import { expect, test } from "@playwright/test";
-import { E2E, login } from "./helpers";
+import { loginOwner } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  await login(page, E2E.ownerPin, /\/panel/);
+  await loginOwner(page, /\/panel/);
 });
 
 test("yeni ürün formu: barkod üret, kaydet → ürün sayfası açılır", async ({ page }) => {

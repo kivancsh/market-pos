@@ -40,13 +40,9 @@ if [ ! -d node_modules ]; then
 fi
 echo "✓ Paketler hazır"
 
-# 4) PIN dosyası
-if [ ! -f .env ]; then
-  cp .env.example .env
-  echo "• PIN dosyası (.env) oluşturuldu. Varsayılan PIN'ler: yönetici 1234, kasiyer 0000."
-  echo "  Değiştirmek için klasördeki 'PIN Ayarla' dosyasına çift tıklayın."
-fi
-echo "✓ PIN dosyası hazır"
+# 4) Ayar dosyası
+[ -f .env ] || cp .env.example .env
+echo "✓ Ayar dosyası hazır"
 
 # 5) Derleme: yoksa veya kod derlemeden sonra değiştiyse yeniden derle
 needs_build=0

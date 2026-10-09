@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test";
-import { E2E, cart, login, openKasa, rescanPause, scan, seedBarcodes } from "./helpers";
+import { cart, loginOwner, openKasa, rescanPause, scan, seedBarcodes } from "./helpers";
 
 test.describe("barkod okuyucu ve kasa", () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, E2E.ownerPin);
+    await loginOwner(page, /\/(panel|kasa)/);
     await openKasa(page);
   });
 
@@ -100,7 +100,7 @@ test.describe("barkod okuyucu ve kasa", () => {
 
 test.describe("okuyucu çift tetikleme", () => {
   test("aynı barkod 80 ms içinde iki kez gelirse tek sayılır (okuyucu hatası)", async ({ page }) => {
-    await login(page, E2E.ownerPin);
+    await loginOwner(page, /\/(panel|kasa)/);
     await openKasa(page);
     const su = seedBarcodes()[0]!.barcode;
     await scan(page, su);

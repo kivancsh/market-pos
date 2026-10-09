@@ -16,6 +16,7 @@ import {
 import { getProductById, type Product } from "../db/repositories/products";
 import { incrementInternalBarcodeSeq } from "../db/repositories/settings";
 import { conflict, notFound, unprocessable } from "../errors";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 
 /**
@@ -117,8 +118,11 @@ export function addBarcodeToProduct(
   const { nowIso } = stamp(ctx);
   return ctx.db
     .transaction(() => {
-      if (!getProductById(ctx.db, productId)) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
-      return attachBarcode(ctx.db, productId, raw, { ...opts, nowIso });
+      const p = getProductById(ctx.db, productId);
+      if (!p) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
+      const b = attachBarcode(ctx.db, productId, raw, { ...opts, nowIso });
+      audit(ctx, "product.barcode", `${p.name}: barkod eklendi ${b.barcode}`, { entityType: "product", entityId: productId });
+      return b;
     })
     .immediate();
 }
@@ -128,9 +132,12 @@ export function assignInternalBarcode(ctx: Ctx, productId: number, makePrimary =
   const { nowIso } = stamp(ctx);
   return ctx.db
     .transaction(() => {
-      if (!getProductById(ctx.db, productId)) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
+      const p = getProductById(ctx.db, productId);
+      if (!p) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
       const code = nextInternalBarcode(ctx.db);
-      return attachBarcode(ctx.db, productId, code, { type: "internal", makePrimary, nowIso });
+      const b = attachBarcode(ctx.db, productId, code, { type: "internal", makePrimary, nowIso });
+      audit(ctx, "product.barcode", `${p.name}: dükkân içi barkod üretildi ${code}`, { entityType: "product", entityId: productId });
+      return b;
     })
     .immediate();
 }
@@ -142,6 +149,10 @@ export function removeBarcode(ctx: Ctx, productId: number, barcodeId: number): v
       const b = getBarcodeById(ctx.db, barcodeId);
       if (!b || b.productId !== productId) throw notFound("BARCODE_NOT_FOUND", "Barkod bulunamadı.");
       deleteBarcode(ctx.db, barcodeId);
+      audit(ctx, "product.barcode", `${getProductById(ctx.db, productId)?.name}: barkod kaldırıldı ${b.barcode}`, {
+        entityType: "product",
+        entityId: productId,
+      });
       if (b.isPrimary) {
         const next = listBarcodesByProduct(ctx.db, productId)[0];
         if (next) setPrimaryBarcode(ctx.db, productId, next.id);
@@ -156,6 +167,10 @@ export function makeBarcodePrimary(ctx: Ctx, productId: number, barcodeId: numbe
       const b = getBarcodeById(ctx.db, barcodeId);
       if (!b || b.productId !== productId) throw notFound("BARCODE_NOT_FOUND", "Barkod bulunamadı.");
       setPrimaryBarcode(ctx.db, productId, barcodeId);
+      audit(ctx, "product.barcode", `${getProductById(ctx.db, productId)?.name}: birincil barkod ${b.barcode}`, {
+        entityType: "product",
+        entityId: productId,
+      });
     })
     .immediate();
 }
@@ -164,12 +179,14 @@ export function makeBarcodePrimary(ctx: Ctx, productId: number, barcodeId: numbe
 export function generateMissingBarcodes(ctx: Ctx): { productId: number; barcode: string }[] {
   const { nowIso } = stamp(ctx);
   return ctx.db
-    .transaction(() =>
-      listProductIdsWithoutBarcode(ctx.db).map((productId) => {
+    .transaction(() => {
+      const out = listProductIdsWithoutBarcode(ctx.db).map((productId) => {
         const code = nextInternalBarcode(ctx.db);
         attachBarcode(ctx.db, productId, code, { type: "internal", makePrimary: true, nowIso });
         return { productId, barcode: code };
-      }),
-    )
+      });
+      if (out.length) audit(ctx, "product.barcode", `Barkodsuz ${out.length} ürüne dükkân içi barkod üretildi`);
+      return out;
+    })
     .immediate();
 }

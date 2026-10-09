@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { sealData } from "iron-session";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import * as backupsRoute from "@/app/api/backups/route";
 import * as dashboardRoute from "@/app/api/dashboard/route";
@@ -10,9 +9,8 @@ import * as closingRoute from "@/app/api/day-closings/[date]/route";
 import * as closeRoute from "@/app/api/day-closings/route";
 import * as byReceiptRoute from "@/app/api/sales/by-receipt/[receiptNo]/route";
 import * as salesRoute from "@/app/api/sales/route";
-import { getSessionSecret } from "@/server/auth/secret";
-import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
 import { setTestCtxFactory } from "@/server/http/api";
+import { sessionCookie } from "../apiHelpers";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
 let env: TestEnv;
@@ -35,7 +33,7 @@ beforeEach(() => {
 });
 
 async function cookie(role: "owner" | "cashier") {
-  return `${SESSION_COOKIE}=${await sealData({ role, loginAt: "x" }, { password: getSessionSecret(), ttl: SESSION_TTL_SECONDS })}`;
+  return sessionCookie(env, role);
 }
 function req(p: string, c: string, body?: unknown) {
   return new Request(`http://localhost:3000${p}`, {

@@ -20,6 +20,7 @@ export function cashierSaleView(s: Sale) {
     vatTotalKurus: s.vatTotalKurus,
     cashReceivedKurus: s.cashReceivedKurus,
     changeKurus: s.changeKurus,
+    userName: s.userName,
   };
 }
 

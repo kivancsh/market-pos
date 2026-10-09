@@ -25,6 +25,7 @@ interface Sale {
   cashReceivedKurus: number | null;
   changeKurus: number | null;
   createdByRole: "owner" | "cashier";
+  userName?: string | null;
   voidedAt: string | null;
   voidReason: string | null;
 }
@@ -172,7 +173,7 @@ export function SaleDetailDialog({
         <div className="flex flex-wrap items-center gap-2 text-sm text-slate-600">
           <span>{formatIstanbulDateTime(sale.createdAt)}</span>
           <span>· {sale.paymentMethod === "cash" ? "Nakit" : "Kart"}</span>
-          <span>· {sale.createdByRole === "owner" ? "Yönetici" : "Kasiyer"}</span>
+          <span>· {sale.userName ? `${sale.userName} (${sale.createdByRole === "owner" ? "yönetici" : "kasiyer"})` : sale.createdByRole === "owner" ? "Yönetici" : "Kasiyer"}</span>
           {voided && <span className="rounded-full bg-red-100 px-2 py-0.5 font-semibold text-red-800">İPTAL</span>}
           {returns.length > 0 && <span className="rounded-full bg-amber-100 px-2 py-0.5 font-semibold text-amber-800">İade var</span>}
           <a href={`/fis/${sale.id}`} target="_blank" rel="noreferrer" className="ml-auto underline">

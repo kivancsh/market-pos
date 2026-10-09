@@ -274,6 +274,7 @@ export interface DaySaleRow {
   itemCount: number;
   returnCount: number;
   refundedKurus: number;
+  userName: string | null;
 }
 
 /** Bir iş gününün satış listesi (iptaller dahil, işaretli). */
@@ -281,7 +282,7 @@ export function listDaySales(db: DB, businessDate: string): DaySaleRow[] {
   return db
     .prepare(
       `SELECT s.id, s.receipt_no AS receiptNo, s.created_at AS createdAt, s.status, s.payment_method AS paymentMethod,
-              s.total_kurus AS totalKurus, s.gross_profit_kurus AS grossProfitKurus,
+              s.total_kurus AS totalKurus, s.gross_profit_kurus AS grossProfitKurus, s.user_name AS userName,
               (SELECT COALESCE(SUM(qty),0) FROM sale_items WHERE sale_id = s.id) AS itemCount,
               (SELECT COUNT(*) FROM returns WHERE sale_id = s.id) AS returnCount,
               (SELECT COALESCE(SUM(refund_total_kurus),0) FROM returns WHERE sale_id = s.id) AS refundedKurus

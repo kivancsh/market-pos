@@ -12,7 +12,11 @@ export const OWNER_ONLY_PREFIXES = [
   "/ayarlar",
   "/iade",
   "/simulator",
+  "/yonetim",
 ];
+
+/** Oturumsuz açılabilen sayfalar (kendi içlerinde veritabanından kontrol yaparlar). */
+const PUBLIC_PATHS = ["/login", "/kurulum"];
 
 /**
  * Sayfa istekleri için ön kontrol (asıl kontrol her sayfada ve her API ucunda sunucuda tekrar yapılır):
@@ -22,9 +26,9 @@ export async function proxy(request: NextRequest) {
   const { pathname, search } = request.nextUrl;
   const role = await readRoleFromCookie(request.cookies.get(SESSION_COOKIE)?.value);
 
-  if (pathname === "/login") {
-    return role ? NextResponse.redirect(new URL("/", request.url)) : NextResponse.next();
-  }
+  // Giriş/kurulum sayfaları her zaman açılır; "zaten girişli mi" kararını sayfa veritabanına bakarak verir
+  // (çerezdeki rol eski olabilir: şifre değişmiş / hesap pasife alınmış olabilir → döngü olmasın).
+  if (PUBLIC_PATHS.includes(pathname)) return NextResponse.next();
   if (!role) {
     const url = new URL("/login", request.url);
     if (pathname !== "/") url.searchParams.set("next", pathname + search);

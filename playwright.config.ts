@@ -6,7 +6,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 const PORT = 3100;
 export const E2E = {
-  ownerPin: "4321",
+  owner: { username: "e2e-admin", password: "e2e-sifre-12345", name: "Test Yönetici" },
   cashierPin: "8765",
   dbPath: "data/e2e/store.db",
   barcodesCsv: "data/e2e/seed-barcodes.csv",
@@ -29,7 +29,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     // Her çalıştırmada temiz örnek veri, sonra sunucu.
-    command: `node -e "require('fs').rmSync('data/e2e',{recursive:true,force:true})" && npx tsx scripts/seed.ts && node node_modules/next/dist/bin/next start -p ${PORT}`,
+    command: `node -e "require('fs').rmSync('data/e2e',{recursive:true,force:true})" && npx tsx scripts/seed.ts && npx tsx scripts/users-cli.ts create-owner e2e-admin e2e-sifre-12345 Test Yönetici && npx tsx scripts/users-cli.ts create-cashier "Test Kasiyer" 8765 && node node_modules/next/dist/bin/next start -p ${PORT}`,
     url: `http://localhost:${PORT}/login`,
     reuseExistingServer: false,
     timeout: 180_000,
@@ -37,8 +37,6 @@ export default defineConfig({
       ...(process.env as Record<string, string>),
       DB_PATH: E2E.dbPath,
       BACKUP_DIR: "data/e2e/backups",
-      OWNER_PIN: E2E.ownerPin,
-      CASHIER_PIN: E2E.cashierPin,
       SESSION_SECRET: "e2e-only-secret-0123456789abcdef0123456789",
     },
   },

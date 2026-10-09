@@ -32,13 +32,9 @@ if [ ! -d node_modules ]; then
 fi
 echo "✓ Paketler hazır"
 
-# 3) PIN dosyası
-NEW_ENV=0
-if [ ! -f .env ]; then
-  cp .env.example .env
-  NEW_ENV=1
-fi
-echo "✓ PIN dosyası hazır"
+# 3) Ayar dosyası
+[ -f .env ] || cp .env.example .env
+echo "✓ Ayar dosyası hazır"
 
 # 4) Derleme (çalışan program varsa önce durdurulması gerekir)
 if lsof -nP -iTCP:3000 -sTCP:LISTEN >/dev/null 2>&1; then
@@ -68,10 +64,8 @@ echo "  • Programı açmak için masaüstündeki 'Market Kasa' simgesine çift
 echo "    Program arka planda çalışır (pencere açılmaz) ve tarayıcı açılır."
 echo "  • Program açıkken simgeye tekrar tıklarsanız: 'Tarayıcıda aç' veya 'Programı kapat'."
 echo "  • Dock'a eklemek için simgeyi Dock'a sürükleyin."
-if [ "$NEW_ENV" = 1 ]; then
-  echo
-  echo "  ⚠️  PIN'ler şimdilik varsayılan: yönetici 1234, kasiyer 0000."
-  echo "     Değiştirmek için klasördeki 'PIN Ayarla' dosyasına çift tıklayın."
-fi
+echo "  • İlk açılışta YÖNETİCİ HESABI oluşturma ekranı gelir (ad, kullanıcı adı, şifre)."
+echo "    Kasiyerleri sonra Yönetim Paneli → Kullanıcılar'dan eklersiniz."
+echo "  • Yönetici şifresini unutursanız: 'Yönetici Şifresi Sıfırla' dosyasına çift tıklayın."
 echo "=============================================="
 finish 0

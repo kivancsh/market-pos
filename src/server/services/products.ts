@@ -12,6 +12,8 @@ import { badRequest, notFound } from "../errors";
 import { idSchema, kurusSchema, vatRateSchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
 import { attachBarcode, nextInternalBarcode } from "./barcodes";
+import { formatTRY } from "@/lib/money";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 import { applyStockChange } from "./stock";
 
@@ -97,7 +99,12 @@ export function createProduct(ctx: Ctx, input: CreateProductInput): ProductWithB
           note: "Başlangıç stoğu",
         });
       }
-      return getProductWithBarcodes(ctx, id)!;
+      const created = getProductWithBarcodes(ctx, id)!;
+      audit(ctx, "product.create", `Ürün eklendi: ${created.name} (${formatTRY(created.salePriceKurus)}, stok ${data.initialStock})`, {
+        entityType: "product",
+        entityId: id,
+      });
+      return created;
     })
     .immediate();
 }
@@ -122,7 +129,8 @@ export function updateProduct(ctx: Ctx, id: number, input: UpdateProductInput): 
   const time = stamp(ctx);
   return ctx.db
     .transaction((): ProductWithBarcodes => {
-      if (!getProductById(ctx.db, id)) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
+      const before = getProductById(ctx.db, id);
+      if (!before) throw notFound("PRODUCT_NOT_FOUND", "Ürün bulunamadı.");
       let categoryId: number | null | undefined;
       if (data.categoryName) categoryId = resolveCategoryId(ctx, { categoryName: data.categoryName }, time.nowIso);
       else if (data.categoryId !== undefined) categoryId = resolveCategoryId(ctx, data, time.nowIso);
@@ -139,7 +147,22 @@ export function updateProduct(ctx: Ctx, id: number, input: UpdateProductInput): 
         },
         time.nowIso,
       );
-      return getProductWithBarcodes(ctx, id)!;
+      const after = getProductWithBarcodes(ctx, id)!;
+      if (after.salePriceKurus !== before.salePriceKurus) {
+        audit(ctx, "product.price", `${after.name}: ${formatTRY(before.salePriceKurus)} → ${formatTRY(after.salePriceKurus)}`, {
+          entityType: "product",
+          entityId: id,
+          details: { old: before.salePriceKurus, new: after.salePriceKurus },
+        });
+      }
+      const changes: string[] = [];
+      if (after.name !== before.name) changes.push(`ad: ${before.name} → ${after.name}`);
+      if (after.categoryName !== before.categoryName) changes.push(`kategori: ${before.categoryName ?? "yok"} → ${after.categoryName ?? "yok"}`);
+      if (after.vatRate !== before.vatRate) changes.push(`KDV: %${before.vatRate} → %${after.vatRate}`);
+      if (after.minStock !== before.minStock) changes.push(`min stok: ${before.minStock} → ${after.minStock}`);
+      if (after.isActive !== before.isActive) changes.push(after.isActive ? "satışa açıldı" : "pasife alındı");
+      if (changes.length) audit(ctx, "product.update", `${after.name}: ${changes.join(", ")}`, { entityType: "product", entityId: id });
+      return after;
     })
     .immediate();
 }

@@ -13,6 +13,8 @@ import { addReturnedQty, getSaleById, getSaleItems } from "../db/repositories/sa
 import { conflict, notFound, unprocessable } from "../errors";
 import { idSchema, optionalText, paymentMethodSchema, qtySchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
+import { formatTRY } from "@/lib/money";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 import { applyStockChange } from "./stock";
 
@@ -107,7 +109,14 @@ export function createReturn(ctx: Ctx, input: CreateReturnInput): CreateReturnRe
           note: data.reason,
         });
       }
-      return { return: getReturnById(db, returnId)!, items: listReturnItems(db, returnId) };
+      const ret = getReturnById(db, returnId)!;
+      audit(
+        ctx,
+        "return.create",
+        `Fiş ${sale.receiptNo}: ${plan.map((p) => `${p.qty} × ${p.item.productNameSnapshot}`).join(", ")} iade, ${formatTRY(ret.refundTotalKurus)} (${ret.refundMethod === "cash" ? "nakit" : "kart"})${data.reason ? ` — ${data.reason}` : ""}`,
+        { entityType: "sale", entityId: sale.id },
+      );
+      return { return: ret, items: listReturnItems(db, returnId) };
     })
     .immediate();
 }

@@ -1,5 +1,4 @@
 import ExcelJS from "exceljs";
-import { sealData } from "iron-session";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import * as commitRoute from "@/app/api/import/products/commit/route";
 import * as previewRoute from "@/app/api/import/products/preview/route";
@@ -7,12 +6,11 @@ import * as templateRoute from "@/app/api/import/products/template/route";
 import * as exportRoute from "@/app/api/reports/[report]/export/route";
 import * as reportRoute from "@/app/api/reports/[report]/route";
 import * as settingsRoute from "@/app/api/settings/route";
-import { getSessionSecret } from "@/server/auth/secret";
-import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
 import { getPeriodSummary } from "@/server/db/repositories/reports";
 import { getSettings } from "@/server/db/repositories/settings";
 import { IMPORT_HEADERS, kurusToExcelNumber, permilleToExcelNumber } from "@/server/excel";
 import { setTestCtxFactory } from "@/server/http/api";
+import { sessionCookie } from "../apiHelpers";
 import { cellToKurus, cellToVat, numberToKurus } from "@/server/services/productImport";
 import { buildReport } from "@/server/services/reports";
 import { createReturn } from "@/server/services/returns";
@@ -30,7 +28,7 @@ beforeEach(() => {
 afterAll(() => setTestCtxFactory(undefined));
 
 async function cookie(role: "owner" | "cashier") {
-  return `${SESSION_COOKIE}=${await sealData({ role, loginAt: "x" }, { password: getSessionSecret(), ttl: SESSION_TTL_SECONDS })}`;
+  return sessionCookie(env, role);
 }
 const params = <T>(v: T) => ({ params: Promise.resolve(v) });
 function get(path: string, c: string) {

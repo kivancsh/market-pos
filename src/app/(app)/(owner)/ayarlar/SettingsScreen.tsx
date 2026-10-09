@@ -24,7 +24,7 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint?: stri
   );
 }
 
-export function SettingsScreen({ initial, defaultPins }: { initial: Settings; defaultPins: boolean }) {
+export function SettingsScreen({ initial }: { initial: Settings }) {
   const [s, setS] = useState(initial);
   const [opening, setOpening] = useState(formatKurusPlain(initial.openingCashKurus));
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
@@ -57,12 +57,6 @@ export function SettingsScreen({ initial, defaultPins }: { initial: Settings; de
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-3 sm:p-4">
       <h1 className="text-2xl font-bold">Ayarlar</h1>
-      {defaultPins && (
-        <Notice kind="warn">
-          Varsayılan PIN&apos;ler (1234 / 0000) kullanılıyor. PIN&apos;ler güvenlik için ekrandan değil, bilgisayardaki <code>.env</code> dosyasından
-          değiştirilir (OWNER_PIN, CASHIER_PIN); ardından uygulamayı yeniden başlatın. Adımlar README dosyasında.
-        </Notice>
-      )}
       {notice && (
         <Notice kind={notice.kind} onClose={() => setNotice(null)}>
           {notice.text}

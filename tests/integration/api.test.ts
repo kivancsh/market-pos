@@ -1,8 +1,8 @@
-import { sealData } from "iron-session";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import * as barcodeRoute from "@/app/api/barcodes/[code]/route";
 import * as catalogRoute from "@/app/api/catalog/route";
 import * as loginRoute from "@/app/api/auth/login/route";
+import * as logoutRoute from "@/app/api/auth/logout/route";
 import * as meRoute from "@/app/api/auth/me/route";
 import * as productsRoute from "@/app/api/products/route";
 import * as purchasesRoute from "@/app/api/purchases/route";
@@ -11,12 +11,14 @@ import * as saleRoute from "@/app/api/sales/[id]/route";
 import * as voidRoute from "@/app/api/sales/[id]/void/route";
 import * as salesRoute from "@/app/api/sales/route";
 import * as settingsRoute from "@/app/api/settings/route";
+import * as setupRoute from "@/app/api/setup/route";
 import * as adjustRoute from "@/app/api/stock/adjust/route";
 import * as todayRoute from "@/app/api/today-stats/route";
 import { resetLimiterForTests } from "@/server/auth/loginLimiter";
-import { getSessionSecret } from "@/server/auth/secret";
-import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
+import { SESSION_COOKIE } from "@/server/auth/session";
 import { setTestCtxFactory } from "@/server/http/api";
+import { updateUser } from "@/server/services/users";
+import { TEST_CASHIER, TEST_OWNER, cookieForUser, ensureUsers, sessionCookie } from "../apiHelpers";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
 let env: TestEnv;
@@ -30,9 +32,8 @@ beforeEach(() => {
 });
 afterAll(() => setTestCtxFactory(undefined));
 
-async function cookieFor(role: "owner" | "cashier"): Promise<string> {
-  const seal = await sealData({ role, loginAt: new Date().toISOString() }, { password: getSessionSecret(), ttl: SESSION_TTL_SECONDS });
-  return `${SESSION_COOKIE}=${seal}`;
+function cookieFor(role: "owner" | "cashier"): Promise<string> {
+  return sessionCookie(env, role);
 }
 
 function req(path: string, opts: { method?: string; body?: unknown; cookie?: string; origin?: string } = {}): Request {
@@ -48,41 +49,95 @@ function req(path: string, opts: { method?: string; body?: unknown; cookie?: str
 }
 const params = <T>(v: T) => ({ params: Promise.resolve(v) });
 const json = async (r: Response) => (await r.json()) as Record<string, unknown>;
+const ownerLogin = (password = TEST_OWNER.password) => ({ mode: "owner", username: TEST_OWNER.username, password });
+const cashierLogin = (pin = TEST_CASHIER.pin) => ({ mode: "cashier", pin });
+
+describe("ilk kurulum", () => {
+  it("hiç yönetici yokken: giriş 409 (kurulum gerekli), kurulum ilk yöneticiyi oluşturup oturum açar", async () => {
+    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: true });
+    const login = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }));
+    expect(login.status).toBe(409);
+
+    const bad = await setupRoute.POST(req("/api/setup", { body: { name: "A", username: "ay", password: "kisa", passwordConfirm: "kisa" } }));
+    expect(bad.status).toBe(400);
+    const r = await setupRoute.POST(
+      req("/api/setup", { body: { ...TEST_OWNER, passwordConfirm: TEST_OWNER.password } }),
+    );
+    expect(r.status).toBe(200);
+    expect(r.headers.get("set-cookie")).toContain(`${SESSION_COOKIE}=`);
+    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: false });
+
+    // ikinci kurulum reddedilir (biri sonradan yönetici olamaz)
+    const again = await setupRoute.POST(req("/api/setup", { body: { name: "Kötü", username: "kotu", password: "baska-sifre-1", passwordConfirm: "baska-sifre-1" } }));
+    expect(again.status).toBe(403);
+  });
+});
 
 describe("giriş", () => {
-  it("doğru PIN ile rol döner ve HttpOnly çerez yazılır", async () => {
-    const r = await loginRoute.POST(req("/api/auth/login", { body: { pin: "4321" } }));
+  beforeEach(() => ensureUsers(env));
+
+  it("yönetici: kullanıcı adı + şifre; kasiyer: PIN. HttpOnly çerez yazılır", async () => {
+    const r = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }));
     expect(r.status).toBe(200);
-    expect(await json(r)).toEqual({ role: "owner" });
+    expect(await json(r)).toEqual({ role: "owner", name: TEST_OWNER.name });
     const setCookie = r.headers.get("set-cookie")!;
-    expect(setCookie).toContain(`${SESSION_COOKIE}=`);
     expect(setCookie).toMatch(/HttpOnly/i);
     expect(setCookie).toMatch(/SameSite=Lax/i);
 
-    const r2 = await loginRoute.POST(req("/api/auth/login", { body: { pin: "8765" } }));
-    expect(await json(r2)).toEqual({ role: "cashier" });
+    const r2 = await loginRoute.POST(req("/api/auth/login", { body: cashierLogin() }));
+    expect(await json(r2)).toEqual({ role: "cashier", name: TEST_CASHIER.name });
+
+    // kullanıcı adı büyük/küçük harf duyarsız
+    const r3 = await loginRoute.POST(req("/api/auth/login", { body: { ...ownerLogin(), username: "YONETICI" } }));
+    expect(r3.status).toBe(200);
   });
 
-  it("çerezle /me rolü döndürür; varsayılan PIN kullanılmıyor", async () => {
+  it("çerezle /me kullanıcıyı döndürür", async () => {
     const r = await meRoute.GET(req("/api/auth/me", { cookie: await cookieFor("owner") }));
-    expect(await json(r)).toEqual({ role: "owner", defaultPins: false });
+    expect(await json(r)).toMatchObject({ needsSetup: false, user: { name: TEST_OWNER.name, role: "owner", username: "yonetici" } });
   });
 
-  it("hatalı PIN 401; 5 hatalı denemeden sonra doğru PIN de 5 dk kilitli (429)", async () => {
+  it("yanlış şifre 401; 5 hatalı denemeden sonra yönetici girişi kilitli; kasiyer girişi etkilenmez", async () => {
     for (let i = 0; i < 4; i++) {
-      const r = await loginRoute.POST(req("/api/auth/login", { body: { pin: "1111" } }));
+      const r = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin("yanlis-sifre") }));
       expect(r.status).toBe(401);
-      expect(((await json(r)).error as { code: string }).code).toBe("WRONG_PIN");
     }
-    const fifth = await loginRoute.POST(req("/api/auth/login", { body: { pin: "1111" } }));
-    expect(fifth.status).toBe(429);
-    const locked = await loginRoute.POST(req("/api/auth/login", { body: { pin: "4321" } }));
+    expect((await loginRoute.POST(req("/api/auth/login", { body: ownerLogin("yanlis-sifre") }))).status).toBe(429);
+    const locked = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }));
     expect(locked.status).toBe(429);
     expect(locked.headers.get("set-cookie")).toBeNull();
+    expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin() }))).status).toBe(200);
+    // bilinmeyen kullanıcı da aynı mesajı alır
+    resetLimiterForTests();
+    const unknown = (await json(await loginRoute.POST(req("/api/auth/login", { body: { mode: "owner", username: "yok", password: "x" } })))) as {
+      error: { message: string };
+    };
+    expect(unknown.error.message).toContain("Kullanıcı adı veya şifre hatalı");
+  });
+
+  it("şifre/PIN değişince veya hesap pasife alınınca eski oturum geçersiz olur", async () => {
+    const { owner, cashier } = ensureUsers(env);
+    const oldCashierCookie = await cookieForUser(cashier);
+    const ownerCtx = { ...env.ctx, actor: { userId: owner.id, name: owner.name, role: "owner" as const } };
+    expect((await catalogRoute.GET(req("/api/catalog", { cookie: oldCashierCookie }))).status).toBe(200);
+    updateUser(ownerCtx, cashier.id, { pin: "5555" });
+    expect((await catalogRoute.GET(req("/api/catalog", { cookie: oldCashierCookie }))).status).toBe(401);
+    expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin() }))).status).toBe(401);
+    expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin("5555") }))).status).toBe(200);
+
+    updateUser(ownerCtx, cashier.id, { isActive: false });
+    expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin("5555") }))).status).toBe(401);
+  });
+
+  it("çıkış oturumu kapatır ve işlem geçmişine yazar", async () => {
+    const r = await logoutRoute.POST(req("/api/auth/logout", { body: {}, cookie: await cookieFor("owner") }));
+    expect(r.status).toBe(200);
+    const row = env.db.prepare("SELECT action, user_name AS u FROM audit_log ORDER BY id DESC LIMIT 1").get();
+    expect(row).toEqual({ action: "auth.logout", u: TEST_OWNER.name });
   });
 
   it("başka siteden gelen (Origin uyuşmayan) istek reddedilir", async () => {
-    const r = await loginRoute.POST(req("/api/auth/login", { body: { pin: "4321" }, origin: "http://evil.example" }));
+    const r = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin(), origin: "http://evil.example" }));
     expect(r.status).toBe(403);
   });
 
@@ -141,6 +196,7 @@ describe("yetkilendirme (sunucu tarafında)", () => {
     const text = await rc.text();
     expect(text).not.toMatch(/cost|profit/i);
     expect(JSON.parse(text).sale.receiptNo).toBe("20261006-0001");
+    expect(JSON.parse(text).sale.userName).toBe(TEST_CASHIER.name); // satışı kimin yaptığı
 
     const ro = await salesRoute.POST(req("/api/sales", { cookie: await cookieFor("owner"), body: body() }));
     const owner = (await ro.json()) as { sale: { grossProfitKurus: number } };

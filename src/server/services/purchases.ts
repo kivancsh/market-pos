@@ -5,6 +5,8 @@ import { insertPurchase, insertPurchaseItem } from "../db/repositories/purchases
 import { notFound, unprocessable } from "../errors";
 import { idSchema, kurusSchema, optionalText, qtySchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
+import { formatTRY } from "@/lib/money";
+import { audit } from "./audit";
 import { stamp } from "./clock";
 import { applyStockChange } from "./stock";
 
@@ -66,6 +68,12 @@ export function createPurchase(ctx: Ctx, input: CreatePurchaseInput): PurchaseRe
         });
         touched.set(product.id, { productId: product.id, name: product.name, stockAfter, avgCostKurus: newAvg });
       }
+      audit(
+        ctx,
+        "purchase.create",
+        `Mal girişi: ${data.items.length} kalem, ${formatTRY(totalCostKurus)}${data.supplier ? ` (${data.supplier})` : ""}`,
+        { entityType: "purchase", entityId: purchaseId, details: [...touched.values()].map((p) => ({ name: p.name, stockAfter: p.stockAfter, avgCost: p.avgCostKurus })) },
+      );
       return { purchaseId, totalCostKurus, products: [...touched.values()] };
     })
     .immediate();

@@ -17,16 +17,13 @@ const ITEMS: NavItem[] = [
   { href: "/panel", label: "Panel", owner: true },
   { href: "/kasa", label: "Kasa" },
   { href: "/iade", label: "İade", owner: true },
-  { href: "/urunler", label: "Ürünler", owner: true },
-  { href: "/mal-girisi", label: "Mal Girişi", owner: true },
-  { href: "/stok-sayim", label: "Stok Sayımı", owner: true },
-  { href: "/etiketler", label: "Etiketler", owner: true },
-  { href: "/raporlar", label: "Raporlar", owner: true },
-  { href: "/ayarlar", label: "Ayarlar", owner: true },
-  { href: "/kasa?sim=1", label: "Simülatör", owner: true },
+  { href: "/yonetim", label: "Yönetim Paneli", owner: true },
 ];
 
-export function AppNav({ role, businessName }: { role: Role; businessName: string }) {
+/** Yönetim Paneli altındaki sayfalar (menüde "Yönetim Paneli" seçili görünsün). */
+const ADMIN_PREFIXES = ["/yonetim", "/urunler", "/mal-girisi", "/stok-sayim", "/etiketler", "/raporlar", "/ayarlar"];
+
+export function AppNav({ role, userName, businessName }: { role: Role; userName: string; businessName: string }) {
   const pathname = usePathname();
   const [busy, setBusy] = useState(false);
   const items = ITEMS.filter((i) => !i.owner || role === "owner");
@@ -51,7 +48,10 @@ export function AppNav({ role, businessName }: { role: Role; businessName: strin
       >
         {items.map((i) => {
           const base = i.href.split("?")[0]!;
-          const active = !i.href.includes("?") && (pathname === base || pathname.startsWith(base + "/"));
+          const active =
+            i.href === "/yonetim"
+              ? ADMIN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))
+              : pathname === base || pathname.startsWith(base + "/");
           return (
             <Link
               key={i.href}
@@ -64,7 +64,9 @@ export function AppNav({ role, businessName }: { role: Role; businessName: strin
         })}
       </nav>
       <div className="ml-auto flex items-center gap-2">
-        <span className="rounded-full bg-slate-700 px-3 py-1 text-sm">{role === "owner" ? "Yönetici" : "Kasiyer"}</span>
+        <span className="rounded-full bg-slate-700 px-3 py-1 text-sm" title={role === "owner" ? "Yönetici" : "Kasiyer"} data-testid="nav-user">
+          {userName} · {role === "owner" ? "Yönetici" : "Kasiyer"}
+        </span>
         <button
           type="button"
           onClick={() => void logout()}

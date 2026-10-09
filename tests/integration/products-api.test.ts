@@ -1,4 +1,3 @@
-import { sealData } from "iron-session";
 import { afterAll, beforeEach, describe, expect, it } from "vitest";
 import * as availabilityRoute from "@/app/api/barcodes/availability/route";
 import * as missingRoute from "@/app/api/barcodes/generate-missing/route";
@@ -9,10 +8,9 @@ import * as productRoute from "@/app/api/products/[id]/route";
 import * as productsRoute from "@/app/api/products/route";
 import * as adjustRoute from "@/app/api/stock/adjust/route";
 import * as movementsRoute from "@/app/api/stock/movements/route";
-import { getSessionSecret } from "@/server/auth/secret";
-import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
 import { getProductById } from "@/server/db/repositories/products";
 import { setTestCtxFactory } from "@/server/http/api";
+import { sessionCookie } from "../apiHelpers";
 import { completeSale } from "@/server/services/sales";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
@@ -26,7 +24,7 @@ beforeEach(() => {
 afterAll(() => setTestCtxFactory(undefined));
 
 async function cookie(role: "owner" | "cashier") {
-  return `${SESSION_COOKIE}=${await sealData({ role, loginAt: "x" }, { password: getSessionSecret(), ttl: SESSION_TTL_SECONDS })}`;
+  return sessionCookie(env, role);
 }
 function req(path: string, c: string, body?: unknown, method?: string) {
   return new Request(`http://localhost:3000${path}`, {

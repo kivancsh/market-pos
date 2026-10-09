@@ -48,6 +48,8 @@ export type CompleteSaleInput = z.input<typeof completeSaleSchema>;
 
 export interface Actor {
   role: Role;
+  userId?: number | null;
+  name?: string | null;
 }
 
 export interface StockShortage {
@@ -231,6 +233,8 @@ export function completeSale(ctx: Ctx, input: CompleteSaleInput, actor: Actor): 
         cashReceivedKurus,
         changeKurus,
         createdByRole: actor.role,
+        userId: actor.userId ?? ctx.actor?.userId ?? null,
+        userName: actor.name ?? ctx.actor?.name ?? null,
       });
 
       const lowStock: LowStockItem[] = [];

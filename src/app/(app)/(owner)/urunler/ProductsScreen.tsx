@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { normalizeBarcode } from "@/lib/barcode";
-import { formatMargin, formatTRY, marginPermille } from "@/lib/money";
+import { formatMargin, formatTRY, marginPermille, parseTRYToKurus } from "@/lib/money";
 import { unitEconomics } from "@/lib/pricing";
 import { api, ApiError } from "@/client/api";
 import { Notice, type NoticeKind } from "@/client/components/Notice";
@@ -29,10 +29,10 @@ const SORTS: { key: SortKey; label: string }[] = [
   { key: "margin", label: "Marj" },
 ];
 
-export function ProductsScreen({ settings }: { settings: KasaSettings }) {
+export function ProductsScreen({ settings, initialCategory = "all" }: { settings: KasaSettings; initialCategory?: string }) {
   const { items, categories, loaded, error, refresh } = useOwnerProducts();
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState<string>("all");
+  const [category, setCategory] = useState<string>(initialCategory);
   const [criticalOnly, setCriticalOnly] = useState(false);
   const [status, setStatus] = useState<Status>("active");
   const [sort, setSort] = useState<{ key: SortKey; dir: 1 | -1 }>({ key: "name", dir: 1 });
@@ -107,6 +107,20 @@ export function ProductsScreen({ settings }: { settings: KasaSettings }) {
       setNotice({ kind: "error", text: e instanceof ApiError ? e.message : "Barkod üretilemedi." });
     } finally {
       setBusy(false);
+    }
+  }
+
+  /** Listeden hızlı fiyat değişikliği. Eski satışlar etkilenmez; işlem geçmişine yazılır. */
+  async function savePrice(p: OwnerProduct, kurus: number): Promise<boolean> {
+    try {
+      await api(`/api/products/${p.id}`, { method: "PATCH", body: { salePriceKurus: kurus } });
+      const warn = kurus < p.avgCostKurus ? " Dikkat: yeni fiyat ortalama maliyetin altında!" : "";
+      setNotice({ kind: warn ? "warn" : "success", text: `${p.name}: ${formatTRY(p.salePriceKurus)} → ${formatTRY(kurus)}.${warn}` });
+      await refresh();
+      return true;
+    } catch (e) {
+      setNotice({ kind: "error", text: e instanceof ApiError ? e.message : "Fiyat kaydedilemedi." });
+      return false;
     }
   }
 
@@ -242,7 +256,9 @@ export function ProductsScreen({ settings }: { settings: KasaSettings }) {
                     </td>
                     <td className="px-3 py-2 text-slate-600">{p.categoryName ?? "—"}</td>
                     <td className="px-3 py-2 text-right tabular-nums">{formatTRY(p.avgCostKurus)}</td>
-                    <td className="px-3 py-2 text-right font-semibold tabular-nums">{formatTRY(p.salePriceKurus)}</td>
+                    <td className="px-3 py-2 text-right font-semibold tabular-nums">
+                      <PriceCell product={p} onSave={savePrice} />
+                    </td>
                     <td className="px-3 py-2 text-right tabular-nums">%{p.vatRate}</td>
                     <td className={`px-3 py-2 text-right tabular-nums ${p.profitKurus < 0 ? "font-semibold text-red-700" : ""}`}>{formatTRY(p.profitKurus)}</td>
                     <td className={`px-3 py-2 text-right tabular-nums ${p.marginPm !== null && p.marginPm < 100 ? "font-semibold text-amber-700" : ""}`}>
@@ -268,7 +284,7 @@ export function ProductsScreen({ settings }: { settings: KasaSettings }) {
         </div>
       )}
       <p className="text-sm text-slate-500">
-        Birim kâr = KDV hariç satış fiyatı − KDV hariç ortalama maliyet. Marj = birim kâr / KDV hariç satış fiyatı. Marjı %10&apos;un altındakiler turuncu.
+        Birim kâr = KDV hariç satış fiyatı − KDV hariç ortalama maliyet. Marj = birim kâr / KDV hariç satış fiyatı. Marjı %10&apos;un altındakiler turuncu. Satış fiyatına tıklayarak fiyatı burada değiştirebilirsiniz.
       </p>
     </main>
   );
@@ -294,5 +310,60 @@ function SortTh({
         {label} {active ? (sort.dir === 1 ? "▲" : "▼") : ""}
       </button>
     </th>
+  );
+}
+
+function PriceCell({ product, onSave }: { product: OwnerProduct; onSave: (p: OwnerProduct, kurus: number) => Promise<boolean> }) {
+  const [text, setText] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const value = text === null ? null : parseTRYToKurus(text);
+  const invalid = text !== null && text.trim() !== "" && (value === null || value <= 0);
+
+  if (text === null) {
+    return (
+      <button
+        type="button"
+        onClick={() => setText(formatTRY(product.salePriceKurus).replace(/[^\d.,]/g, ""))}
+        className="rounded px-1 underline decoration-dotted underline-offset-4 hover:bg-amber-100"
+        title="Fiyatı değiştirmek için tıklayın"
+        data-testid={`price-edit-${product.id}`}
+      >
+        {formatTRY(product.salePriceKurus)}
+      </button>
+    );
+  }
+
+  async function save() {
+    if (value === null || value <= 0) return;
+    if (value === product.salePriceKurus) return setText(null);
+    setSaving(true);
+    const ok = await onSave(product, value);
+    setSaving(false);
+    if (ok) setText(null);
+  }
+
+  return (
+    <span className="inline-flex flex-col items-end gap-1">
+      <input
+        autoFocus
+        inputMode="decimal"
+        value={text}
+        readOnly={saving}
+        onChange={(e) => setText(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") void save();
+          if (e.key === "Escape") setText(null);
+        }}
+        onBlur={() => {
+          if (!saving) setText(null);
+        }}
+        aria-label={`${product.name} yeni satış fiyatı`}
+        className={`h-9 w-28 rounded border-2 px-2 text-right ${invalid ? "border-red-500" : "border-amber-400"}`}
+        data-testid={`price-input-${product.id}`}
+      />
+      <span className="text-xs font-normal text-slate-500">
+        {invalid ? "Geçersiz tutar" : value !== null && value < product.avgCostKurus ? "maliyetin altında!" : "Enter: kaydet · Esc: vazgeç"}
+      </span>
+    </span>
   );
 }
