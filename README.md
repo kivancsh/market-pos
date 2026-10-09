@@ -24,17 +24,24 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ---
 
-## Kısayol: Terminal kullanmadan çalıştırma (Mac)
+## Kolay kurulum: masaüstü simgesi (Mac)
 
-Klasörde **çift tıklanabilir** üç dosya vardır:
+1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, PIN dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
+2. Bundan sonra programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program kapalıysa başlar ve tarayıcı açılır; zaten açıksa sadece tarayıcı açılır. Simgeyi Dock'a da sürükleyebilirsiniz.
+3. Açılan siyah Terminal penceresi programın kendisidir: **açık kaldığı sürece program çalışır**, kapatınca durur. Telefondan panel adresi de bu pencerede yazar.
+
+Klasördeki diğer çift tıklanabilir dosyalar:
 
 | Dosya | Ne yapar |
 |---|---|
-| **Market Kasa Başlat** | Eksikleri kendisi tamamlar (paketler, PIN dosyası, gerekirse derleme), programı başlatır ve tarayıcıyı açar. Açılan pencere programın kendisidir: **açık kaldığı sürece program çalışır**, kapatınca durur. Telefondan panel adresini de bu pencerede yazar. |
-| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip programı yeniden başlatın. |
+| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip (⌘ + S) programı yeniden başlatın. |
 | **Yedek Al** | Anlık yedek alır ve `backups` klasörünü açar. |
+| **Market Kasa Başlat** | Masaüstü simgesiyle aynı işi yapar. |
 
-İlk çift tıklamada Mac "Terminal, Masaüstü klasöründeki dosyalara erişmek istiyor" diye sorarsa **İzin Ver** deyin.
+- İlk açılışta Mac "Terminal, Masaüstü klasöründeki dosyalara erişmek istiyor" veya "gelen bağlantılara izin verilsin mi?" diye sorarsa **İzin Ver** deyin.
+- `market-pos` klasörünü başka bir yere taşırsanız **Kurulum**'a tekrar çift tıklayın (simge yeni yeri öğrenir).
+- Kodda güncelleme olduğunda (ör. GitHub'dan yeni sürüm) programı kapatıp **Kurulum**'u tekrar çalıştırmanız yeterlidir.
+
 Aşağıdaki Terminal adımları, bu dosyaların yaptığı işin elle yapılışıdır; kısayolları kullanıyorsanız gerekmez.
 
 ## 1. İlk kurulum
