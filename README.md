@@ -24,6 +24,19 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ---
 
+## Kısayol: Terminal kullanmadan çalıştırma (Mac)
+
+Klasörde **çift tıklanabilir** üç dosya vardır:
+
+| Dosya | Ne yapar |
+|---|---|
+| **Market Kasa Başlat** | Eksikleri kendisi tamamlar (paketler, PIN dosyası, gerekirse derleme), programı başlatır ve tarayıcıyı açar. Açılan pencere programın kendisidir: **açık kaldığı sürece program çalışır**, kapatınca durur. Telefondan panel adresini de bu pencerede yazar. |
+| **PIN Ayarla** | PIN dosyasını (`.env`) TextEdit'te açar. Kaydedip programı yeniden başlatın. |
+| **Yedek Al** | Anlık yedek alır ve `backups` klasörünü açar. |
+
+İlk çift tıklamada Mac "Terminal, Masaüstü klasöründeki dosyalara erişmek istiyor" diye sorarsa **İzin Ver** deyin.
+Aşağıdaki Terminal adımları, bu dosyaların yaptığı işin elle yapılışıdır; kısayolları kullanıyorsanız gerekmez.
+
 ## 1. İlk kurulum
 
 Aşağıdaki komutlar **Terminal** uygulamasına yazılır (Mac'te: Finder → Uygulamalar → İzlenceler → Terminal).
