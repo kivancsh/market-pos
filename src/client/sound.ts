@@ -12,16 +12,34 @@ function audio(): AudioContext | null {
   }
 }
 
-/** Tarayıcılar sesi ilk kullanıcı etkileşiminden sonra açar; bunu sayfa açılışında çağırın. */
-export function unlockAudioOnFirstGesture(): void {
-  if (typeof window === "undefined") return;
+/**
+ * Tarayıcılar sesi ilk kullanıcı etkileşiminden sonra açar. Ses motoru (AudioContext) burada, sayfa
+ * açılırken boşta oluşturulur (askıda başlar); ilk tuş/tıklamada yalnızca hafif `resume()` çağrılır.
+ * Oluşturmayı ilk tuşa bırakmak ~90 ms sürüp sonraki tuşları geciktiriyordu (okuyucunun ilk karakteri düşüyordu).
+ */
+export function unlockAudioOnFirstGesture(): () => void {
+  if (typeof window === "undefined") return () => {};
+  const prepare = window.setTimeout(() => {
+    try {
+      ctx ??= new AudioContext();
+    } catch {
+      // ses desteklenmiyor
+    }
+  }, 0);
   const unlock = () => {
-    audio();
-    window.removeEventListener("pointerdown", unlock);
-    window.removeEventListener("keydown", unlock);
+    if (ctx && ctx.state === "suspended") void ctx.resume();
+    if (ctx) remove();
   };
-  window.addEventListener("pointerdown", unlock);
-  window.addEventListener("keydown", unlock);
+  const remove = () => {
+    window.removeEventListener("pointerdown", unlock, true);
+    window.removeEventListener("keydown", unlock, true);
+  };
+  window.addEventListener("pointerdown", unlock, true);
+  window.addEventListener("keydown", unlock, true);
+  return () => {
+    window.clearTimeout(prepare);
+    remove();
+  };
 }
 
 function tone(freq: number, startOffset: number, duration: number, type: OscillatorType, volume: number) {

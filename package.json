@@ -10,10 +10,11 @@
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
+    "test:e2e": "next build && playwright test",
     "seed": "tsx scripts/seed.ts",
     "backup": "tsx scripts/backup.ts",
-    "check:integrity": "tsx scripts/check-integrity.ts"
+    "check:integrity": "tsx scripts/check-integrity.ts",
+    "start:shop": "next start -H 0.0.0.0 -p 3000"
   },
   "dependencies": {
     "better-sqlite3": "^13.0.3",

@@ -59,3 +59,14 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Bugün kapalıysa satış ve iade 409; mal girişi/stok sayımı kapalı güne de yazılabilir.
 - Nakitte alınan para boşsa tam tutar alındı sayılır.
 - Beklenen kasa = açılış kasası + nakit satış − nakit iade.
+
+## Test ve teknik notlar
+- `npm test`: Vitest (tests/unit, tests/integration; bellek içi SQLite; API uçları Request ile doğrudan çağrılır,
+  `setTestCtxFactory`). `npm run test:e2e`: önce `next build`, sonra Playwright `next start -p 3100`
+  AYRI veritabanıyla (`data/e2e/`, PIN 4321/8765). Gerçek veriye dokunulmaz.
+- Okuyucu: `ScannerDetector` saf mantık; hook zamanı `event.timeStamp` ile ölçer (işlenme anı değil).
+  Tuş yolunda ağır iş yapma (ör. AudioContext ilk tuşta oluşturulunca ilk karakter düşüyordu; sayfa açılışında hazırlanır).
+- Kasiyer görünümleri izin listesiyle (`src/server/views.ts`); yeni alan eklerken kasiyere sızmasın.
+- Raporlar tek tanımdan (`src/server/services/reports.ts`) hem ekran hem Excel üretir.
+- Excel'e TL/yüzde yazarken metin üzerinden sayıya çevrilir (`kurusToExcelNumber`), float aritmetiği yok.
+- Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).

@@ -8,6 +8,7 @@ import Database from "better-sqlite3";
 import { formatTRY } from "../src/lib/money";
 import { openDatabase, resolveDbPath } from "../src/server/db/connection";
 import { findStockMismatches } from "../src/server/db/repositories/integrity";
+import { backupDir } from "../src/server/services/backup";
 import { barcodesToCsv, runSeed } from "../src/server/seed/seed";
 
 function stampForFile(d: Date): string {
@@ -22,7 +23,7 @@ async function backupIfHasSales(dbPath: string): Promise<string | null> {
     const hasSalesTable = db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name='sales'").get();
     const sales = hasSalesTable ? (db.prepare("SELECT COUNT(*) AS c FROM sales").get() as { c: number }).c : 0;
     if (sales === 0) return null;
-    const dir = path.join(process.cwd(), "backups");
+    const dir = backupDir();
     fs.mkdirSync(dir, { recursive: true });
     const target = path.join(dir, `store-before-seed-${stampForFile(new Date())}.db`);
     await db.backup(target);

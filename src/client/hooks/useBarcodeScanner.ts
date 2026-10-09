@@ -55,7 +55,9 @@ export function useBarcodeScanner({ enabled, config, onScan, onDuplicate }: UseB
       if (!d || !latest.current.enabled || e.isComposing) return;
       const decision = d.feed({
         key: e.key,
-        time: performance.now(),
+        // Tuşun basıldığı an (olay zaman damgası). İşlendiği an değil: sayfa o sırada ekranı güncelliyorsa
+        // olay geç işlenir ve aralık olduğundan uzun ölçülürdü (ilk karakterin düşmesine yol açıyordu).
+        time: e.timeStamp > 0 ? e.timeStamp : performance.now(),
         ctrlKey: e.ctrlKey,
         metaKey: e.metaKey,
         altKey: e.altKey,
