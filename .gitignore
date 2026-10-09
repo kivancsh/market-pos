@@ -48,3 +48,6 @@ next-env.d.ts
 /playwright-report/
 /playwright/.cache/
 /tests/e2e/.auth/
+
+# Yerel geliştirme ayarları (bilgisayara özel yollar içerir)
+/.claude/
