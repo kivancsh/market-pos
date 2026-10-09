@@ -1,0 +1,26 @@
+{
+  "fps": 30,
+  "duration": 40,
+  "bpm": 120,
+  "scenes": [
+    { "id": "intro", "start": 0, "end": 4 },
+    { "id": "hook", "start": 4, "end": 8 },
+    { "id": "login", "start": 8, "end": 12 },
+    { "id": "kasa", "start": 12, "end": 18 },
+    { "id": "pay", "start": 18, "end": 22 },
+    { "id": "panel", "start": 22, "end": 26 },
+    { "id": "manage", "start": 26, "end": 30 },
+    { "id": "montage", "start": 30, "end": 34 },
+    { "id": "outro", "start": 34, "end": 40 }
+  ],
+  "sfx": {
+    "whoosh": [4, 8, 12, 18, 22, 26, 28, 30, 31, 32, 33],
+    "impact": [4, 34],
+    "keyTap": [9.0, 9.5, 10.0, 10.5, 11.0],
+    "beep": [13.0, 14.0, 15.0, 16.0],
+    "click": [18.0, 20.25, 29.0],
+    "chime": [20.5],
+    "pop": [24.0],
+    "finalHit": [38]
+  }
+}

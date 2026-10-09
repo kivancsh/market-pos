@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>Market Kasa Tanıtım</title>
+<style>
+  :root { --em: #10b981; --em2: #059669; --em3: #34d399; --amber: #f59e0b; --ink: #070d1a; --slate: #cbd5e1; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 1920px; height: 1080px; overflow: hidden; background: #04070e; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #fff; }
+  #stage { position: absolute; inset: 0; overflow: hidden; }
+  .abs { position: absolute; left: 0; top: 0; }
+  .layer { position: absolute; inset: 0; }
+  .blob { position: absolute; border-radius: 50%; width: 1100px; height: 1100px; }
+  .grid { position: absolute; inset: -200px; background-image: linear-gradient(rgba(255,255,255,.055) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.055) 1px, transparent 1px); background-size: 80px 80px; -webkit-mask-image: radial-gradient(ellipse at center, #000 0%, transparent 70%); }
+  .dot { position: absolute; width: 6px; height: 6px; border-radius: 50%; background: #a7f3d0; box-shadow: 0 0 12px #34d399; }
+
+  /* kinetik metin */
+  .w { display: inline-block; overflow: hidden; vertical-align: top; padding: 0.04em 0.02em 0.14em; margin-bottom: -0.1em; }
+  .wi { display: inline-block; will-change: transform; }
+  .grad { background: linear-gradient(90deg, #34d399, #10b981 45%, #fbbf24); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+  /* tarayıcı çerçevesi */
+  .persp { position: absolute; inset: 0; perspective: 2600px; perspective-origin: 50% 50%; }
+  .browser { position: absolute; border-radius: 20px; background: #fff; overflow: hidden; box-shadow: 0 50px 120px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.08), 0 0 140px rgba(16,185,129,.18); transform-origin: 50% 50%; }
+  .bar { height: 46px; background: linear-gradient(#f1f4f8, #e7ebf1); display: flex; align-items: center; gap: 9px; padding: 0 18px; border-bottom: 1px solid #d9dee6; }
+  .bar i { width: 13px; height: 13px; border-radius: 50%; display: block; }
+  .url { margin-left: 26px; height: 28px; flex: 1; max-width: 520px; border-radius: 9px; background: #fff; color: #475569; font-size: 15px; display: flex; align-items: center; padding: 0 12px; gap: 8px; box-shadow: inset 0 0 0 1px #dfe3ea; }
+  .url b { color: #0f172a; font-weight: 600; }
+  .vp { position: relative; overflow: hidden; background: #f1f5f9; }
+  .cam { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; transform-origin: 0 0; }
+  .cam img { position: absolute; left: 0; top: 0; width: 1440px; height: 900px; }
+  .ov { position: absolute; inset: 0; pointer-events: none; }
+  .ring { position: absolute; border: 4px solid var(--em); border-radius: 14px; box-shadow: 0 0 0 6px rgba(16,185,129,.18), 0 0 30px rgba(16,185,129,.55); }
+  .ring.amber { border-color: var(--amber); box-shadow: 0 0 0 6px rgba(245,158,11,.2), 0 0 30px rgba(245,158,11,.55); }
+  .cursor { position: absolute; width: 34px; height: 44px; transform-origin: 4px 4px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.35)); }
+  .ripple { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 3px solid var(--em); }
+
+  /* adım başlıkları */
+  .cap { position: absolute; width: 470px; }
+  .pill { display: inline-flex; align-items: center; gap: 10px; height: 40px; padding: 0 18px; border-radius: 999px; background: rgba(16,185,129,.16); border: 1px solid rgba(52,211,153,.45); color: #6ee7b7; font-weight: 800; letter-spacing: .14em; font-size: 16px; }
+  .pill .n { width: 26px; height: 26px; border-radius: 50%; background: var(--em); color: #04120c; display: grid; place-items: center; letter-spacing: 0; font-size: 15px; }
+  .ctitle { font-size: 68px; line-height: 1.02; font-weight: 800; letter-spacing: -0.02em; margin-top: 22px; }
+  .csub { font-size: 27px; line-height: 1.38; color: var(--slate); margin-top: 22px; font-weight: 450; }
+  .bigdigit { position: absolute; font-size: 640px; font-weight: 900; line-height: 1; color: transparent; -webkit-text-stroke: 2px rgba(52,211,153,.13); letter-spacing: -0.05em; }
+
+  .chip { position: absolute; display: flex; align-items: center; gap: 14px; height: 70px; padding: 0 28px 0 18px; border-radius: 999px; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.14); font-size: 30px; font-weight: 700; white-space: nowrap; backdrop-filter: blur(6px); }
+  .chip .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(135deg, #10b981, #047857); }
+
+  .label { position: absolute; width: 470px; height: 250px; border-radius: 22px; background: #fff; color: #0f172a; box-shadow: 0 30px 60px rgba(0,0,0,.45); padding: 22px 26px; overflow: hidden; }
+  .label .ln { font-size: 22px; font-weight: 700; }
+  .label .lp { font-size: 38px; font-weight: 900; margin-top: 2px; }
+  .label svg { position: absolute; left: 26px; bottom: 18px; }
+  .laser { position: absolute; left: -10px; right: -10px; height: 4px; background: #ef4444; box-shadow: 0 0 18px 4px rgba(239,68,68,.75); border-radius: 4px; }
+  .okbadge { position: absolute; right: 18px; top: 18px; width: 54px; height: 54px; border-radius: 50%; background: var(--em); display: grid; place-items: center; box-shadow: 0 0 0 8px rgba(16,185,129,.2); }
+
+  .phone { position: absolute; width: 340px; height: 708px; border-radius: 54px; background: #0b0f17; padding: 12px; box-shadow: 0 50px 100px rgba(0,0,0,.6), 0 0 0 2px #2a3140, inset 0 0 0 2px #3b4456; }
+  .phone .scr { width: 316px; height: 684px; border-radius: 44px; overflow: hidden; position: relative; background: #fff; }
+  .phone .scr img { width: 316px; position: absolute; left: 0; top: 0; }
+  .phone .island { position: absolute; left: 50%; top: 22px; width: 96px; height: 28px; margin-left: -48px; border-radius: 20px; background: #000; z-index: 2; }
+
+  .toast { position: absolute; display: flex; align-items: center; gap: 14px; padding: 18px 26px; border-radius: 18px; background: #ecfdf5; border: 2px solid #34d399; color: #065f46; font-size: 26px; font-weight: 700; box-shadow: 0 20px 50px rgba(0,0,0,.35); white-space: nowrap; }
+  .steps { position: absolute; display: flex; gap: 10px; }
+  .steps div { width: 120px; height: 6px; border-radius: 6px; background: rgba(255,255,255,.14); overflow: hidden; }
+  .steps div span { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #10b981, #34d399); }
+  .mlabel { position: absolute; font-size: 54px; font-weight: 800; letter-spacing: -0.02em; white-space: nowrap; }
+  .confetti { position: absolute; width: 12px; height: 18px; border-radius: 3px; }
+  #flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+  #vignette { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.55) 100%); }
+  #fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<script>
+"use strict";
+const ASSETS = new URLSearchParams(location.search).get("assets") || ".";
+const BOXES = window.BOXES || {};
+const W = 1920, H = 1080;
+
+// ------------------------------------------------------------------ yardımcılar
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, p) => a + (b - a) * p;
+const E = {
+  lin: (p) => p,
+  outCubic: (p) => 1 - Math.pow(1 - p, 3),
+  inCubic: (p) => p * p * p,
+  inOutCubic: (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2),
+  outExpo: (p) => (p >= 1 ? 1 : 1 - Math.pow(2, -10 * p)),
+  inExpo: (p) => (p <= 0 ? 0 : Math.pow(2, 10 * p - 10)),
+  inOutExpo: (p) => (p <= 0 ? 0 : p >= 1 ? 1 : p < 0.5 ? Math.pow(2, 20 * p - 10) / 2 : (2 - Math.pow(2, -20 * p + 10)) / 2),
+  outBack: (p) => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); },
+  outElastic: (p) => (p <= 0 ? 0 : p >= 1 ? 1 : Math.pow(2, -10 * p) * Math.sin((p * 10 - 0.75) * ((2 * Math.PI) / 3)) + 1),
+};
+const P = (t, a, b, e = E.outCubic) => e(clamp((t - a) / (b - a)));
+const win = (t, a, b) => t >= a && t < b;
+function el(tag, cls, parent, html) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html !== undefined) e.innerHTML = html;
+  (parent || stage).appendChild(e);
+  return e;
+}
+const stage = document.getElementById("stage");
+const S = (e, o) => { for (const k in o) e.style[k] = o[k]; };
+const tf = (e, x, y, s = 1, extra = "") => (e.style.transform = `translate(${x}px,${y}px) scale(${s}) ${extra}`);
+let seed = 1234;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) - 1) / 2147483646;
+
+// kelime kelime giren/çıkan metin
+function kinetic(parent, html, cls) {
+  const box = el("div", cls, parent);
+  const words = [];
+  for (const part of html.split(/(<br>)/)) {
+    if (part === "<br>") { el("br", null, box); continue; }
+    for (const w of part.split(" ").filter(Boolean)) {
+      const o = el("span", "w", box);
+      const i = el("span", "wi", o, w.replace(/\{(.+?)\}/g, '<span class="grad">$1</span>'));
+      words.push(i);
+      box.appendChild(document.createTextNode(" "));
+    }
+  }
+  return { box, words };
+}
+function animWords(k, t, tIn, tOut, stagger = 0.055, dur = 0.55) {
+  k.words.forEach((w, i) => {
+    const a = P(t, tIn + i * stagger, tIn + i * stagger + dur, E.outExpo);
+    const b = P(t, tOut + i * 0.025, tOut + i * 0.025 + 0.3, E.inCubic);
+    w.style.transform = `translateY(${(1 - a) * 115 - b * 115}%) rotate(${(1 - a) * 6}deg)`;
+  });
+  k.box.style.visibility = t >= tIn - 0.05 && t < tOut + 0.6 ? "visible" : "hidden";
+}
+
+// ------------------------------------------------------------------ EAN-13 barkod (gerçek kodlama)
+const EAN = {
+  L: ["0001101","0011001","0010011","0111101","0100011","0110001","0101111","0111011","0110111","0001011"],
+  G: ["0100111","0110011","0011011","0100001","0011101","0111001","0000101","0010001","0001001","0010111"],
+  R: ["1110010","1100110","1101100","1000010","1011100","1001110","1010000","1000100","1001000","1110100"],
+  P: ["LLLLLL","LLGLGG","LLGGLG","LLGGGL","LGLLGG","LGGLLG","LGGGLL","LGLGLG","LGLGGL","LGGLGL"],
+};
+function eanSvg(code, w, h) {
+  const d = code.split("").map(Number);
+  let bits = "101";
+  const par = EAN.P[d[0]];
+  for (let i = 1; i <= 6; i++) bits += EAN[par[i - 1]][d[i]];
+  bits += "01010";
+  for (let i = 7; i <= 12; i++) bits += EAN.R[d[i]];
+  bits += "101";
+  const mw = w / bits.length;
+  let rects = "";
+  for (let i = 0; i < bits.length; i++) if (bits[i] === "1") rects += `<rect x="${(i * mw).toFixed(2)}" y="0" width="${(mw + 0.3).toFixed(2)}" height="${h - 24}" fill="#0f172a"/>`;
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${rects}<text x="${w / 2}" y="${h - 2}" text-anchor="middle" font-size="22" font-family="ui-monospace,Menlo,monospace" letter-spacing="5" fill="#0f172a">${code}</text></svg>`;
+}
+
+// ------------------------------------------------------------------ simgeler (SVG)
+const ICON = {
+  scan: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>',
+  box: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg>',
+  chart: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  bolt: '<svg width="26" height="26" viewBox="0 0 24 24" fill="#fff"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>',
+  wifi: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><path d="M5 12.5a10 10 0 0114 0M8.5 16a5 5 0 017 0M12 19.5h.01M3 3l18 18"/></svg>',
+  lock: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>',
+  check: '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  cursor: '<svg width="34" height="44" viewBox="0 0 34 44"><path d="M3 3 L3 34 L11 26 L17 40 L23 37 L17 24 L28 24 Z" fill="#fff" stroke="#0f172a" stroke-width="2.6" stroke-linejoin="round"/></svg>',
+};
+
+// ------------------------------------------------------------------ arka plan
+const bg = el("div", "layer");
+S(bg, { background: "radial-gradient(ellipse at 50% 40%, #0d1a2e 0%, #070d1a 55%, #04070e 100%)" });
+const blobs = [
+  ["rgba(16,185,129,.30)", 0.13, 0.0], ["rgba(6,182,212,.20)", 0.09, 2.1], ["rgba(245,158,11,.13)", 0.11, 4.2],
+].map(([c, sp, ph]) => { const b = el("div", "blob", bg); b.style.background = `radial-gradient(circle, ${c} 0%, transparent 62%)`; return { b, sp, ph }; });
+const grid = el("div", "grid", bg);
+const dots = Array.from({ length: 46 }, () => ({ d: el("div", "dot", bg), x: rnd() * W, y: rnd() * H, v: 18 + rnd() * 40, s: 0.4 + rnd() * 0.9, ph: rnd() * 6 }));
+
+// ------------------------------------------------------------------ tarayıcı bileşeni
+function makeBrowser(parent, vw, url, shots) {
+  const vh = Math.round(vw / 1.6);
+  const root = el("div", "browser", parent);
+  S(root, { width: vw + "px", height: vh + 46 + "px" });
+  const bar = el("div", "bar", root, '<i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i>');
+  const u = el("div", "url", bar, "");
+  const vp = el("div", "vp", root);
+  S(vp, { width: vw + "px", height: vh + "px" });
+  const cam = el("div", "cam", vp);
+  const imgs = {};
+  for (const s of shots) { const i = el("img", null, cam); i.src = `${ASSETS}/shots/${s}.png`; i.style.opacity = 0; imgs[s] = i; }
+  const ov = el("div", "ov", vp);
+  const b = { root, u, vp, cam, imgs, ov, w: vw, h: vh, k: { s: vw / 1440, tx: 0, ty: 0 } };
+  setUrl(b, url);
+  return b;
+}
+function setUrl(b, path) { if (b._url !== path) { b.u.innerHTML = `<svg width="12" height="14" viewBox="0 0 12 14"><rect x="1" y="6" width="10" height="7" rx="1.5" fill="#64748b"/><path d="M3 6V4a3 3 0 016 0v2" stroke="#64748b" stroke-width="1.6" fill="none"/></svg> localhost:3000<b>${path}</b>`; b._url = path; } }
+function setShot(b, name) { for (const k in b.imgs) b.imgs[k].style.opacity = k === name ? 1 : 0; }
+function setCam(b, rect, p, punch = 1) {
+  const r = [0, 0, 1440, 900].map((v, i) => lerp(v, rect[i], p));
+  const s = Math.min(b.w / r[2], b.h / r[3]) * punch;
+  let tx = b.w / 2 - (r[0] + r[2] / 2) * s, ty = b.h / 2 - (r[1] + r[3] / 2) * s;
+  tx = clamp(tx, b.w - 1440 * s, 0); ty = clamp(ty, b.h - 900 * s, 0);
+  b.cam.style.transform = `translate(${tx}px,${ty}px) scale(${s})`;
+  b.k = { s, tx, ty };
+}
+const camLerp = (a, b, p) => a.map((v, i) => lerp(v, b[i], p));
+const toView = (b, x, y) => [b.k.tx + x * b.k.s, b.k.ty + y * b.k.s];
+function ring(b, cls) { const r = el("div", "ring " + (cls || ""), b.ov); r.style.opacity = 0; return r; }
+function setRing(b, r, rect, op, pad = 8) {
+  const [x0, y0] = toView(b, rect[0] - pad, rect[1] - pad);
+  const [x1, y1] = toView(b, rect[0] + rect[2] + pad, rect[1] + rect[3] + pad);
+  S(r, { left: x0 + "px", top: y0 + "px", width: x1 - x0 + "px", height: y1 - y0 + "px", opacity: op });
+}
+function makeCursor(b) {
+  const c = el("div", "cursor", b.ov, ICON.cursor);
+  const rp = el("div", "ripple", b.ov);
+  return { c, rp };
+}
+// imleç: path = [[zaman, x, y], ...] uygulama koordinatı; clicks = [zaman...]
+function driveCursor(b, cur, t, path, clicks, vis) {
+  let x = path[0][1], y = path[0][2];
+  for (let i = 1; i < path.length; i++) {
+    const [t0, x0, y0] = path[i - 1], [t1, x1, y1] = path[i];
+    if (t >= t1) { x = x1; y = y1; continue; }
+    if (t > t0) { const p = E.inOutCubic((t - t0) / (t1 - t0)); x = lerp(x0, x1, p); y = lerp(y0, y1, p) - Math.sin(p * Math.PI) * 30; }
+    break;
+  }
+  const [vx, vy] = toView(b, x, y);
+  let press = 1, rip = -1;
+  for (const ct of clicks) { if (win(t, ct - 0.06, ct + 0.12)) press = 0.82; if (win(t, ct, ct + 0.5)) rip = (t - ct) / 0.5; }
+  S(cur.c, { left: vx + "px", top: vy + "px", opacity: vis, transform: `scale(${press})` });
+  if (rip >= 0) S(cur.rp, { left: vx + 4 + "px", top: vy + 4 + "px", opacity: (1 - rip) * vis, transform: `scale(${1 + rip * 4})` });
+  else cur.rp.style.opacity = 0;
+}
+
+// ------------------------------------------------------------------ SAHNE: giriş (logo)
+const intro = el("div", "layer");
+const glow = el("div", "abs", intro); S(glow, { width: "900px", height: "900px", borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,.45), transparent 60%)" });
+const ringFx = el("div", "abs", intro); S(ringFx, { width: "300px", height: "300px", borderRadius: "50%", border: "3px solid rgba(52,211,153,.8)" });
+const logo = el("img", "abs", intro); logo.src = `${ASSETS}/icon.png`; S(logo, { width: "260px", height: "260px", filter: "drop-shadow(0 30px 60px rgba(0,0,0,.5))" });
+const title = el("div", "abs", intro); S(title, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.035em" });
+const letters = [];
+"Market Kasa".split("").forEach((ch, i) => { const s = el("span", "wi", title, ch === " " ? "&nbsp;" : ch); if (i >= 7) s.classList.add("grad"); letters.push(s); });
+const tagRow = el("div", "abs", intro); S(tagRow, { width: "1920px", display: "flex", justifyContent: "center", gap: "26px", top: "680px" });
+const tagWords = ["Okut.", "Sat.", "Kazancını gör."].map((w, i) => { const s = el("div", null, tagRow, w); S(s, { display: "inline-block", fontSize: "60px", fontWeight: "800", color: i === 2 ? "#34d399" : "#fff", whiteSpace: "nowrap" }); return s; });
+
+// ------------------------------------------------------------------ SAHNE: kanca
+const hook = el("div", "layer");
+const hook1 = kinetic(hook, "Küçük dükkânlar için", "abs");
+S(hook1.box, { width: "1920px", textAlign: "center", top: "250px", fontSize: "52px", fontWeight: "600", color: "#cbd5e1" });
+const hookWords = [["Barkodlu satış", ICON.scan], ["Stok", ICON.box], ["Kâr takibi", ICON.chart]].map(([w, ic]) => {
+  const c = el("div", "abs", hook); S(c, { fontSize: "104px", fontWeight: "900", letterSpacing: "-0.03em", whiteSpace: "nowrap", display: "flex", alignItems: "center", gap: "26px" });
+  c.innerHTML = `<span style="width:96px;height:96px;border-radius:26px;display:grid;place-items:center;background:linear-gradient(135deg,#10b981,#047857);box-shadow:0 20px 40px rgba(16,185,129,.35)">${ic.replace(/width="26" height="26"/, 'width="54" height="54"')}</span>${w}`;
+  return c;
+});
+const hook3 = kinetic(hook, "Tek programda, {kendi} {bilgisayarınızda.}", "abs");
+S(hook3.box, { width: "1920px", textAlign: "center", top: "790px", fontSize: "50px", fontWeight: "700" });
+
+// ------------------------------------------------------------------ SAHNE: adımlar (kalıcı tarayıcı)
+const steps = el("div", "layer");
+const digit = el("div", "bigdigit", steps, "1");
+const persp = el("div", "persp", steps);
+const B = makeBrowser(persp, 1280, "/login", ["login-pin-0", "login-pin-1", "login-pin-2", "login-pin-3", "login-pin-4", "kasa-0", "kasa-1", "kasa-2", "kasa-3", "kasa-4", "pay-0", "pay-1", "pay-done", "panel", "yonetim", "toplu-fiyat"]);
+const ringA = ring(B), ringB = ring(B, "amber");
+const cur = makeCursor(B);
+const toast = el("div", "toast", B.ov, `<span style="width:34px;height:34px;border-radius:50%;background:#10b981;display:grid;place-items:center">${ICON.check.replace('width="30" height="30"', 'width="20" height="20"')}</span> 6 ürünün fiyatı güncellendi`);
+const confetti = Array.from({ length: 70 }, () => {
+  const c = el("div", "confetti", B.ov);
+  c.style.background = ["#10b981", "#34d399", "#f59e0b", "#fbbf24", "#60a5fa", "#f472b6"][Math.floor(rnd() * 6)];
+  return { c, a: rnd() * Math.PI * 2, v: 300 + rnd() * 700, r: rnd() * 720, d: rnd() * 0.12 };
+});
+const phone = el("div", "phone", steps, '<div class="island"></div><div class="scr"><img></div>');
+phone.querySelector("img").src = `${ASSETS}/shots/phone-panel.png`;
+
+const CAPS = [
+  { n: 1, t: "Giriş yap", s: "Kasiyer PIN'iyle, yönetici kendi şifresiyle girer.", a: 8.1, b: 11.65 },
+  { n: 2, t: "Okut, {sepete} {düşsün}", s: "Barkod okuyucu ürünü anında tanır. Aynı ürünü okutunca adet artar.", a: 12.05, b: 17.65 },
+  { n: 3, t: "Nakit ya da kart", s: "Tek tuş: F8 nakit, F9 kart. Para üstünü program hesaplar.", a: 18.05, b: 21.55 },
+  { n: 4, t: "Kârını {anlık} gör", s: "Ciro, KDV hariç kâr, marj ve saatlik satışlar. Telefondan da.", a: 22.35, b: 25.65 },
+  { n: 5, t: "Fiyatları {tek} {panelden} yönet", s: "Toplu zam, yuvarlama, önizleme. Eski satışların kârı değişmez.", a: 26.3, b: 29.55 },
+].map((c) => {
+  const box = el("div", "cap", steps);
+  const pill = el("div", "pill", box, `<span class="n">${c.n}</span>ADIM ${c.n}`);
+  const t = kinetic(box, c.t, "ctitle");
+  const s = el("div", "csub", box, c.s);
+  return { ...c, box, pill, tk: t, sub: s };
+});
+const stepBar = el("div", "steps", steps, "<div><span></span></div>".repeat(5));
+const stepFills = [...stepBar.querySelectorAll("span")];
+
+// barkod etiket kartları (adım 2)
+const SCANS = [
+  { t: 13.0, name: "Kola 1 L", price: "₺50,00", code: "2000000000039", row: 0 },
+  { t: 14.0, name: "Cips Büyük Boy", price: "₺70,00", code: "2000000000077", row: 1 },
+  { t: 15.0, name: "Süt 1 L", price: "₺45,00", code: "2000000000114", row: 2 },
+  { t: 16.0, name: "Kola 1 L", price: "₺50,00", code: "2000000000039", row: 0 },
+].map((s) => {
+  const c = el("div", "label", steps, `<div class="ln">${s.name}</div><div class="lp">${s.price}</div>${eanSvg(s.code, 300, 118)}`);
+  const laser = el("div", "laser", c);
+  const ok = el("div", "okbadge", c, ICON.check);
+  return { ...s, c, laser, ok };
+});
+const f8 = el("div", "abs", steps, "F8");
+S(f8, { width: "92px", height: "92px", borderRadius: "18px", background: "linear-gradient(#ffffff,#e2e8f0)", color: "#0f172a", fontSize: "38px", fontWeight: "800", display: "grid", placeItems: "center", boxShadow: "0 8px 0 #94a3b8, 0 20px 40px rgba(0,0,0,.4)" });
+
+// ------------------------------------------------------------------ SAHNE: montaj
+const mont = el("div", "layer");
+const MONT = [
+  { shot: "etiketler", title: "Barkod etiketi bas", sub: "A4 etiket kâğıdına, fiyatıyla", url: "/etiketler", focus: [560, 150, 720, 450] },
+  { shot: "raporlar", title: "Raporlar + Excel", sub: "Ürün ve kategori kârlılığı", url: "/raporlar", focus: [60, 120, 1320, 820] },
+  { shot: "islem-gecmisi", title: "İşlem geçmişi", sub: "Kim, ne zaman, ne değiştirdi", url: "/yonetim/islem-gecmisi", focus: [140, 180, 1160, 725] },
+  { shot: "kullanicilar", title: "Kasiyer hesapları", sub: "Her kasiyere kendi PIN'i", url: "/yonetim/kullanicilar", focus: [250, 120, 940, 590] },
+].map((m, i) => {
+  const wrap = el("div", "persp", mont);
+  const b = makeBrowser(wrap, 1180, m.url, [m.shot]);
+  setShot(b, m.shot);
+  const lab = el("div", "mlabel", mont, `<span style="color:#34d399">+</span> ${m.title}`);
+  const sub = el("div", "abs", mont, m.sub);
+  S(sub, { fontSize: "30px", color: "#cbd5e1", whiteSpace: "nowrap" });
+  return { ...m, wrap, b, lab, sub, t0: 30 + i };
+});
+const moreTag = el("div", "pill", mont, "VE DAHASI");
+moreTag.style.position = "absolute";
+
+// ------------------------------------------------------------------ SAHNE: kapanış
+const outro = el("div", "layer");
+const oGlow = el("div", "abs", outro); S(oGlow, { width: "1200px", height: "1200px", borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,.35), transparent 60%)" });
+const oLogo = el("img", "abs", outro); oLogo.src = `${ASSETS}/icon.png`; S(oLogo, { width: "200px", height: "200px", filter: "drop-shadow(0 30px 60px rgba(0,0,0,.5))" });
+const oTitle = el("div", "abs", outro, 'Market <span class="grad">Kasa</span>'); S(oTitle, { width: "1920px", textAlign: "center", fontSize: "132px", fontWeight: "900", letterSpacing: "-0.035em" });
+const oChips = [["Masaüstünden tek tık", ICON.bolt], ["İnternetsiz çalışır", ICON.wifi], ["Veriler sizde kalır", ICON.lock]].map(([t, ic]) => el("div", "chip", outro, `<span class="ic">${ic}</span>${t}`));
+const oTag = el("div", "abs", outro, 'Okut. Sat. <span class="grad">Kazancını gör.</span>'); S(oTag, { width: "1920px", textAlign: "center", fontSize: "64px", fontWeight: "800" });
+const oSmall = el("div", "abs", outro, "Küçük dükkânlar için barkodlu satış, stok ve kâr takibi"); S(oSmall, { width: "1920px", textAlign: "center", fontSize: "28px", color: "#94a3b8" });
+
+const vignette = el("div", null); vignette.id = "vignette";
+const flash = el("div", null); flash.id = "flash";
+const fade = el("div", null); fade.id = "fade";
+
+// ------------------------------------------------------------------ zaman çizelgesi
+function renderBg(t) {
+  blobs.forEach(({ b, sp, ph }, i) => {
+    const x = W / 2 - 550 + Math.sin(t * sp * 2 + ph) * 520 + (i - 1) * 260;
+    const y = H / 2 - 550 + Math.cos(t * sp * 1.6 + ph) * 260;
+    tf(b, x, y, 1 + 0.08 * Math.sin(t * 0.7 + ph));
+  });
+  tf(grid, -((t * 14) % 80), -((t * 9) % 80));
+  dots.forEach((d) => {
+    const y = (((d.y - t * d.v) % (H + 40)) + H + 40) % (H + 40) - 20;
+    const x = d.x + Math.sin(t * 0.8 + d.ph) * 24;
+    S(d.d, { transform: `translate(${x}px,${y}px) scale(${d.s})`, opacity: 0.25 + 0.35 * Math.sin(t * 2 + d.ph) ** 2 });
+  });
+}
+
+function renderIntro(t) {
+  const vis = t < 4.2;
+  intro.style.display = vis ? "block" : "none";
+  if (!vis) return;
+  const out = P(t, 3.55, 4.05, E.inExpo);
+  S(intro, { transform: `scale(${1 + out * 2.2})`, opacity: 1 - out, filter: `blur(${out * 14}px)` });
+  const pl = P(t, 0.25, 1.0, E.outBack);
+  const lift = P(t, 0.95, 1.5, E.inOutCubic);
+  tf(logo, W / 2 - 130, 230 - lift * 70, pl, `rotate(${(1 - pl) * -25}deg)`);
+  logo.style.opacity = P(t, 0.25, 0.45);
+  tf(glow, W / 2 - 450, 360 - 450 - lift * 70, 0.6 + pl * 0.5 + 0.04 * Math.sin(t * 6));
+  glow.style.opacity = P(t, 0.2, 0.9) * 0.9;
+  const rp = P(t, 0.35, 1.4, E.outCubic);
+  tf(ringFx, W / 2 - 150, 360 - 150 - lift * 70, 0.6 + rp * 2.4);
+  ringFx.style.opacity = (1 - rp) * (t > 0.35 ? 1 : 0);
+  tf(title, 0, 470 - lift * 40);
+  letters.forEach((s, i) => {
+    const a = P(t, 1.0 + i * 0.045, 1.55 + i * 0.045, E.outExpo);
+    s.style.transform = `translateY(${(1 - a) * 90}px) scale(${0.6 + a * 0.4})`;
+    s.style.opacity = a;
+  });
+  tagWords.forEach((s, i) => {
+    const a = P(t, 2.0 + i * 0.5, 2.35 + i * 0.5, E.outBack);
+    tf(s, 0, (1 - a) * 40, 0.7 + a * 0.3);
+    s.style.opacity = P(t, 2.0 + i * 0.5, 2.15 + i * 0.5);
+  });
+}
+
+function renderHook(t) {
+  const vis = win(t, 3.9, 8.4);
+  hook.style.display = vis ? "block" : "none";
+  if (!vis) return;
+  const enter = P(t, 3.95, 4.4, E.outExpo);
+  const out = P(t, 7.55, 8.05, E.inExpo);
+  S(hook, { transform: `translateX(${-out * 1400}px) scale(${0.85 + enter * 0.15})`, filter: `blur(${(1 - enter) * 10 + out * 18}px)`, opacity: enter });
+  animWords(hook1, t, 4.05, 99);
+  const ys = [370, 500, 630];
+  hookWords.forEach((c, i) => {
+    const ti = 4.5 + i * 0.5;
+    const a = P(t, ti, ti + 0.45, E.outBack);
+    const w = c.offsetWidth || 900;
+    tf(c, W / 2 - w / 2 + (1 - a) * (i % 2 ? -300 : 300), ys[i], 0.8 + a * 0.2);
+    c.style.opacity = P(t, ti, ti + 0.15);
+  });
+  animWords(hook3, t, 6.2, 99, 0.09);
+}
+
+const R = (k, name) => (BOXES[name] && BOXES[name][k]) || null;
+function renderSteps(t) {
+  const vis = win(t, 7.5, 30.4);
+  steps.style.display = vis ? "block" : "none";
+  if (!vis) return;
+
+  // --- tarayıcı yerleşimi: sağda (8–22), solda (22–26), sağda (26–30)
+  const enter = P(t, 7.6, 8.35, E.outExpo);
+  const toLeft = P(t, 21.65, 22.35, E.inOutCubic);
+  const toRight = P(t, 25.65, 26.35, E.inOutCubic);
+  const exit = P(t, 29.5, 29.95, E.inExpo);
+  const side = toLeft - toRight; // 0 sağ, 1 sol
+  let bx = lerp(600, 110, side) + (1 - enter) * 1500 - exit * 2400;
+  const by = 118 + Math.sin(t * 0.9) * 6;
+  const rotY = lerp(-7, 4, side) + Math.sin(t * 0.7) * 1.5 + (1 - enter) * -30 + exit * 25;
+  const rotX = 3 + Math.sin(t * 0.55) * 1;
+  const blur = (1 - enter) * 16 + exit * 22 + Math.sin(side * Math.PI) * 6;
+  S(B.root, { left: bx + "px", top: by + "px", transform: `rotateY(${rotY}deg) rotateX(${rotX}deg)`, filter: blur > 0.2 ? `blur(${blur}px)` : "none" });
+
+  // --- ekran + kamera
+  let shot = "login-pin-0", url = "/login", cam = [0, 0, 1440, 900], cp = 0, punch = 1;
+  const pinCard = [528, 111, 384, 678];
+  const keys = [[668, 393], [552, 469], [784, 469], [668, 545]].map(([x, y]) => [x, y, 104, 63]);
+  const tapT = [9.0, 9.5, 10.0, 10.5];
+  ringA.style.opacity = 0; ringB.style.opacity = 0; toast.style.opacity = 0;
+  let curVis = 0;
+  confetti.forEach((c) => (c.c.style.opacity = 0));
+
+  if (t < 12) {
+    shot = tapT.reduce((s, tt, i) => (t >= tt ? `login-pin-${i + 1}` : s), "login-pin-0");
+    cam = pinCard; cp = 0.2 + P(t, 8.2, 9.0, E.inOutCubic) * 0.55;
+    setShot(B, shot); setCam(B, cam, cp);
+    curVis = P(t, 8.5, 8.8) * (1 - P(t, 11.3, 11.6));
+    const path = [[8.5, 1000, 820], [8.85, 720, 425], [9.35, 604, 500], [9.85, 836, 500], [10.35, 720, 576], [10.85, 720, 732]];
+    driveCursor(B, cur, t, path, [...tapT, 11.0], curVis);
+    tapT.forEach((tt, i) => { if (win(t, tt, tt + 0.35)) setRing(B, ringA, keys[i], 1 - (t - tt) / 0.35, 4); });
+    if (win(t, 11.0, 11.6)) setRing(B, ringA, [552, 701, 336, 63], 1 - P(t, 11.3, 11.6), 6);
+  } else if (t < 18) {
+    url = "/kasa";
+    shot = SCANS.reduce((s, sc, i) => (t >= sc.t ? `kasa-${i + 1}` : s), "kasa-0");
+    const c1 = [0, 50, 1065, 666], c2 = [0, 0, 1440, 900];
+    cam = camLerp(c1, c2, P(t, 16.35, 16.95, E.inOutCubic));
+    cp = P(t, 12.1, 12.8, E.inOutCubic);
+    punch = 1 + 0.025 * Math.max(0, ...SCANS.map((s) => (win(t, s.t, s.t + 0.25) ? 1 - (t - s.t) / 0.25 : 0)));
+    setShot(B, shot); setCam(B, cam, cp, punch);
+    const last = SCANS.filter((s) => t >= s.t).pop();
+    if (last && t < last.t + 0.7) setRing(B, ringA, [13, 250 + last.row * 61, 1030, 61], 1 - (t - last.t) / 0.7, 2);
+    if (t >= 16.6) setRing(B, ringB, R("total", "kasa-4") || [1085, 221, 327, 48], P(t, 16.6, 16.9) * (1 - P(t, 17.5, 17.8)) * (0.8 + 0.2 * Math.sin(t * 12)), 14);
+  } else if (t < 22) {
+    url = "/kasa";
+    shot = t < 18.25 ? "kasa-4" : t < 19.0 ? "pay-0" : t < 20.5 ? "pay-1" : "pay-done";
+    const dlg = [440, 160, 560, 580];
+    cam = shot === "pay-done" ? camLerp(dlg, [420, 260, 600, 380], P(t, 20.5, 21.1, E.outCubic)) : dlg;
+    cp = P(t, 18.25, 18.7, E.inOutCubic);
+    punch = 1 + (win(t, 20.5, 20.8) ? 0.05 * (1 - (t - 20.5) / 0.3) : 0) + (win(t, 18.25, 18.5) ? 0.04 * (1 - (t - 18.25) / 0.25) : 0);
+    setShot(B, shot); setCam(B, cam, cp, punch);
+    if (win(t, 19.0, 20.3)) setRing(B, ringA, R("cash", "pay-1") || [516, 372, 408, 56], P(t, 19.0, 19.2) * (1 - P(t, 19.5, 19.7)), 4);
+    if (win(t, 19.45, 20.3)) setRing(B, ringB, [516, 556, 408, 68], P(t, 19.45, 19.65) * (1 - P(t, 20.1, 20.3)), 4);
+    curVis = P(t, 19.5, 19.7) * (1 - P(t, 20.5, 20.7));
+    driveCursor(B, cur, t, [[19.5, 1000, 820], [20.15, 720, 673]], [20.25], curVis);
+    if (shot === "pay-done") {
+      const cx = 720, cy = 330;
+      confetti.forEach((c) => {
+        const u = (t - 20.5 - c.d) / 1.3;
+        if (u < 0 || u > 1) return;
+        const x = cx + Math.cos(c.a) * c.v * u * 0.55;
+        const y = cy + Math.sin(c.a) * c.v * u * 0.45 + 420 * u * u;
+        const [vx, vy] = toView(B, x, y);
+        S(c.c, { opacity: 1 - u * u, transform: `translate(${vx}px,${vy}px) rotate(${c.r * u}deg)` });
+      });
+      if (t >= 20.9) setRing(B, ringB, R("changeAmount", "pay-done") || [504, 496, 432, 60], P(t, 20.9, 21.1) * (1 - P(t, 21.4, 21.6)), 6);
+    }
+  } else if (t < 26) {
+    url = "/panel"; shot = "panel";
+    const cards = [96, 120, 1248, 300], profit = [726, 133, 302, 135], chart = [517, 433, 826, 311];
+    const a = P(t, 22.2, 22.9, E.inOutCubic), b = P(t, 23.7, 24.4, E.inOutCubic);
+    cam = b > 0 ? camLerp(cards, [80, 110, 1300, 640], b) : cards;
+    cp = a;
+    setShot(B, shot); setCam(B, cam, cp);
+    if (win(t, 22.9, 24.0)) setRing(B, ringB, profit, P(t, 22.9, 23.1) * (1 - P(t, 23.75, 24.0)), 4);
+    if (win(t, 24.5, 25.7)) setRing(B, ringA, chart, P(t, 24.5, 24.7) * (1 - P(t, 25.4, 25.65)), 4);
+  } else {
+    if (t < 27.9) {
+      url = "/yonetim"; shot = "yonetim";
+      cam = [140, 60, 1160, 725]; cp = P(t, 26.2, 26.9, E.inOutCubic);
+      const tile = R("tileBulk", "yonetim") || [915, 181, 365, 106];
+      punch = 1 + 0.06 * P(t, 27.4, 27.9, E.inExpo);
+      setShot(B, shot); setCam(B, camLerp(cam, tile, P(t, 27.45, 27.9, E.inExpo) * 0.85), cp, punch);
+      curVis = P(t, 26.6, 26.8);
+      driveCursor(B, cur, t, [[26.6, 600, 820], [27.3, tile[0] + 180, tile[1] + 55]], [27.5], curVis);
+      if (win(t, 27.0, 27.9)) setRing(B, ringA, tile, P(t, 27.0, 27.2), 4);
+    } else {
+      url = "/yonetim/toplu-fiyat"; shot = "toplu-fiyat";
+      const tb = R("bulkTable", "toplu-fiyat") || [224, 551, 992, 254];
+      const ap = R("bulkApply", "toplu-fiyat") || [224, 817, 176, 48];
+      const c1 = [200, 360, 1040, 560];
+      cam = c1; cp = 1;
+      punch = 1 + 0.06 * (1 - P(t, 27.9, 28.3, E.outCubic));
+      setShot(B, shot); setCam(B, cam, cp, punch);
+      if (win(t, 28.3, 29.0)) setRing(B, ringB, tb, P(t, 28.3, 28.5) * (1 - P(t, 28.8, 29.0)), 4);
+      curVis = P(t, 28.2, 28.4) * (1 - P(t, 29.5, 29.6));
+      driveCursor(B, cur, t, [[28.2, 900, 860], [28.85, ap[0] + 120, ap[1] + 30]], [29.0], curVis);
+      if (t >= 29.15) {
+        const a = P(t, 29.15, 29.45, E.outBack);
+        const [vx, vy] = toView(B, ap[0] + 220, ap[1] - 6);
+        S(toast, { left: vx + "px", top: vy + "px", opacity: P(t, 29.15, 29.3), transform: `translateY(${(1 - a) * 30}px) scale(${0.85 + a * 0.15})` });
+      }
+    }
+  }
+  setUrl(B, url);
+  if (curVis <= 0) { cur.c.style.opacity = 0; cur.rp.style.opacity = 0; }
+
+  // --- başlıklar
+  const capLeft = { x: 96, y: 300 }, capRight = { x: 1380, y: 300 };
+  CAPS.forEach((c) => {
+    const on = win(t, c.a - 0.1, c.b + 0.6);
+    c.box.style.display = on ? "block" : "none";
+    if (!on) return;
+    const pos = c.n === 4 ? capRight : capLeft;
+    const y = c.n === 2 ? 150 : pos.y;
+    const pin = P(t, c.a, c.a + 0.4, E.outBack), pout = P(t, c.b, c.b + 0.3, E.inCubic);
+    S(c.box, { left: pos.x + "px", top: y + "px" });
+    S(c.pill, { transform: `translateX(${(1 - pin) * -60 - pout * 60}px)`, opacity: Math.min(P(t, c.a, c.a + 0.2), 1 - pout) });
+    animWords(c.tk, t, c.a + 0.08, c.b, 0.06);
+    S(c.sub, { transform: `translateY(${(1 - P(t, c.a + 0.3, c.a + 0.8, E.outExpo)) * 30}px)`, opacity: Math.min(P(t, c.a + 0.3, c.a + 0.7), 1 - pout) });
+  });
+  const cur5 = CAPS.filter((c) => t >= c.a - 0.1).pop() || CAPS[0];
+  digit.textContent = cur5.n;
+  const dPos = cur5.n === 4 ? 1290 : -40;
+  const dIn = P(t, cur5.a - 0.1, cur5.a + 0.6, E.outExpo), dOut = P(t, cur5.b, cur5.b + 0.4, E.inCubic);
+  S(digit, { left: dPos + "px", top: "160px", opacity: dIn * (1 - dOut), transform: `translateY(${(1 - dIn) * 120 - dOut * 80}px) scale(${0.9 + dIn * 0.1})` });
+
+  // adım çubuğu
+  S(stepBar, { left: W / 2 - 320 + "px", top: "1032px", opacity: enter * (1 - exit) });
+  const bounds = [[8, 12], [12, 18], [18, 22], [22, 26], [26, 30]];
+  stepFills.forEach((f, i) => (f.style.width = clamp((t - bounds[i][0]) / (bounds[i][1] - bounds[i][0])) * 100 + "%"));
+
+  // etiket kartları (adım 2)
+  SCANS.forEach((s) => {
+    const on = win(t, s.t - 0.5, s.t + 0.6);
+    s.c.style.display = on ? "block" : "none";
+    if (!on) return;
+    const a = P(t, s.t - 0.5, s.t - 0.15, E.outExpo);
+    const fly = P(t, s.t + 0.15, s.t + 0.55, E.inCubic);
+    const x = 96 + fly * 620, y = 640 + (1 - a) * 200 - fly * 380;
+    S(s.c, { transform: `translate(${x}px,${y}px) scale(${1 - fly * 0.6}) rotate(${(1 - a) * -6 + fly * 8}deg)`, opacity: a * (1 - fly) });
+    const sweep = P(t, s.t - 0.18, s.t + 0.02, E.inOutCubic);
+    S(s.laser, { top: 120 + sweep * 110 + "px", opacity: win(t, s.t - 0.2, s.t + 0.06) ? 1 : 0 });
+    const ok = P(t, s.t, s.t + 0.25, E.outBack);
+    S(s.ok, { transform: `scale(${ok})`, opacity: t >= s.t ? 1 : 0 });
+  });
+
+  // F8 tuşu
+  const f8a = P(t, 17.75, 18.0, E.outBack), f8press = win(t, 18.0, 18.12) ? 8 : 0, f8out = P(t, 18.5, 18.8, E.inCubic);
+  S(f8, { transform: `translate(${300}px,${720 + f8press + (1 - f8a) * 60}px) scale(${f8a * (1 - f8out * 0.3)})`, opacity: f8a * (1 - f8out), boxShadow: `0 ${8 - f8press}px 0 #94a3b8, 0 20px 40px rgba(0,0,0,.4)` });
+
+  // telefon (adım 4)
+  const ph = P(t, 23.85, 24.35, E.outBack), phOut = P(t, 25.6, 26.0, E.inCubic);
+  phone.style.display = win(t, 23.8, 26.1) ? "block" : "none";
+  S(phone, { transform: `translate(${1020 + (1 - ph) * 200 + phOut * 300}px,${300 + (1 - ph) * 500}px) rotate(${(1 - ph) * 14 + 6}deg)`, opacity: Math.min(1, ph * 2) * (1 - phOut) });
+  phone.querySelector("img").style.transform = `translateY(${-P(t, 24.4, 25.6, E.inOutCubic) * 340}px)`;
+}
+
+function renderMontage(t) {
+  const vis = win(t, 29.6, 34.3);
+  mont.style.display = vis ? "block" : "none";
+  if (!vis) return;
+  const tagIn = P(t, 29.8, 30.2, E.outBack);
+  S(moreTag, { left: "96px", top: "350px", transform: `scale(${tagIn})`, opacity: tagIn * (1 - P(t, 33.7, 33.95)) });
+  MONT.forEach((m, i) => {
+    const a = P(t, m.t0 - 0.25, m.t0 + 0.2, E.outExpo);
+    const b = i < 3 ? P(t, m.t0 + 0.75, m.t0 + 1.0, E.inExpo) : P(t, 33.65, 34.0, E.inExpo);
+    const on = win(t, m.t0 - 0.3, m.t0 + 1.05);
+    m.wrap.style.display = on ? "block" : "none";
+    m.lab.style.display = on ? "block" : "none";
+    m.sub.style.display = on ? "block" : "none";
+    if (!on) return;
+    const x = 640 + (1 - a) * 1400 - b * 1600;
+    const blur = (1 - a) * 18 + b * 22;
+    S(m.b.root, { left: x + "px", top: "200px", transform: `rotateY(${-10 + (1 - a) * -25 + b * 25}deg) rotateX(3deg) scale(${0.9 + a * 0.05})`, filter: blur > 0.3 ? `blur(${blur}px)` : "none" });
+    setCam(m.b, m.focus, P(t, m.t0, m.t0 + 1.0, E.inOutCubic) * 0.6 + 0.2);
+    const la = P(t, m.t0 + 0.02, m.t0 + 0.35, E.outExpo);
+    const lo = i < 3 ? P(t, m.t0 + 0.72, m.t0 + 0.9, E.inCubic) : P(t, 33.6, 33.85, E.inCubic);
+    S(m.lab, { left: "96px", top: "430px", transform: `translate(${-lo * 140}px,${(1 - la) * 80}px)`, opacity: la * (1 - lo) });
+    S(m.sub, { left: "100px", top: "512px", transform: `translate(${-lo * 100}px,${(1 - la) * 60}px)`, opacity: P(t, m.t0 + 0.1, m.t0 + 0.4) * (1 - lo) });
+  });
+}
+
+function renderOutro(t) {
+  const vis = t >= 33.8;
+  outro.style.display = vis ? "block" : "none";
+  if (!vis) return;
+  const a = P(t, 34.0, 34.6, E.outBack);
+  const pulse = win(t, 38.0, 38.6) ? 0.08 * (1 - (t - 38) / 0.6) : 0;
+  tf(oGlow, W / 2 - 600, 330 - 600, 0.5 + a * 0.5 + 0.04 * Math.sin(t * 5) + pulse * 2);
+  oGlow.style.opacity = P(t, 33.9, 34.5);
+  tf(oLogo, W / 2 - 100, 170, a + pulse, `rotate(${(1 - a) * 20}deg)`);
+  oLogo.style.opacity = P(t, 34.0, 34.2);
+  const ta = P(t, 34.25, 34.85, E.outExpo);
+  S(oTitle, { transform: `translateY(${400 + (1 - ta) * 60}px) scale(${1 + pulse})`, opacity: ta, letterSpacing: `${-0.035 + (1 - ta) * 0.08}em` });
+  const cx = [W / 2 - 610, W / 2 - 185, W / 2 + 255];
+  oChips.forEach((c, i) => {
+    const ci = P(t, 35.0 + i * 0.5, 35.4 + i * 0.5, E.outBack);
+    S(c, { transform: `translate(${cx[i]}px,${600 + (1 - ci) * 50}px) scale(${0.7 + ci * 0.3})`, opacity: P(t, 35.0 + i * 0.5, 35.15 + i * 0.5) });
+  });
+  const tg = P(t, 36.6, 37.2, E.outExpo);
+  S(oTag, { transform: `translateY(${730 + (1 - tg) * 50}px) scale(${1 + pulse * 0.6})`, opacity: tg });
+  S(oSmall, { transform: `translateY(${835 + (1 - P(t, 37.0, 37.5, E.outExpo)) * 30}px)`, opacity: P(t, 37.0, 37.4) });
+}
+
+function renderFX(t) {
+  let f = 0;
+  for (const [ft, a, d] of [[4.0, 0.55, 0.35], [8.0, 0.18, 0.25], [12.0, 0.12, 0.2], [18.0, 0.1, 0.2], [20.5, 0.18, 0.3], [22.0, 0.1, 0.2], [26.0, 0.16, 0.25], [30.0, 0.14, 0.2], [34.0, 0.5, 0.4], [38.0, 0.35, 0.5]]) {
+    if (win(t, ft, ft + d)) f = Math.max(f, a * (1 - (t - ft) / d));
+  }
+  flash.style.opacity = f;
+  fade.style.opacity = Math.max(1 - P(t, 0, 0.5), P(t, 39.0, 40.0, E.inCubic));
+}
+
+window.renderFrame = (t) => {
+  renderBg(t);
+  renderIntro(t);
+  renderHook(t);
+  renderSteps(t);
+  renderMontage(t);
+  renderOutro(t);
+  renderFX(t);
+};
+window.ready = Promise.all([...document.images].map((i) => (i.complete ? Promise.resolve() : new Promise((r) => { i.onload = r; i.onerror = r; })))).then(() => document.fonts.ready);
+renderFrame(Number(new URLSearchParams(location.search).get("t") || 0));
+</script>
+</body>
+</html>
