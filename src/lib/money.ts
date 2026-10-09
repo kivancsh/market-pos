@@ -154,3 +154,24 @@ export function marginPermille(profitKurus: number, netRevenueKurus: number): nu
   if (netRevenueKurus === 0) return null;
   return mulDivRound(profitKurus, 1000, netRevenueKurus);
 }
+
+/** Binde değerini "%12,3" biçiminde yazar; null ise "—". */
+export function formatPermille(permille: number | null): string {
+  if (permille === null) return "—";
+  const neg = permille < 0;
+  const abs = Math.abs(permille);
+  return `${neg ? "-" : ""}%${(abs - (abs % 10)) / 10},${abs % 10}`;
+}
+
+/** Değişim (binde): (şimdi − önce) / |önce|. Önceki 0 ise null (oran tanımsız). */
+export function changePermille(current: number, previous: number): number | null {
+  if (previous === 0) return null;
+  return mulDivRound(current - previous, 1000, Math.abs(previous));
+}
+
+const TRY_SHORT = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
+
+/** Grafik ekseni için kuruşsuz gösterim: 123456 → "₺1.235" (yuvarlanmış). */
+export function formatTRYShort(kurus: number): string {
+  return TRY_SHORT.format(String(divRound(kurus, 100)) as Intl.StringNumericLiteral);
+}

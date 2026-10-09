@@ -22,28 +22,34 @@ export function BarChartCard({
   title,
   data,
   format,
+  axisFormat,
   height = 220,
   valueLabel,
+  emptyText = "Bu dönemde satış yok.",
 }: {
   title: string;
   data: BarDatum[];
+  /** İpucu ve tablo için tam biçim */
   format: (v: number) => string;
+  /** Eksen için kısa biçim (varsayılan: format) */
+  axisFormat?: (v: number) => string;
   height?: number;
   valueLabel: string;
+  emptyText?: string;
 }) {
   const allZero = data.every((d) => d.value === 0);
   return (
     <figure className="rounded-2xl bg-white p-4 shadow-sm">
       <figcaption className="mb-2 font-semibold text-slate-900">{title}</figcaption>
       {allZero ? (
-        <p className="py-10 text-center text-slate-500">Bu dönemde satış yok.</p>
+        <p className="py-10 text-center text-slate-500">{emptyText}</p>
       ) : (
         <div style={{ height }} role="img" aria-label={`${title} grafiği`}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} margin={{ top: 8, right: 4, bottom: 0, left: 0 }} barCategoryGap="20%">
               <CartesianGrid vertical={false} stroke={GRID} />
               <XAxis dataKey="label" tickLine={false} axisLine={{ stroke: GRID }} tick={{ fill: AXIS_TEXT, fontSize: 11 }} interval="preserveStartEnd" minTickGap={8} />
-              <YAxis tickLine={false} axisLine={false} tick={{ fill: AXIS_TEXT, fontSize: 11 }} width={56} tickFormatter={(v: number) => format(v)} allowDecimals={false} />
+              <YAxis tickLine={false} axisLine={false} tick={{ fill: AXIS_TEXT, fontSize: 11 }} width={56} tickFormatter={(v: number) => (axisFormat ?? format)(v)} allowDecimals={false} />
               <Tooltip
                 cursor={{ fill: "rgba(148,163,184,0.15)" }}
                 content={({ active, payload }) => {

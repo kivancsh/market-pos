@@ -87,3 +87,20 @@ describe("formatMargin", () => {
     expect(formatMargin(1, 3)).toBe("%33,3");
   });
 });
+
+describe("panel yardımcıları", async () => {
+  const { formatPermille, changePermille, formatTRYShort } = await import("@/lib/money");
+  it("yüzde değişim (önceki 0 ise tanımsız)", () => {
+    expect(changePermille(1200, 1000)).toBe(200);
+    expect(changePermille(800, 1000)).toBe(-200);
+    expect(changePermille(500, 0)).toBeNull();
+    expect(changePermille(-500, -1000)).toBe(500);
+    expect(formatPermille(123)).toBe("%12,3");
+    expect(formatPermille(-5)).toBe("-%0,5");
+    expect(formatPermille(null)).toBe("—");
+  });
+  it("kısa TL", () => {
+    expect(formatTRYShort(123456)).toBe("₺1.235");
+    expect(formatTRYShort(0)).toBe("₺0");
+  });
+});

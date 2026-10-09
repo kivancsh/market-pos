@@ -66,8 +66,9 @@ export function createReturn(ctx: Ctx, input: CreateReturnInput): CreateReturnRe
         const share = (amount: number) => incrementalShare(amount, item.qty, item.returnedQty, qty);
         const refundKurus = share(item.lineTotalKurus);
         const netKurus = share(item.lineNetKurus);
+        const costKurus = share(item.lineCostKurus);
         const costNetKurus = share(item.lineCostNetKurus);
-        return { item, qty, refundKurus, netKurus, costNetKurus, profitReversalKurus: netKurus - costNetKurus };
+        return { item, qty, refundKurus, netKurus, costKurus, costNetKurus, profitReversalKurus: netKurus - costNetKurus };
       });
 
       const total = (f: (p: (typeof plan)[number]) => number) => plan.reduce((a, p) => a + f(p), 0);
@@ -77,6 +78,7 @@ export function createReturn(ctx: Ctx, input: CreateReturnInput): CreateReturnRe
         businessDate: time.businessDate,
         refundTotalKurus: total((p) => p.refundKurus),
         netTotalKurus: total((p) => p.netKurus),
+        costTotalKurus: total((p) => p.costKurus),
         costNetTotalKurus: total((p) => p.costNetKurus),
         profitReversalKurus: total((p) => p.profitReversalKurus),
         refundMethod: data.refundMethod ?? sale.paymentMethod,
@@ -90,6 +92,7 @@ export function createReturn(ctx: Ctx, input: CreateReturnInput): CreateReturnRe
           qty: p.qty,
           refundKurus: p.refundKurus,
           netKurus: p.netKurus,
+          costKurus: p.costKurus,
           costNetKurus: p.costNetKurus,
           profitReversalKurus: p.profitReversalKurus,
         });

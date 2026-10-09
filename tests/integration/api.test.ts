@@ -156,8 +156,8 @@ describe("yetkilendirme (sunucu tarafında)", () => {
     );
     const o = await json(await todayRoute.GET(req("/api/today-stats", { cookie: await cookieFor("owner") })));
     const c = await json(await todayRoute.GET(req("/api/today-stats", { cookie: await cookieFor("cashier") })));
-    expect(o).toEqual({ date: "2026-10-06", saleCount: 1, revenueKurus: 2000 });
-    expect(c).toEqual({ date: "2026-10-06", saleCount: 1 });
+    expect(o).toEqual({ date: "2026-10-06", saleCount: 1, revenueKurus: 2000, dayClosed: false });
+    expect(c).toEqual({ date: "2026-10-06", saleCount: 1, dayClosed: false });
   });
 });
 

@@ -23,7 +23,7 @@ export function runMigrations(db: DB, dir: string = MIGRATIONS_DIR): string[] {
   );
 
   const files = fs
-    .readdirSync(dir)
+    .readdirSync(/*turbopackIgnore: true*/ dir)
     .filter((f) => /^\d{3}_.+\.sql$/.test(f))
     .sort();
 
@@ -32,7 +32,8 @@ export function runMigrations(db: DB, dir: string = MIGRATIONS_DIR): string[] {
 
   for (const file of files) {
     if (applied.has(file)) continue;
-    const sql = fs.readFileSync(path.join(dir, file), "utf8");
+    // Uygulama proje klasöründen çalışır; migration dosyaları çalışma anında diskten okunur (bilinçli).
+    const sql = fs.readFileSync(path.join(/*turbopackIgnore: true*/ dir, file), "utf8");
     db.transaction(() => {
       db.exec(sql);
       record.run(file, new Date().toISOString());

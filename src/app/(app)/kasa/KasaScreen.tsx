@@ -29,6 +29,7 @@ interface TodayStats {
   date: string;
   saleCount: number;
   revenueKurus?: number;
+  dayClosed: boolean;
 }
 
 export function KasaScreen(props: { role: Role; settings: KasaSettings; simulator: boolean }) {
@@ -382,6 +383,12 @@ function Kasa({ role, settings, simulator }: { role: Role; settings: KasaSetting
             </ul>
           )}
         </div>
+
+        {stats?.dayClosed && (
+          <div role="alert" className="rounded-xl border-2 border-red-400 bg-red-50 px-4 py-3 text-lg font-semibold text-red-900">
+            Gün kapatıldı. Yeni satış için yöneticinin günü panelden yeniden açması gerekir.
+          </div>
+        )}
 
         {/* Mesaj */}
         <div className="min-h-14" aria-live="assertive">

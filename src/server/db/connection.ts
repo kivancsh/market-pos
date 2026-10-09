@@ -32,7 +32,7 @@ export function openMemoryDatabase(): DB {
 
 export function resolveDbPath(): string {
   const fromEnv = process.env.DB_PATH;
-  return fromEnv ? path.resolve(process.cwd(), fromEnv) : DEFAULT_DB_PATH;
+  return fromEnv ? path.resolve(/*turbopackIgnore: true*/ process.cwd(), fromEnv) : DEFAULT_DB_PATH;
 }
 
 // Geliştirme sırasında sıcak yeniden yüklemede tek bağlantı korunur.

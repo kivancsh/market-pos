@@ -8,6 +8,7 @@ export interface Return {
   businessDate: string;
   refundTotalKurus: number;
   netTotalKurus: number;
+  costTotalKurus: number;
   costNetTotalKurus: number;
   profitReversalKurus: number;
   refundMethod: PaymentMethod;
@@ -21,6 +22,7 @@ export interface ReturnItem {
   qty: number;
   refundKurus: number;
   netKurus: number;
+  costKurus: number;
   costNetKurus: number;
   profitReversalKurus: number;
 }
@@ -28,7 +30,7 @@ export interface ReturnItem {
 const SELECT_RETURN = `
   SELECT id, sale_id AS saleId, created_at AS createdAt, business_date AS businessDate,
          refund_total_kurus AS refundTotalKurus, net_total_kurus AS netTotalKurus,
-         cost_net_total_kurus AS costNetTotalKurus, profit_reversal_kurus AS profitReversalKurus,
+         cost_total_kurus AS costTotalKurus, cost_net_total_kurus AS costNetTotalKurus, profit_reversal_kurus AS profitReversalKurus,
          refund_method AS refundMethod, reason
     FROM returns`;
 
@@ -44,7 +46,7 @@ export function listReturnItems(db: DB, returnId: number): ReturnItem[] {
   return db
     .prepare(
       `SELECT id, return_id AS returnId, sale_item_id AS saleItemId, qty, refund_kurus AS refundKurus,
-              net_kurus AS netKurus, cost_net_kurus AS costNetKurus, profit_reversal_kurus AS profitReversalKurus
+              net_kurus AS netKurus, cost_kurus AS costKurus, cost_net_kurus AS costNetKurus, profit_reversal_kurus AS profitReversalKurus
          FROM return_items WHERE return_id = ? ORDER BY id`,
     )
     .all(returnId) as ReturnItem[];
@@ -59,12 +61,12 @@ export function insertReturn(db: DB, r: Omit<Return, "id">): number {
     db
       .prepare(
         `INSERT INTO returns (sale_id, created_at, business_date, refund_total_kurus, net_total_kurus,
-                              cost_net_total_kurus, profit_reversal_kurus, refund_method, reason)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                              cost_total_kurus, cost_net_total_kurus, profit_reversal_kurus, refund_method, reason)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
       .run(
         r.saleId, r.createdAt, r.businessDate, r.refundTotalKurus, r.netTotalKurus,
-        r.costNetTotalKurus, r.profitReversalKurus, r.refundMethod, r.reason,
+        r.costTotalKurus, r.costNetTotalKurus, r.profitReversalKurus, r.refundMethod, r.reason,
       ).lastInsertRowid,
   );
 }
@@ -73,11 +75,11 @@ export function insertReturnItem(db: DB, i: Omit<ReturnItem, "id">): number {
   return Number(
     db
       .prepare(
-        `INSERT INTO return_items (return_id, sale_item_id, qty, refund_kurus, net_kurus, cost_net_kurus,
+        `INSERT INTO return_items (return_id, sale_item_id, qty, refund_kurus, net_kurus, cost_kurus, cost_net_kurus,
                                    profit_reversal_kurus)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(i.returnId, i.saleItemId, i.qty, i.refundKurus, i.netKurus, i.costNetKurus, i.profitReversalKurus)
+      .run(i.returnId, i.saleItemId, i.qty, i.refundKurus, i.netKurus, i.costKurus, i.costNetKurus, i.profitReversalKurus)
       .lastInsertRowid,
   );
 }
