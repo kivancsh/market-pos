@@ -54,6 +54,8 @@ next-env.d.ts
 
 # Windows paketi için ayrı derleme klasörü
 /.next-win/
+# Test ve deneme için ayrı derleme klasörleri (NEXT_DIST_DIR=.next-e2e, .next-ui, .next-guide …)
+/.next-*/
 
 # Kurulumdaki sürüm bilgisi (GitHub yayınında pakete eklenir; geliştirme kopyasında yok)
 /version.json
