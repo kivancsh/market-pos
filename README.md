@@ -285,7 +285,7 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 ### E-posta: onay kodları ve günlük rapor
 
-Program onay kodlarını ve günlük raporu **dükkânın kendi e-posta hesabından** gönderir. Gmail önerilir (Outlook/Hotmail, iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
+Program onay kodlarını ve günlük raporu **dükkânın kendi e-posta hesabından** gönderir. Gmail önerilir (iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). **Outlook / Hotmail gönderen olarak kullanılamaz:** Microsoft 2026'dan beri programların şifreyle e-posta göndermesine izin vermiyor. Hotmail adresiniz yine **alıcı** olabilir (kodlar ve rapor oraya gelir); gönderen için bir Gmail hesabı açın. Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
 
 1. **myaccount.google.com** → **Güvenlik** → **2 Adımlı Doğrulama**'yı açın (kapalıysa).
 2. Arama kutusuna **Uygulama şifreleri** yazın → ad olarak **Market Kasa** → **Oluştur**.

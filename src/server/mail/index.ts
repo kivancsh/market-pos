@@ -6,6 +6,7 @@
  * (e-postaları göndermek yerine o klasöre JSON olarak yazar; uçtan uca testler ve kurulum testi). Kurulum dosyaları
  * bu değişkeni ayarlamaz; gerçek kullanımda her zaman SMTP kullanılır.
  */
+import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -17,6 +18,7 @@ import { AppError } from "../errors";
 
 export const MAIL_PROVIDERS = {
   gmail: { label: "Gmail", host: "smtp.gmail.com", port: 465 },
+  // Artık çalışmıyor (bkz. MICROSOFT_UNSUPPORTED); eski kayıtlar bozulmasın diye listede, ekranlarda gösterilmez
   outlook: { label: "Outlook / Hotmail", host: "smtp-mail.outlook.com", port: 587 },
   icloud: { label: "iCloud", host: "smtp.mail.me.com", port: 587 },
   yandex: { label: "Yandex", host: "smtp.yandex.com", port: 465 },
@@ -123,6 +125,9 @@ function transportFor(s: { host: string; port: number; user: string; pass: strin
 
 /** SMTP girişini dener; başarılıysa ayarları kaydeder. */
 export async function saveMailSettings(db: DB, input: MailSettingsInput): Promise<MailStatus> {
+  if (input.provider === "outlook" || (input.provider !== "custom" && isMicrosoftPersonal(input.user))) {
+    throw new AppError("MAIL_PROVIDER_UNSUPPORTED", MICROSOFT_UNSUPPORTED, 400);
+  }
   const s = resolveSettings(input);
   if (!s.host) throw new AppError("MAIL_HOST_REQUIRED", "SMTP sunucu adresini yazın.", 400);
   if (!process.env.MAIL_DEV_DIR && !testSender) {
@@ -138,7 +143,9 @@ export async function saveMailSettings(db: DB, input: MailSettingsInput): Promis
 
 /** SMTP hatalarını sade Türkçeye çevirir. */
 export function friendlyMailError(e: unknown, provider?: string): string {
-  const err = e as { code?: string; responseCode?: number; message?: string };
+  const err = e as { code?: string; responseCode?: number; message?: string; response?: string };
+  // Microsoft: "5.7.139 ... basic authentication is disabled" / "5.7.30 Basic authentication is not supported"
+  if (/5\.7\.(139|30)|basic auth/i.test(`${err.response ?? ""} ${err.message ?? ""}`)) return MICROSOFT_UNSUPPORTED;
   if (err.code === "EAUTH" || err.responseCode === 535 || err.responseCode === 534) {
     return provider === "gmail"
       ? "Gmail girişi reddedildi. Normal Gmail şifresi değil, Google hesabınızdan alınan 16 haneli 'uygulama şifresi' gerekir (2 adımlı doğrulama açık olmalı)."

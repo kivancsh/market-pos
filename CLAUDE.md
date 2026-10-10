@@ -60,7 +60,8 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   kasiyerinki dahil), yönetici e-posta değişimi ve "Şifremi unuttum" her zaman yöneticinin e-postasına giden 6 haneli kodla tamamlanır.
   Kod: HMAC hash, 10 dk, 5 deneme, 60 sn yeniden gönderme aralığı, tek kullanımlık; girdi kod tüketilmeden önce doğrulanır.
   E-posta yoksa son çare `npm run users -- reset-password` (kasa bilgisayarında).
-- Gönderim hesabı (Gmail uygulama şifresi önerilir; Outlook/iCloud/Yandex/SMTP) `settings`'te, şifre AES-256-GCM ile şifreli. Test modu: `MAIL_DEV_DIR`
+- Gönderim hesabı (Gmail uygulama şifresi önerilir; iCloud/Yandex/SMTP; Microsoft kişisel hesapları 2026'dan beri yalnız OAuth2 → gönderen olarak
+  reddedilir, `src/lib/mailAddress.ts`; alıcı olarak sorun yok) `settings`'te, şifre AES-256-GCM ile şifreli. Test modu: `MAIL_DEV_DIR`
   (postalar JSON dosyası olur) — yalnızca e2e/smoke test ortamında; kurulum paketleri bunu asla ayarlamaz.
 - Günlük rapor: Günü Kapat'ta + yedek saatte (varsayılan 23:30; kaçarsa ertesi açılışta dünkü) yönetici e-postalarına HTML özet + ürün kârlılığı Excel'i.
   Gün başına bir otomatik gönderim (`daily_report_log`); hareketsiz gün atlanır. Zamanlayıcı `src/instrumentation.ts` → `src/server/scheduler.ts`.

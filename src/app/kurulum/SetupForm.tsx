@@ -4,13 +4,13 @@ import { useState } from "react";
 import { api } from "@/client/api";
 import { CodeEntry, type Challenge } from "@/client/components/CodeEntry";
 import { errText } from "@/client/errors";
+import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
 
 type Step = "mail" | "info" | "code";
-type Provider = "gmail" | "outlook" | "icloud" | "yandex" | "custom";
+type Provider = "gmail" | "icloud" | "yandex" | "custom";
 
 const PROVIDERS: { key: Provider; label: string }[] = [
   { key: "gmail", label: "Gmail (önerilen)" },
-  { key: "outlook", label: "Outlook / Hotmail" },
   { key: "icloud", label: "iCloud" },
   { key: "yandex", label: "Yandex" },
   { key: "custom", label: "Diğer (SMTP)" },
@@ -120,6 +120,11 @@ export function SetupForm({ mailConfigured, mailUser }: { mailConfigured: boolea
           <label className="block text-sm font-medium text-slate-700">
             E-posta adresi
             <input type="email" autoCapitalize="none" value={mailAddr} onChange={(e) => setMailAddr(e.target.value)} className={field} placeholder="dukkan@gmail.com" data-testid="setup-mail-user" />
+            {isMicrosoftPersonal(mailAddr) && (
+              <span className="mt-1 block rounded-lg bg-amber-50 px-2 py-1 text-sm font-medium text-amber-900" data-testid="mail-microsoft-hint">
+                {MICROSOFT_UNSUPPORTED}
+              </span>
+            )}
           </label>
           <label className="block text-sm font-medium text-slate-700">
             {provider === "gmail" ? "Uygulama şifresi (16 harf)" : "Şifre / uygulama şifresi"}

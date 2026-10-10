@@ -12,7 +12,8 @@ import * as secretVerifyRoute from "@/app/api/users/[id]/secret/verify/route";
 import { resetLimiterForTests } from "@/server/auth/loginLimiter";
 import { readMailConfig } from "@/server/db/repositories/mailConfig";
 import { setTestCtxFactory } from "@/server/http/api";
-import { decryptSecret, encryptSecret, maskEmail, saveMailSettings, setTestMailSender } from "@/server/mail";
+import { decryptSecret, encryptSecret, friendlyMailError, maskEmail, saveMailSettings, setTestMailSender } from "@/server/mail";
+import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
 import { completeSale } from "@/server/services/sales";
 import { dueReportDates, runScheduledReports } from "@/server/services/dailyReport";
 import { updateSettings } from "@/server/services/settings";
@@ -272,5 +273,33 @@ describe("günlük rapor e-postası", () => {
     sell();
     const r = await dailyEmailRoute.POST(req("/api/reports/daily-email", { body: {}, cookie: await cookieForUser(owner) }));
     expect(await json(r)).toMatchObject({ ok: true, recipients: [TEST_OWNER.email], date: "2026-10-06" });
+  });
+});
+
+describe("Microsoft (Outlook / Hotmail) gönderen hesap olamaz", () => {
+  it("Outlook seçeneği ve Hotmail/Outlook/Live adresleri bağlanmadan anlaşılır mesajla reddedilir", async () => {
+    for (const input of [
+      { provider: "outlook" as const, user: "dukkan@outlook.com", pass: "x" },
+      { provider: "gmail" as const, user: "dukkan@hotmail.com", pass: "x" },
+      { provider: "icloud" as const, user: "Dukkan@Live.com", pass: "x" },
+      { provider: "yandex" as const, user: "dukkan@msn.com", pass: "x" },
+    ]) {
+      await expect(saveMailSettings(env.db, input)).rejects.toMatchObject({ code: "MAIL_PROVIDER_UNSUPPORTED" });
+    }
+    expect(readMailConfig(env.db)).toBeNull();
+    // Gmail adresiyle sorun yok (test modunda bağlantı denenmez)
+    await expect(saveMailSettings(env.db, { provider: "gmail", user: "dukkan@gmail.com", pass: "abcd efgh ijkl mnop" })).resolves.toBeTruthy();
+  });
+
+  it("Microsoft'un 'basic authentication' reddi sade Türkçeye çevrilir", () => {
+    expect(friendlyMailError({ code: "EAUTH", responseCode: 535, response: "535 5.7.139 Authentication unsuccessful, basic authentication is disabled." }, "custom")).toBe(
+      MICROSOFT_UNSUPPORTED,
+    );
+    expect(friendlyMailError({ code: "EAUTH", responseCode: 535, response: "535 5.7.8 Username and Password not accepted." }, "gmail")).toMatch(/uygulama şifresi/);
+  });
+
+  it("Hotmail adresi yönetici (alıcı) e-postası olarak kullanılabilir", () => {
+    expect(isMicrosoftPersonal("ayse@hotmail.com")).toBe(true);
+    expect(isMicrosoftPersonal("ayse@gmail.com")).toBe(false);
   });
 });

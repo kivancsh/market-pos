@@ -12,6 +12,7 @@ import type { MailStatus } from "@/server/mail";
 import type { UpdateInfo } from "@/server/update";
 import { UpdateSection } from "./UpdateSection";
 import { errText } from "@/client/errors";
+import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
 import type { BackupInfo } from "@/server/services/backup";
 import type { ImportPreview, ImportResult } from "@/server/services/productImport";
 
@@ -422,7 +423,6 @@ function BackupSection() {
 
 const PROVIDERS = [
   { key: "gmail", label: "Gmail" },
-  { key: "outlook", label: "Outlook / Hotmail" },
   { key: "icloud", label: "iCloud" },
   { key: "yandex", label: "Yandex" },
   { key: "custom", label: "Diğer (SMTP)" },
@@ -518,6 +518,11 @@ function MailSection({ initial }: { initial: MailStatus }) {
           <label className="text-sm font-medium text-slate-700">
             E-posta adresi
             <input type="email" autoCapitalize="none" value={user} onChange={(e) => setUser(e.target.value)} className={field} />
+            {isMicrosoftPersonal(user) && (
+              <span className="mt-1 block rounded-lg bg-amber-50 px-2 py-1 text-sm font-medium text-amber-900" data-testid="mail-microsoft-hint">
+                {MICROSOFT_UNSUPPORTED}
+              </span>
+            )}
           </label>
           <label className="text-sm font-medium text-slate-700">
             {provider === "gmail" ? "Uygulama şifresi (16 harf)" : "Şifre / uygulama şifresi"}
