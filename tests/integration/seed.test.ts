@@ -155,5 +155,5 @@ describe("seed farklı tarih ve saatlerde", () => {
       expect(stocks).toEqual(SEED_PRODUCTS.map((p) => p.stock));
       db.close();
     }
-  });
+  }, 60_000); // 30 tam seed: yavaş makinelerde (GitHub Windows) 5 sn'yi aşabiliyor
 });
