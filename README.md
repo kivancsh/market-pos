@@ -122,7 +122,7 @@ Programın çalışması için **Node.js 24 (LTS)** gerekir.
 ### 1.2 Programı hazırlama
 
 ```bash
-cd ~/Desktop/market-pos
+cd ~/market-pos
 ```
 
 ```bash

@@ -97,7 +97,8 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   `scripts/mac-update.sh` (arka planda): durdur → eskiyi `data/updates/previous`'a al → yeni dosyalar (data/backups/.env asla) →
   paketler değiştiyse `npm ci` → derle → başlat; hata olursa eskiye döner, sonucu `data/updates/last-result.json`'a yazar.
   Güncelleme sürerken `service.sh start` bekler (`data/updates/updating.pid`). `.git` olan klasör = geliştirme kopyası, güncellenmez.
-  Bu Mac'te proje iCloud'la eşitlenen Masaüstü'nde: derleme/kopyalama takılabiliyor (deneme kurulumlarını scratchpad'de yap).
+  Proje bu Mac'te `~/market-pos`'ta (10.10.2026'da iCloud'la eşitlenen Masaüstü'nden taşındı: orada derleme takılıyor,
+  veritabanı bozulma riski vardı). Proje/veritabanını Masaüstü'ne ya da Belgeler'e geri koyma.
   İndirme adresi sabit (GitHub); `MARKET_KASA_UPDATE_BASE` yalnızca testler içindir.
 - Sunucu kodunda değişken yolla dosya işlemi (`path.join(dir, x)`) Next'e bütün proje klasörünü Windows paketine ekletir
   (derleme uyarısı "Dynamic filesystem access…"; paket 37 → 82 MB olmuştu). `path.join(/*turbopackIgnore: true*/ …)` kullan;
