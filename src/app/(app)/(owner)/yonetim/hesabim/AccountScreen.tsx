@@ -15,11 +15,17 @@ export function AccountScreen({
   initialName,
   initialUsername,
   initialEmail,
+  mailConfigured,
+  codeRequired,
 }: {
   id: number;
   initialName: string;
   initialUsername: string;
   initialEmail: string | null;
+  /** Ayarlar'da e-posta gönderim hesabı bağlı mı (e-posta eklemek için gerekli) */
+  mailConfigured: boolean;
+  /** Şifre değişikliği e-posta koduyla mı (e-posta bağlı + adres var) */
+  codeRequired: boolean;
 }) {
   const [name, setName] = useState(initialName);
   const [username, setUsername] = useState(initialUsername);
@@ -63,7 +69,7 @@ export function AccountScreen({
     try {
       const r = await api<{ user: { email: string } }>("/api/account/email/verify", { body: { token: challenge.token, code } });
       setEmail(r.user.email);
-      router.refresh(); // üstteki "e-posta adresi yok" şeridi kalksın
+      router.refresh(); // şifre değiştirme artık e-posta koduyla (sayfa bilgisi tazelenir)
       setChallenge(null);
       setNewEmail("");
       setNotice({ kind: "success", text: `E-posta adresiniz ${r.user.email} olarak kaydedildi. Onay kodları ve günlük rapor buraya gelecek.` });
@@ -106,17 +112,18 @@ export function AccountScreen({
 
         <div className="space-y-3 rounded-2xl bg-white p-4 shadow-sm">
           <h2 className="text-lg font-semibold">Şifre</h2>
-          <p className="text-sm text-slate-600">Şifre değiştirirken e-posta adresinize onay kodu gönderilir.</p>
+          <p className="text-sm text-slate-600">
+            {codeRequired ? "Şifre değiştirirken e-posta adresinize onay kodu gönderilir." : "Mevcut şifrenizi ve yeni şifrenizi yazarak değiştirirsiniz."}
+          </p>
           <button
             type="button"
-            disabled={busy || !email}
+            disabled={busy}
             onClick={() => setPwDialog(true)}
             className="h-12 w-full rounded-xl bg-slate-900 font-bold text-white disabled:bg-slate-300"
             data-testid="account-change-password"
           >
             Şifremi değiştir
           </button>
-          {!email && <p className="text-sm text-amber-700">Önce aşağıdan e-posta adresinizi ekleyin.</p>}
         </div>
       </div>
 
@@ -127,12 +134,20 @@ export function AccountScreen({
         }}
         className="space-y-3 rounded-2xl bg-white p-4 shadow-sm"
       >
-        <h2 className="text-lg font-semibold">E-posta adresim</h2>
+        <h2 className="text-lg font-semibold">E-posta adresim (isteğe bağlı)</h2>
         <p className="text-sm text-slate-600">
-          Şu an: <b data-testid="account-email">{email ?? "— (eklenmemiş)"}</b>. Onay kodları ve günlük rapor bu adrese gelir. Değiştirirken yeni adrese bir kod
-          gönderilir; adresin size ait olduğu böyle doğrulanır.
+          Şu an: <b data-testid="account-email">{email ?? "— (eklenmemiş)"}</b>. E-posta eklerseniz &quot;Şifremi unuttum&quot; ile şifrenizi e-postayla
+          yenileyebilir, günlük raporu alabilirsiniz; şifre değişiklikleri de e-posta koduyla yapılır. Eklerken adrese bir kod gönderilir.
         </p>
-        {!challenge ? (
+        {!mailConfigured ? (
+          <p className="rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700" data-testid="account-email-needs-mail">
+            E-posta eklemek için önce{" "}
+            <a href="/ayarlar" className="font-semibold underline">
+              Ayarlar → E-posta gönderimi
+            </a>{" "}
+            bölümünden e-postaların gönderileceği hesabı bağlayın.
+          </p>
+        ) : !challenge ? (
           <div className="flex flex-wrap gap-2">
             <input type="email" autoCapitalize="none" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="yeni@ornek.com" className={`${field} mt-0 flex-1`} data-testid="account-new-email" />
             <button type="submit" disabled={busy || !newEmail} className="h-12 rounded-xl bg-slate-900 px-5 font-bold text-white disabled:bg-slate-300">
@@ -155,13 +170,15 @@ export function AccountScreen({
       </form>
 
       <p className="text-sm text-slate-500">
-        Şifrenizi unutursanız: giriş ekranında <strong>Şifremi unuttum</strong> (e-postanıza kod gelir) ya da kasa bilgisayarında <strong>Yönetici Şifresi Sıfırla</strong>.
+        Şifrenizi unutursanız: kasa bilgisayarında <strong>Yönetici Şifresi Sıfırla</strong>
+        {codeRequired ? <> ya da giriş ekranında <strong>Şifremi unuttum</strong> (e-postanıza kod gelir)</> : null}.
       </p>
 
       {pwDialog && (
         <SecretChangeDialog
           self
           target={{ id, name, role: "owner", cashierNo: null, isActive: true }}
+          codeRequired={codeRequired}
           onClose={() => setPwDialog(false)}
           onDone={(msg) => {
             setPwDialog(false);

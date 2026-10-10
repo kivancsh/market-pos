@@ -84,29 +84,13 @@ const ctx = await browser.newContext(ctxOpts);
 const p = await ctx.newPage();
 await p.goto(`${BASE}/`);
 await p.waitForURL(/\/kurulum/);
-// ① e-posta gönderim hesabı (test modunda bağlantı denenmez; adres yalnızca görüntü için)
-await p.getByRole("button", { name: "Değiştir" }).click();
-await p.getByTestId("setup-mail-provider").selectOption("gmail");
-await p.getByTestId("setup-mail-user").fill("kosemarket.ornek@gmail.com");
-await p.getByTestId("setup-mail-pass").fill("abcd efgh ijkl mnop");
-await p.setViewportSize({ width: 1280, height: 1000 });
-// Test modunda "değiştirmeden devam et (test@…)" bağlantısı çıkar; gerçek ilk kurulumda yoktur.
-await p.getByRole("button", { name: /Değiştirmeden devam et/ }).evaluate((e) => (e.style.display = "none"));
-await shot(p, "kurulum-eposta", { notes: ['[data-testid="setup-mail-provider"]', '[data-testid="setup-mail-user"]', '[data-testid="setup-mail-pass"]', p.locator(".bg-sky-50").first(), '[data-testid="setup-submit"]'] });
-await p.getByTestId("setup-submit").click();
-// ② yönetici bilgileri
+// Tek adım: ad, kullanıcı adı, şifre (e-posta isteğe bağlı, sonra Ayarlar'dan)
 await p.getByTestId("setup-name").fill("Ayşe Yılmaz");
 await p.getByTestId("setup-username").fill("ayse");
-await p.getByTestId("setup-email").fill("ayse.ornek@gmail.com");
 await p.getByTestId("setup-password").fill("demo-sifre-2026");
 await p.getByTestId("setup-password2").fill("demo-sifre-2026");
-await shot(p, "kurulum", { notes: [p.locator(".bg-emerald-50").first(), '[data-testid="setup-name"]', '[data-testid="setup-username"]', '[data-testid="setup-email"]', '[data-testid="setup-password"]', '[data-testid="setup-password2"]', '[data-testid="setup-submit"]'] });
-// ③ e-postaya gelen kod
+await shot(p, "kurulum", { notes: ['[data-testid="setup-name"]', '[data-testid="setup-username"]', '[data-testid="setup-password"]', '[data-testid="setup-password2"]', '[data-testid="setup-submit"]'] });
 let since = Date.now();
-await p.getByTestId("setup-submit").click();
-await p.getByTestId("code-input").fill(await lastCode(since));
-await shot(p, "kurulum-kod", { notes: ['[data-testid="code-input"]', '[data-testid="code-resend"]', '[data-testid="setup-submit"]'] });
-await p.setViewportSize(VP);
 await p.getByTestId("setup-submit").click();
 await p.waitForURL(/\/yonetim/);
 await p.request.patch(`${BASE}/api/settings`, { data: { businessName: "Köşe Market" } });
@@ -122,16 +106,11 @@ await p.getByTestId("user-add").click();
 await p.getByTestId("user-list").getByText("Mehmet Kaya").waitFor();
 await shot(p, "kullanicilar", { notes: [p.getByText(/Kasiyer No: 1001/).first(), p.getByTestId("user-list").getByText("1001", { exact: true }), p.getByRole("button", { name: "PIN değiştir" }), p.getByRole("button", { name: "Pasife al" })] });
 
-// PIN değiştirme: önce yöneticinin e-postasına kod
+// PIN değiştirme (yöneticinin e-postası yok: kodsuz, doğrudan)
 await p.getByRole("button", { name: "PIN değiştir" }).click();
-await p.getByTestId("secret-send-code").waitFor();
-await shot(p, "pin-degistir", { clip: p.getByRole("dialog").locator("> div").first(), pad: 0, notes: ['[data-testid="secret-send-code"]'] });
-since = Date.now();
-await p.getByTestId("secret-send-code").click();
-await p.getByTestId("code-input").fill(await lastCode(since));
 await p.getByTestId("secret-new").fill("1357");
 await p.getByTestId("secret-confirm").fill("1357");
-await shot(p, "pin-degistir-kod", { clip: p.getByRole("dialog").locator("> div").first(), pad: 0, notes: ['[data-testid="code-input"]', '[data-testid="secret-new"]', '[data-testid="secret-confirm"]', '[data-testid="secret-save"]'] });
+await shot(p, "pin-degistir", { clip: p.getByRole("dialog").locator("> div").first(), pad: 0, notes: ['[data-testid="secret-new"]', '[data-testid="secret-confirm"]', '[data-testid="secret-save"]'] });
 await p.getByTestId("secret-save").click();
 await p.getByRole("dialog").waitFor({ state: "detached" });
 
@@ -151,16 +130,11 @@ await p.getByTestId("login-tab-cashier").click();
 for (const d of "100113") await p.keyboard.press(d); // No 1001 → imleç PIN'e geçer
 await shot(p, "giris-kasiyer", { notes: ['[data-testid="login-tab-cashier"]', '[data-testid="login-tab-owner"]', '[data-testid="login-cashier-no"]', '[data-testid="login-pin"]', p.getByRole("button", { name: "5", exact: true }), p.getByRole("button", { name: "Giriş", exact: true })] });
 await p.getByTestId("login-tab-owner").click();
-// Şifremi unuttum (kod gönderilir, şifre değiştirilmeden geri dönülür)
+// Şifremi unuttum (yönetici e-postası yok: kasa bilgisayarındaki aracı tarif eder)
 await p.getByTestId("login-forgot").click();
-await p.getByTestId("forgot-username").fill("ayse");
-since = Date.now();
-await p.getByTestId("forgot-send").click();
-await p.getByTestId("code-input").fill(await lastCode(since));
-await p.getByTestId("forgot-new").fill("yeni-sifre-2026");
-await p.getByTestId("forgot-new2").fill("yeni-sifre-2026");
-await shot(p, "sifremi-unuttum", { notes: ['[data-testid="code-input"]', '[data-testid="forgot-new"]', '[data-testid="forgot-new2"]', '[data-testid="forgot-save"]'] });
-await p.getByRole("button", { name: /Girişe dön/ }).click();
+await p.getByTestId("login-reset-help").waitFor();
+await shot(p, "sifremi-unuttum", { notes: ['[data-testid="login-forgot"]', '[data-testid="login-reset-help"]'] });
+await p.getByTestId("login-forgot").click();
 await p.getByTestId("login-username").fill("ayse");
 await p.getByTestId("login-password").fill("demo-sifre-2026");
 await shot(p, "giris-yonetici", { notes: ['[data-testid="login-tab-owner"]', '[data-testid="login-username"]', '[data-testid="login-password"]', '[data-testid="login-owner-submit"]'] });
@@ -356,6 +330,28 @@ const sec = (txt) => p.locator("section").filter({ hasText: txt }).first();
 await shot(p, "ayarlar-isletme", { clip: sec("İşletme ve kasa"), pad: 8 });
 await shot(p, "ayarlar-okuyucu", { clip: sec("Barkod okuyucu ve ses"), pad: 8 });
 await shot(p, "ayarlar-rapor", { clip: sec("Günlük rapor e-postası"), pad: 8, notes: [sec("Günlük rapor e-postası").locator('input[type="checkbox"]'), '[data-testid="set-report-time"]'] });
+// E-posta bağlama formu (test modunda bağlantı denenmez; adres yalnızca görüntü için)
+const mailSec = sec("E-posta gönderimi");
+await mailSec.getByRole("button", { name: "Hesabı değiştir" }).click();
+await mailSec.locator("select").selectOption("gmail");
+await mailSec.locator('input[type="email"]').fill("kosemarket.ornek@gmail.com");
+await mailSec.locator('input[type="password"]').fill("abcd efgh ijkl mnop");
+// Test modunda form "Vazgeç" düğmesiyle gelir; gerçek ilk bağlamada da aynı
+await shot(p, "ayarlar-eposta-bagla", { clip: mailSec, pad: 8, notes: [mailSec.locator('input[type="email"]'), mailSec.locator('input[type="password"]'), '[data-testid="gmail-help"]', mailSec.getByRole("button", { name: "Bağlan ve kaydet" })] });
+await mailSec.getByRole("button", { name: "Bağlan ve kaydet" }).click();
+await p.getByText(/Bağlandı: e-postalar/).waitFor();
+// Yöneticinin e-postası (alıcı): Hesabım'dan kodla
+await p.setViewportSize(VP);
+await p.goto(`${BASE}/yonetim/hesabim`);
+await p.getByTestId("account-new-email").fill("ayse.ornek@gmail.com");
+since = Date.now();
+await p.getByRole("button", { name: /Ekle \(kod gönder\)/ }).click();
+await p.getByTestId("code-input").fill(await lastCode(since));
+await p.getByRole("button", { name: "Onayla" }).click();
+await p.getByText(/olarak kaydedildi/).waitFor();
+await p.goto(`${BASE}/ayarlar`);
+await p.setViewportSize({ width: 1280, height: 2600 });
+await p.waitForTimeout(900);
 since = Date.now();
 await p.getByTestId("send-report-now").click();
 await p.getByText(/Bugünün raporu gönderildi/).waitFor();

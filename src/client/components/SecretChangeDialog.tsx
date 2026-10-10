@@ -15,19 +15,22 @@ export interface SecretTarget {
 }
 
 /**
- * Şifre / PIN değiştirme (ve pasif kasiyeri yeni PIN'le aktif etme): önce yöneticinin e-postasına kod gider,
- * kod + yeni şifre/PIN girilince değişir.
+ * Şifre / PIN değiştirme (ve pasif kasiyeri yeni PIN'le aktif etme).
+ * codeRequired (e-posta bağlı ve yöneticinin e-postası var): önce yöneticinin e-postasına kod gider, kod + yeni şifre/PIN.
+ * Değilse doğrudan: yeni şifre/PIN (yönetici kendi şifresinde mevcut şifresini de yazar).
  */
 export function SecretChangeDialog({
   target,
   self = false,
   activate = false,
+  codeRequired,
   onDone,
   onClose,
 }: {
   target: SecretTarget;
   self?: boolean;
   activate?: boolean;
+  codeRequired: boolean;
   onDone: (message: string) => void;
   onClose: () => void;
 }) {
@@ -37,6 +40,7 @@ export function SecretChangeDialog({
   const [code, setCode] = useState("");
   const [secret, setSecret] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [current, setCurrent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -54,13 +58,20 @@ export function SecretChangeDialog({
   }
 
   async function save() {
-    if (!challenge) return;
+    if (codeRequired && !challenge) return;
     setBusy(true);
     setError(null);
     try {
-      await api(`/api/users/${target.id}/secret/verify`, {
-        body: { token: challenge.token, code, secret, secretConfirm: confirm, activate },
-      });
+      if (codeRequired) {
+        await api(`/api/users/${target.id}/secret/verify`, {
+          body: { token: challenge!.token, code, secret, secretConfirm: confirm, activate },
+        });
+      } else {
+        await api(`/api/users/${target.id}/secret`, {
+          method: "PUT",
+          body: { secret, secretConfirm: confirm, activate, ...(self ? { currentPassword: current } : {}) },
+        });
+      }
       onDone(
         activate
           ? `${target.name} yeni PIN'le tekrar aktif.`
@@ -79,7 +90,7 @@ export function SecretChangeDialog({
   return (
     <Modal title={activate ? `${target.name}: tekrar aktif yap` : `${self ? "Şifremi" : `${target.name}: ${label}`} değiştir`} onClose={busy ? undefined : onClose}>
       <div className="space-y-3">
-        {!challenge ? (
+        {codeRequired && !challenge ? (
           <>
             <p className="text-slate-700">
               Güvenlik için <b>e-posta adresinize bir onay kodu</b> gönderilecek. Kodu ve {who} için yeni {label}i girince değişiklik yapılır.
@@ -96,16 +107,22 @@ export function SecretChangeDialog({
               void save();
             }}
           >
-            <CodeEntry challenge={challenge} code={code} onCode={setCode} onResend={() => void send()} busy={busy} />
+            {challenge && <CodeEntry challenge={challenge} code={code} onCode={setCode} onResend={() => void send()} busy={busy} />}
+            {!codeRequired && self && (
+              <label className="block text-sm font-medium text-slate-700">
+                Mevcut şifreniz
+                <input type="password" autoComplete="current-password" autoFocus value={current} onChange={(e) => setCurrent(e.target.value)} className={field} data-testid="secret-current" />
+              </label>
+            )}
             <label className="block text-sm font-medium text-slate-700">
               Yeni {label} {isPin ? "(4-8 rakam)" : "(en az 8 karakter)"}
-              <input type="password" inputMode={isPin ? "numeric" : undefined} autoComplete="new-password" value={secret} onChange={(e) => setSecret(e.target.value)} className={field} data-testid="secret-new" />
+              <input type="password" inputMode={isPin ? "numeric" : undefined} autoComplete="new-password" autoFocus={!codeRequired && !self} value={secret} onChange={(e) => setSecret(e.target.value)} className={field} data-testid="secret-new" />
             </label>
             <label className="block text-sm font-medium text-slate-700">
               Yeni {label} (tekrar)
               <input type="password" inputMode={isPin ? "numeric" : undefined} autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} className={field} data-testid="secret-confirm" />
             </label>
-            <button type="submit" disabled={busy || code.length !== 6 || !secret} className="h-12 w-full rounded-xl bg-emerald-600 font-bold text-white disabled:bg-slate-300" data-testid="secret-save">
+            <button type="submit" disabled={busy || (codeRequired && code.length !== 6) || !secret || (!codeRequired && self && !current)} className="h-12 w-full rounded-xl bg-emerald-600 font-bold text-white disabled:bg-slate-300" data-testid="secret-save">
               {busy ? "Kaydediliyor…" : "Kaydet"}
             </button>
           </form>

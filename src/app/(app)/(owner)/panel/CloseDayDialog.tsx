@@ -44,11 +44,7 @@ export function CloseDayDialog({
           ? ` Günlük rapor e-postayla gönderildi (${r.report.recipients.join(", ")}).`
           : r.report.status === "failed"
             ? ` Günlük rapor e-postası gönderilemedi: ${r.report.message}`
-            : r.report.reason === "not_configured"
-              ? " (Günlük rapor e-postası için Ayarlar → E-posta'yı ayarlayın.)"
-              : r.report.reason === "no_recipients"
-                ? " (Günlük rapor için Hesabım'dan e-posta adresinizi ekleyin.)"
-                : "";
+            : "";
       onDone(backup + report);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Gün kapatılamadı.");

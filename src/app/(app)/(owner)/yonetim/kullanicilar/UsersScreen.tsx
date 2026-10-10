@@ -19,7 +19,7 @@ interface U {
 
 const field = "h-11 rounded-lg border border-slate-300 px-3";
 
-export function UsersScreen({ meId }: { meId: number }) {
+export function UsersScreen({ meId, codeRequired }: { meId: number; codeRequired: boolean }) {
   const [users, setUsers] = useState<U[] | null>(null);
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
   const [kind, setKind] = useState<"cashier" | "owner">("cashier");
@@ -50,7 +50,7 @@ export function UsersScreen({ meId }: { meId: number }) {
   }, [load, router]);
 
   async function add() {
-    const body = kind === "cashier" ? { role: "cashier", name, pin } : { role: "owner", name, username, email, password };
+    const body = kind === "cashier" ? { role: "cashier", name, pin } : { role: "owner", name, username, email: email.trim() || null, password };
     setBusy(true);
     try {
       const r = await api<{ user: U }>("/api/users", { body });
@@ -106,8 +106,8 @@ export function UsersScreen({ meId }: { meId: number }) {
     <main className="mx-auto flex w-full max-w-4xl flex-col gap-4 p-3 sm:p-4">
       <h1 className="text-2xl font-bold">Kullanıcılar</h1>
       <p className="text-slate-600">
-        Kasiyerler <b>Kasiyer No + PIN</b> ile, yöneticiler kullanıcı adı ve şifre ile girer. PIN ve şifre değiştirme yöneticidedir; her seferinde
-        e-postanıza onay kodu gelir. PIN/şifre değişince o kişinin açık oturumları kapanır.
+        Kasiyerler <b>Kasiyer No + PIN</b> ile, yöneticiler kullanıcı adı ve şifre ile girer. PIN ve şifre değiştirme yöneticidedir
+        {codeRequired ? "; her seferinde e-postanıza onay kodu gelir" : ""}. PIN/şifre değişince o kişinin açık oturumları kapanır.
       </p>
       {notice && (
         <Notice kind={notice.kind} onClose={() => setNotice(null)}>
@@ -145,7 +145,7 @@ export function UsersScreen({ meId }: { meId: number }) {
               <input autoCapitalize="none" value={username} onChange={(e) => setUsername(e.target.value)} className={field} />
             </label>
             <label className="flex flex-col text-sm font-medium">
-              E-posta
+              E-posta (isteğe bağlı)
               <input type="email" autoCapitalize="none" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
             </label>
             <label className="flex flex-col text-sm font-medium">
@@ -175,7 +175,7 @@ export function UsersScreen({ meId }: { meId: number }) {
                 <span className="font-semibold">{u.name}</span>
                 {u.id === meId && <span className="ml-2 text-xs text-slate-500">(siz)</span>}
                 <span className="block text-xs text-slate-500">
-                  {u.role === "owner" ? `Yönetici · ${u.username}${u.email ? ` · ${u.email}` : " · e-posta yok"}` : `Kasiyer · No ${u.cashierNo} + PIN ile giriş`}{" "}
+                  {u.role === "owner" ? `Yönetici · ${u.username}${u.email ? ` · ${u.email}` : ""}` : `Kasiyer · No ${u.cashierNo} + PIN ile giriş`}{" "}
                   {u.isActive ? "" : "· pasif"}
                 </span>
               </span>
@@ -209,6 +209,7 @@ export function UsersScreen({ meId }: { meId: number }) {
         <SecretChangeDialog
           target={dialog.user}
           activate={dialog.activate}
+          codeRequired={codeRequired}
           onClose={() => setDialog(null)}
           onDone={(msg) => {
             setDialog(null);

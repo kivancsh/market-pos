@@ -53,13 +53,16 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - `owner`: her şey. `cashier`: sadece kasa; maliyet/kâr alanları API yanıtlarında **hiç olmaz**; void/iade/mal girişi yok.
 - Kasiyer indirimi `cashier_can_discount` ayarına bağlı (varsayılan kapalı).
 - Rol kontrolü her zaman sunucuda. 5 hatalı denemede 5 dk kilit (kasiyer PIN'i ve yönetici şifresi ayrı sayılır).
-- Hesaplar `users` tablosunda (Aşama 9 kararı, kullanıcı onaylı): yönetici = kullanıcı adı + şifre (≥ 8) + e-posta, kasiyer = ad + PIN (4–8 rakam, aktif kasiyerler arasında tekil)
+- Hesaplar `users` tablosunda (Aşama 9 kararı, kullanıcı onaylı): yönetici = kullanıcı adı + şifre (≥ 8) + e-posta (isteğe bağlı), kasiyer = ad + PIN (4–8 rakam, aktif kasiyerler arasında tekil)
   + otomatik **Kasiyer No** (`cashier_no`, 1001'den artan, asla yeniden kullanılmaz). Kasiyer girişi = Kasiyer No + PIN.
   Sır'lar scrypt ile hash'lenir; `.env`'de PIN yok.
-- E-posta onayı (kullanıcı kararı): ilk kurulum (`/kurulum`: gönderim hesabı → bilgiler → kod), şifre/PIN değiştirme ve sıfırlama (yalnız yönetici yapar;
-  kasiyerinki dahil), yönetici e-posta değişimi ve "Şifremi unuttum" her zaman yöneticinin e-postasına giden 6 haneli kodla tamamlanır.
-  Kod: HMAC hash, 10 dk, 5 deneme, 60 sn yeniden gönderme aralığı, tek kullanımlık; girdi kod tüketilmeden önce doğrulanır.
-  E-posta yoksa son çare `npm run users -- reset-password` (kasa bilgisayarında).
+- E-posta isteğe bağlı (kullanıcı kararı 11.10.2026, "kurulum basit olmalı"): ilk kurulum tek adım, e-postasız (`POST /api/setup`: ad,
+  kullanıcı adı, şifre → hesap + oturum). E-posta Ayarlar → E-posta gönderimi'nden bağlanır. Şifre/PIN değiştirme yalnız yöneticide:
+  gönderim bağlı VE yöneticinin e-postası varsa (`secretChangeNeedsCode`) e-postaya giden 6 haneli kodla (secret/start + verify); değilse
+  doğrudan `PUT /api/users/[id]/secret` (kendi şifresinde mevcut şifre zorunlu; kod mümkünken bu uç 409 CODE_REQUIRED).
+  "Şifremi unuttum" e-postayla yalnızca gönderim bağlı ve yönetici e-postası varken; yoksa giriş ekranı "Yönetici Şifresi Sıfırla"yı tarif eder.
+  E-posta ekleme/değiştirme her zaman yeni adrese kodla. Kod: HMAC hash, 10 dk, 5 deneme, 60 sn yeniden gönderme aralığı, tek kullanımlık;
+  girdi kod tüketilmeden önce doğrulanır. Son çare `npm run users -- reset-password` (kasa bilgisayarında).
 - Gönderim hesabı (Gmail uygulama şifresi önerilir; iCloud/Yandex/SMTP; Microsoft kişisel hesapları 2026'dan beri yalnız OAuth2 → gönderen olarak
   reddedilir, `src/lib/mailAddress.ts`; alıcı olarak sorun yok) `settings`'te, şifre AES-256-GCM ile şifreli. Test modu: `MAIL_DEV_DIR`
   (postalar JSON dosyası olur) — yalnızca e2e/smoke test ortamında; kurulum paketleri bunu asla ayarlamaz.

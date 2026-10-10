@@ -422,7 +422,7 @@ function BackupSection() {
 }
 
 const PROVIDERS = [
-  { key: "gmail", label: "Gmail" },
+  { key: "gmail", label: "Gmail (önerilen)" },
   { key: "icloud", label: "iCloud" },
   { key: "yandex", label: "Yandex" },
   { key: "custom", label: "Diğer (SMTP)" },
@@ -431,7 +431,7 @@ const PROVIDERS = [
 /** E-posta gönderim hesabı: durum, değiştir, deneme e-postası, raporu şimdi gönder. */
 function MailSection({ initial }: { initial: MailStatus }) {
   const [status, setStatus] = useState(initial);
-  const [editing, setEditing] = useState(!initial.configured);
+  const [editing, setEditing] = useState(false);
   const [provider, setProvider] = useState<(typeof PROVIDERS)[number]["key"]>((initial.provider as "gmail") ?? "gmail");
   const [user, setUser] = useState(initial.user ?? "");
   const [pass, setPass] = useState("");
@@ -473,8 +473,11 @@ function MailSection({ initial }: { initial: MailStatus }) {
 
   return (
     <section className="rounded-2xl bg-white p-4 shadow-sm" aria-label="E-posta">
-      <h2 className="text-lg font-semibold">E-posta gönderimi</h2>
-      <p className="mt-1 text-sm text-slate-600">Onay kodları ve günlük rapor bu hesaptan gönderilir. Alıcı, yöneticilerin Hesabım&apos;daki e-posta adresleridir.</p>
+      <h2 className="text-lg font-semibold">E-posta gönderimi (isteğe bağlı)</h2>
+      <p className="mt-1 text-sm text-slate-600">
+        Bağlarsanız: şifrenizi unutunca e-postayla yenileyebilir, her akşam günlük raporu e-postayla alırsınız; şifre değişiklikleri e-posta koduyla yapılır.
+        E-postalar bu hesaptan gönderilir; alıcı, yöneticilerin Hesabım&apos;daki e-posta adresleridir.
+      </p>
       {notice && (
         <div className="mt-2">
           <Notice kind={notice.kind} onClose={() => setNotice(null)}>
@@ -482,7 +485,16 @@ function MailSection({ initial }: { initial: MailStatus }) {
           </Notice>
         </div>
       )}
-      {!editing && status.configured ? (
+      {!editing && !status.configured ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="flex-1 text-sm text-slate-600" data-testid="mail-status">
+            Bağlı değil. Program e-postasız da tam çalışır.
+          </span>
+          <button type="button" onClick={() => setEditing(true)} className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white" data-testid="mail-connect">
+            E-posta bağla
+          </button>
+        </div>
+      ) : !editing && status.configured ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="flex-1 font-medium" data-testid="mail-status">
             ✓ Bağlı: {status.user}
@@ -540,16 +552,23 @@ function MailSection({ initial }: { initial: MailStatus }) {
               </label>
             </div>
           )}
-          <p className="text-xs text-slate-500 sm:col-span-2">
-            Gmail için normal şifre değil, Google hesabınızdan alınan <b>uygulama şifresi</b> gerekir (myaccount.google.com → Güvenlik → 2 Adımlı Doğrulama → Uygulama
-            şifreleri).
-          </p>
+          {provider === "gmail" && (
+            <div className="rounded-xl bg-sky-50 p-3 text-sm text-sky-900 sm:col-span-2" data-testid="gmail-help">
+              <b>Gmail uygulama şifresi nasıl alınır?</b>
+              <ol className="mt-1 list-decimal space-y-0.5 pl-5">
+                <li>Telefonda ya da bilgisayarda Google hesabınıza girin: <b>myaccount.google.com</b></li>
+                <li><b>Güvenlik</b> → <b>2 Adımlı Doğrulama</b>&apos;yı açın (kapalıysa).</li>
+                <li>Arama kutusuna <b>Uygulama şifreleri</b> yazın, açın.</li>
+                <li>Ad olarak <b>Market Kasa</b> yazıp <b>Oluştur</b>&apos;a basın.</li>
+                <li>Çıkan 16 harfli şifreyi yukarıdaki kutuya yazın (boşluklar önemli değil).</li>
+              </ol>
+              <p className="mt-1">Normal Gmail şifreniz burada çalışmaz.</p>
+            </div>
+          )}
           <div className="flex gap-2 sm:col-span-2">
-            {status.configured && (
-              <button type="button" onClick={() => setEditing(false)} className="h-11 rounded-xl border border-slate-300 px-5 font-semibold">
-                Vazgeç
-              </button>
-            )}
+            <button type="button" onClick={() => setEditing(false)} className="h-11 rounded-xl border border-slate-300 px-5 font-semibold">
+              Vazgeç
+            </button>
             <button type="submit" disabled={busy || !user || !pass} className="h-11 rounded-xl bg-slate-900 px-5 font-bold text-white disabled:bg-slate-300">
               {busy ? "Bağlanılıyor…" : "Bağlan ve kaydet"}
             </button>

@@ -9,15 +9,17 @@ import * as dailyEmailRoute from "@/app/api/reports/daily-email/route";
 import * as catalogRoute from "@/app/api/catalog/route";
 import * as secretStartRoute from "@/app/api/users/[id]/secret/start/route";
 import * as secretVerifyRoute from "@/app/api/users/[id]/secret/verify/route";
+import * as secretDirectRoute from "@/app/api/users/[id]/secret/route";
 import { resetLimiterForTests } from "@/server/auth/loginLimiter";
 import { readMailConfig } from "@/server/db/repositories/mailConfig";
+import { getUserById } from "@/server/db/repositories/users";
 import { setTestCtxFactory } from "@/server/http/api";
 import { decryptSecret, encryptSecret, friendlyMailError, maskEmail, saveMailSettings, setTestMailSender } from "@/server/mail";
 import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
 import { completeSale } from "@/server/services/sales";
 import { dueReportDates, runScheduledReports } from "@/server/services/dailyReport";
 import { updateSettings } from "@/server/services/settings";
-import { authenticateOwner, createUser, updateUser } from "@/server/services/users";
+import { authenticateCashier, authenticateOwner, createUser, updateUser } from "@/server/services/users";
 import { TEST_CASHIER, TEST_OWNER, captureMail, cookieForUser, ensureUsers } from "../apiHelpers";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
@@ -206,11 +208,12 @@ describe("e-posta gönderim ayarları", () => {
     expect(decryptSecret(parts.join("."))).toBeNull(); // değiştirilmiş veri çözülmez
   });
 
-  it("gönderim ayarlı değilse kod istenemez (anlaşılır hata)", async () => {
+  it("gönderim ayarlı değilse şifremi unuttum kasa bilgisayarındaki aracı tarif eder", async () => {
     ensureUsers(env);
     setTestMailSender(null);
     const r = await json(await forgotStartRoute.POST(req("/api/auth/forgot/start", { body: { username: "yonetici" } })));
-    expect(r.error.code).toBe("MAIL_NOT_CONFIGURED");
+    expect(r.error.code).toBe("EMAIL_REQUIRED");
+    expect(r.error.message).toContain("Yönetici Şifresi Sıfırla");
     expect(env.db.prepare("SELECT COUNT(*) AS n FROM verification_codes").get()).toEqual({ n: 0 });
   });
 });
@@ -302,4 +305,57 @@ describe("Microsoft (Outlook / Hotmail) gönderen hesap olamaz", () => {
     expect(isMicrosoftPersonal("ayse@hotmail.com")).toBe(true);
     expect(isMicrosoftPersonal("ayse@gmail.com")).toBe(false);
   });
+});
+
+describe("e-posta isteğe bağlı: bağlı değilken şifre/PIN doğrudan değişir", () => {
+  function put(path: string, body: unknown, cookie: string): Request {
+    return new Request(`http://localhost:3000${path}`, {
+      method: "PUT",
+      headers: new Headers({ host: "localhost:3000", cookie, "content-type": "application/json" }),
+      body: JSON.stringify(body),
+    });
+  }
+
+  it("kasiyer PIN'i kodsuz değişir; yönetici kendi şifresinde mevcut şifreyi yazar", async () => {
+    const { owner, cashier } = ensureUsers(env);
+    setTestMailSender(null); // e-posta gönderimi bağlı değil
+    const cookie = await cookieForUser(owner);
+
+    const pin = await secretDirectRoute.PUT(put(`/api/users/${cashier.id}/secret`, { secret: "4455", secretConfirm: "4455" }, cookie), params({ id: String(cashier.id) }));
+    expect(pin.status).toBe(200);
+    expect(authenticateCashier_(cashier.cashierNo!, "4455")).toBe(true);
+    const log = env.db.prepare("SELECT summary FROM audit_log WHERE action = 'user.secret' ORDER BY id DESC").get() as { summary: string };
+    expect(log.summary).toContain("e-posta bağlı değil");
+
+    const wrong = await secretDirectRoute.PUT(
+      put(`/api/users/${owner.id}/secret`, { secret: "yeni-sifre-999", secretConfirm: "yeni-sifre-999", currentPassword: "yanlis-sifre" }, cookie),
+      params({ id: String(owner.id) }),
+    );
+    expect(wrong.status).toBe(400);
+    expect((await json(wrong)).error.code).toBe("WRONG_PASSWORD");
+    const ok = await secretDirectRoute.PUT(
+      put(`/api/users/${owner.id}/secret`, { secret: "yeni-sifre-999", secretConfirm: "yeni-sifre-999", currentPassword: TEST_OWNER.password }, cookie),
+      params({ id: String(owner.id) }),
+    );
+    expect(ok.status).toBe(200);
+    expect(authenticateOwner(env.ctx, TEST_OWNER.username, "yeni-sifre-999")).not.toBeNull();
+
+    // kasiyer bu ucu kullanamaz (PIN değişince eski oturumu düştü: taze oturumla)
+    const cashierCookie = await cookieForUser(getUserById(env.db, cashier.id)!);
+    expect((await secretDirectRoute.PUT(put(`/api/users/${cashier.id}/secret`, { secret: "1212", secretConfirm: "1212" }, cashierCookie), params({ id: String(cashier.id) }))).status).toBe(403);
+  });
+
+  it("e-posta bağlı ve yöneticinin adresi varsa kodsuz değişiklik reddedilir (kod zorunlu)", async () => {
+    const { owner, cashier } = ensureUsers(env); // test yöneticisinin e-postası var, gönderim yakalanıyor (bağlı sayılır)
+    const r = await secretDirectRoute.PUT(
+      put(`/api/users/${cashier.id}/secret`, { secret: "4455", secretConfirm: "4455" }, await cookieForUser(owner)),
+      params({ id: String(cashier.id) }),
+    );
+    expect(r.status).toBe(409);
+    expect((await json(r)).error.code).toBe("CODE_REQUIRED");
+  });
+
+  function authenticateCashier_(no: number, pin: string): boolean {
+    return authenticateCashier(env.ctx, String(no), pin) !== null;
+  }
 });

@@ -77,23 +77,12 @@ function PostJson($path, $obj, $session) {
   $b = [Text.Encoding]::UTF8.GetBytes(($obj | ConvertTo-Json -Depth 5))
   return Invoke-RestMethod "$base$path" -Method Post -ContentType 'application/json; charset=utf-8' -Body $b -WebSession $session
 }
-function LastMailCode() {
-  $f = Get-ChildItem $env:MAIL_DEV_DIR -Filter *.json -ErrorAction SilentlyContinue | Sort-Object Name | Select-Object -Last 1
-  if (-not $f) { Fail 'Onay kodu e-postası oluşmadı' }
-  $m = [regex]::Match((Get-Content $f.FullName -Raw -Encoding UTF8 | ConvertFrom-Json).subject, '(\d{6})')
-  return $m.Groups[1].Value
-}
 
-Step 'İlk yönetici hesabı: bilgiler → e-postaya kod → kodla oluştur'
+Step 'İlk yönetici hesabı (tek adım, e-postasız)'
 $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession
-$ch = PostJson '/api/setup/start' @{ name = 'Test Yönetici'; username = 'test'; email = 'test@market-kasa.local'; password = 'test-sifre-123'; passwordConfirm = 'test-sifre-123' } $s
-if (-not $ch.token) { Fail 'Onay kodu isteği başarısız' }
-$setupCode = LastMailCode
-PostJson '/api/setup/verify' @{ token = $ch.token; code = $setupCode } $s | Out-Null
+PostJson '/api/setup' @{ name = 'Test Yönetici'; username = 'test'; password = 'test-sifre-123'; passwordConfirm = 'test-sifre-123' } $s | Out-Null
 $me = Invoke-RestMethod "$base/api/auth/me" -WebSession $s
-if ($me.user.role -ne 'owner') { Fail 'Kodla kurulumdan sonra yönetici oturumu açılmadı' }
-$owner = (Invoke-RestMethod "$base/api/users" -WebSession $s).items | Where-Object { $_.username -eq 'test' }
-if ($owner.email -ne 'test@market-kasa.local') { Fail "Yönetici e-postası kaydedilmedi: $($owner.email)" }
+if ($me.user.role -ne 'owner') { Fail 'Kurulumdan sonra yönetici oturumu açılmadı' }
 
 Step 'Kasiyer: otomatik Kasiyer No, No + PIN ile giriş'
 $k = PostJson '/api/users' @{ role = 'cashier'; name = 'Test Kasiyer'; pin = '4826' } $s
@@ -101,6 +90,11 @@ if ($k.user.cashierNo -ne 1001) { Fail "Kasiyer No beklenen 1001, gelen $($k.use
 $ks = New-Object Microsoft.PowerShell.Commands.WebRequestSession
 $login = PostJson '/api/auth/login' @{ mode = 'cashier'; cashierNo = '1001'; pin = '4826' } $ks
 if ($login.role -ne 'cashier') { Fail 'Kasiyer girişi başarısız' }
+# E-posta bağlı değilken yönetici kasiyerin PIN'ini doğrudan değiştirir
+$b2 = [Text.Encoding]::UTF8.GetBytes((@{ secret = '5937'; secretConfirm = '5937' } | ConvertTo-Json))
+Invoke-RestMethod "$base/api/users/$($k.user.id)/secret" -Method Put -ContentType 'application/json; charset=utf-8' -Body $b2 -WebSession $s | Out-Null
+$ks2 = New-Object Microsoft.PowerShell.Commands.WebRequestSession
+if ((PostJson '/api/auth/login' @{ mode = 'cashier'; cashierNo = '1001'; pin = '5937' } $ks2).role -ne 'cashier') { Fail 'Yeni PIN ile kasiyer girişi başarısız' }
 $p = Invoke-RestMethod "$base/api/products" -WebSession $s
 if ($null -eq $p.items) { Fail 'Ürün listesi alınamadı' }
 

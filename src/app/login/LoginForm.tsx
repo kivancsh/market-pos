@@ -10,7 +10,18 @@ const MAX_LEN = 8;
 
 type Mode = "cashier" | "owner";
 
-export function LoginForm({ next, businessName, initialMode }: { next: string; businessName: string; initialMode: Mode }) {
+export function LoginForm({
+  next,
+  businessName,
+  initialMode,
+  forgotByEmail,
+}: {
+  next: string;
+  businessName: string;
+  initialMode: Mode;
+  /** E-posta gönderimi bağlı mı ("Şifremi unuttum" e-postayla mı, kasa bilgisayarındaki araçla mı) */
+  forgotByEmail: boolean;
+}) {
   const [mode, setMode] = useState<Mode>(initialMode);
   return (
     <div className="w-full max-w-sm rounded-3xl bg-white p-6 shadow-xl">
@@ -30,7 +41,7 @@ export function LoginForm({ next, businessName, initialMode }: { next: string; b
           </button>
         ))}
       </div>
-      {mode === "cashier" ? <CashierPin next={next} /> : <OwnerPassword next={next} />}
+      {mode === "cashier" ? <CashierPin next={next} /> : <OwnerPassword next={next} forgotByEmail={forgotByEmail} />}
     </div>
   );
 }
@@ -178,13 +189,14 @@ function CashierPin({ next }: { next: string }) {
   );
 }
 
-function OwnerPassword({ next }: { next: string }) {
+function OwnerPassword({ next, forgotByEmail }: { next: string; forgotByEmail: boolean }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [forgot, setForgot] = useState(false);
+  const [resetHelp, setResetHelp] = useState(false);
 
   async function submit() {
     if (busy || !username || !password) return;
@@ -240,9 +252,28 @@ function OwnerPassword({ next }: { next: string }) {
       <button type="submit" disabled={busy || !username || !password} className="h-14 w-full rounded-2xl bg-emerald-600 text-xl font-bold text-white disabled:bg-slate-300" data-testid="login-owner-submit">
         {busy ? "Giriş yapılıyor…" : "Yönetici girişi"}
       </button>
-      <button type="button" onClick={() => setForgot(true)} className="w-full text-center text-sm font-semibold text-emerald-800 underline" data-testid="login-forgot">
+      <button
+        type="button"
+        onClick={() => (forgotByEmail ? setForgot(true) : setResetHelp((v) => !v))}
+        className="w-full text-center text-sm font-semibold text-emerald-800 underline"
+        data-testid="login-forgot"
+      >
         Şifremi unuttum
       </button>
+      {resetHelp && (
+        <div className="rounded-xl bg-sky-50 p-3 text-sm text-sky-900" data-testid="login-reset-help">
+          <b>Şifrenizi kasa bilgisayarından yenileyin:</b>
+          <ul className="mt-1 list-disc space-y-0.5 pl-5">
+            <li>
+              Windows: <b>Başlat menüsü → Market Kasa → Yönetici Şifresi Sıfırla</b>
+            </li>
+            <li>
+              Mac: <b>market-pos</b> klasöründeki <b>Yönetici Şifresi Sıfırla</b> dosyasına çift tıklayın
+            </li>
+          </ul>
+          <p className="mt-1">Açılan pencerede yeni şifreyi iki kez yazın (yazarken görünmez).</p>
+        </div>
+      )}
     </form>
   );
 }

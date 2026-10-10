@@ -1,6 +1,8 @@
 /**
- * Kullanıcı hesapları: yönetici (kullanıcı adı + şifre + e-posta), kasiyer (Kasiyer No + PIN).
- * Şifre/PIN değiştirme ve sıfırlama yöneticidedir ve her seferinde yöneticinin e-postasına giden onay koduyla yapılır.
+ * Kullanıcı hesapları: yönetici (kullanıcı adı + şifre, e-posta isteğe bağlı), kasiyer (Kasiyer No + PIN).
+ * İlk kurulum e-postasız ve tek adımdır (kullanıcı kararı: kurulum basit olmalı).
+ * Şifre/PIN değiştirme ve sıfırlama yöneticidedir. E-posta gönderimi bağlıysa ve yöneticinin e-postası varsa her seferinde
+ * e-postaya giden onay koduyla yapılır; değilse doğrudan (yönetici kendi şifresinde mevcut şifresini yazar).
  * Şifre/PIN değişince veya hesap pasife alınınca o kullanıcının açık oturumları geçersiz olur.
  */
 import type { Ctx } from "../context";
@@ -21,6 +23,7 @@ import {
 } from "../db/repositories/users";
 import { badRequest, conflict, forbidden, notFound } from "../errors";
 import { hashSecret, verifyDummy, verifySecret } from "../auth/passwords";
+import { isMailConfigured } from "../mail";
 import { parseInput, z } from "../validation/zod";
 import { audit } from "./audit";
 import { stamp } from "./clock";
@@ -51,34 +54,16 @@ function assertPinUnique(ctx: Ctx, pin: string, exceptId?: number) {
 const setupBase = z.object({
   name: nameSchema,
   username: usernameSchema,
-  email: emailSchema,
+  email: emailSchema.nullish(),
   password: passwordSchema,
   passwordConfirm: z.string(),
 });
 export const setupSchema = setupBase.refine((d) => d.password === d.passwordConfirm, { message: "Şifreler aynı değil.", path: ["passwordConfirm"] });
 
-interface SetupPayload {
-  name: string;
-  username: string;
-  email: string;
-  passwordHash: string;
-}
-
-/** İlk kurulum 1. adım: bilgileri doğrular; onay kodu bu e-postaya gönderilecek. Şifre sadece hash olarak saklanır. */
-export function prepareSetup(ctx: Ctx, input: unknown): { email: string; payload: SetupPayload } {
+/** İlk kurulum (tek adım, e-postasız): ilk yönetici hesabı hemen oluşur. Sadece hiç yönetici yokken. */
+export function setupOwner(ctx: Ctx, input: unknown): User {
   const data = parseInput(setupSchema, input);
-  if (hasOwner(ctx)) throw forbidden("ALREADY_SET_UP", "Kurulum zaten yapılmış. Yönetici hesabıyla giriş yapın.");
-  if (usernameTaken(ctx.db, data.username)) throw conflict("USERNAME_TAKEN", "Bu kullanıcı adı alınmış.");
-  return {
-    email: data.email,
-    payload: { name: data.name, username: data.username, email: data.email, passwordHash: hashSecret(data.password) },
-  };
-}
-
-/** İlk kurulum 2. adım: e-posta kodu doğrulandı → yönetici hesabını oluştur. */
-export function completeSetup(ctx: Ctx, row: VerificationRow): User {
-  const p = JSON.parse(row.payloadJson ?? "{}") as SetupPayload;
-  return insertFirstOwner(ctx, p.name, p.username, p.passwordHash, p.email);
+  return insertFirstOwner(ctx, data.name, data.username, hashSecret(data.password), data.email ?? null);
 }
 
 function insertFirstOwner(ctx: Ctx, name: string, username: string, passwordHash: string, email: string | null): User {
@@ -92,7 +77,7 @@ function insertFirstOwner(ctx: Ctx, name: string, username: string, passwordHash
       audit(
         { ...ctx, actor: { userId: id, name: user.name, role: "owner" } },
         "user.create",
-        `İlk yönetici hesabı oluşturuldu: ${user.name} (${user.username})${email ? ", e-posta onaylı" : ""}`,
+        `İlk yönetici hesabı oluşturuldu: ${user.name} (${user.username})`,
         { entityType: "user", entityId: id },
       );
       return user;
@@ -100,16 +85,16 @@ function insertFirstOwner(ctx: Ctx, name: string, username: string, passwordHash
     .immediate();
 }
 
-/** Bilgisayardan (komut satırı) ilk yönetici: fiziksel erişim olduğu için e-posta onayı istenmez. */
+/** Bilgisayardan (komut satırı) ilk yönetici. */
 export function createFirstOwner(ctx: Ctx, input: { name: string; username: string; password: string; passwordConfirm: string; email?: string | null }): User {
-  const data = parseInput(setupBase.extend({ email: emailSchema.nullish() }), input);
+  const data = parseInput(setupBase, input);
   if (data.password !== data.passwordConfirm) throw badRequest("PASSWORD_MISMATCH", "Şifreler aynı değil.");
   return insertFirstOwner(ctx, data.name, data.username, hashSecret(data.password), data.email ?? null);
 }
 
 export const createUserSchema = z.discriminatedUnion("role", [
   z.object({ role: z.literal("cashier"), name: nameSchema, pin: pinSchema }),
-  z.object({ role: z.literal("owner"), name: nameSchema, username: usernameSchema, email: emailSchema, password: passwordSchema }),
+  z.object({ role: z.literal("owner"), name: nameSchema, username: usernameSchema, email: emailSchema.nullish(), password: passwordSchema }),
 ]);
 
 export function createUser(ctx: Ctx, input: z.input<typeof createUserSchema>): User {
@@ -132,7 +117,7 @@ export function createUser(ctx: Ctx, input: z.input<typeof createUserSchema>): U
       if (usernameTaken(ctx.db, data.username)) throw conflict("USERNAME_TAKEN", "Bu kullanıcı adı alınmış.");
       const id = insertUser(
         ctx.db,
-        { role: "owner", name: data.name, username: data.username, passwordHash: secretHash, pinHash: null, email: data.email },
+        { role: "owner", name: data.name, username: data.username, passwordHash: secretHash, pinHash: null, email: data.email ?? null },
         nowIso,
       );
       audit(ctx, "user.create", `Yönetici eklendi: ${data.name} (${data.username})`, { entityType: "user", entityId: id });
@@ -166,9 +151,9 @@ export function updateUser(ctx: Ctx, id: number, input: z.input<typeof updateUse
       if (u.role === "cashier" && data.username) throw badRequest("BAD_FIELD", "Kasiyerin kullanıcı adı olmaz; Kasiyer No kullanılır.");
       if (data.username && usernameTaken(ctx.db, data.username, id)) throw conflict("USERNAME_TAKEN", "Bu kullanıcı adı alınmış.");
       // Tekrar aktif edilen kasiyerin eski PIN'i bu arada başka kasiyere verilmiş olabilir (hash'ler karşılaştırılamaz):
-      // yeni PIN zorunlu → e-posta onaylı "PIN değiştir" akışıyla aktif edilir.
+      // yeni PIN zorunlu → "PIN değiştir" akışıyla (activate) aktif edilir.
       if (data.isActive === true && u.role === "cashier" && !u.isActive) {
-        throw badRequest("PIN_REQUIRED", "Kasiyeri tekrar aktif yapmak için yeni bir PIN belirleyin (e-posta onaylı).");
+        throw badRequest("PIN_REQUIRED", "Kasiyeri tekrar aktif yapmak için yeni bir PIN belirleyin.");
       }
 
       updateUserFields(ctx.db, id, { name: data.name, username: data.username, isActive: data.isActive }, nowIso);
@@ -183,12 +168,25 @@ export function updateUser(ctx: Ctx, id: number, input: z.input<typeof updateUse
     .immediate();
 }
 
-// ------------------------------------------------------------------ e-posta onaylı işlemler
+// ------------------------------------------------------------------ şifre/PIN değiştirme (e-posta kodlu ya da doğrudan)
+
+/**
+ * Bu yönetici için şifre/PIN değişiklikleri e-posta koduyla mı yapılır? E-posta gönderimi bağlı ve yöneticinin
+ * e-postası varsa evet (güvenlik); değilse doğrudan yapılır (e-posta isteğe bağlı).
+ */
+export function secretChangeNeedsCode(ctx: Ctx, owner: Pick<User, "email">): boolean {
+  return Boolean(owner.email) && isMailConfigured(ctx.db);
+}
+
+function actorOwner(ctx: Ctx): User {
+  const me = ctx.actor?.userId ? getUserById(ctx.db, ctx.actor.userId) : undefined;
+  if (!me || me.role !== "owner" || !me.isActive) throw forbidden("FORBIDDEN", "Bu işlem için yetkiniz yok.");
+  return me;
+}
 
 /** İşlemi yapan yöneticinin e-postası (kodlar buraya gider). */
 function actorOwnerWithEmail(ctx: Ctx): User & { email: string } {
-  const me = ctx.actor?.userId ? getUserById(ctx.db, ctx.actor.userId) : undefined;
-  if (!me || me.role !== "owner" || !me.isActive) throw forbidden("FORBIDDEN", "Bu işlem için yetkiniz yok.");
+  const me = actorOwner(ctx);
   if (!me.email) {
     throw badRequest("EMAIL_REQUIRED", "Onay kodu gönderebilmek için önce Yönetim Paneli → Hesabım'dan e-posta adresinizi ekleyin.");
   }
@@ -231,6 +229,28 @@ export function validateSecretChange(ctx: Ctx, targetId: number, input: unknown)
 export function applySecretChange(ctx: Ctx, row: VerificationRow, targetId: number, data: z.infer<typeof secretChangeSchema>): User {
   const p = JSON.parse(row.payloadJson ?? "{}") as { targetId?: number };
   if (p.targetId !== targetId || row.userId !== ctx.actor?.userId) throw badRequest("CODE_INVALID", "Bu kod bu işlem için değil. Yeni kod isteyin.");
+  return writeSecret(ctx, targetId, data, "e-posta onaylı");
+}
+
+/**
+ * E-posta bağlı değilken doğrudan şifre/PIN değiştirme. E-posta kodu kullanılabiliyorsa reddedilir (kod zorunlu).
+ * Yönetici kendi şifresini değiştiriyorsa mevcut şifresini de yazar.
+ */
+export function changeSecretDirect(ctx: Ctx, targetId: number, input: unknown): User {
+  const me = actorOwner(ctx);
+  if (secretChangeNeedsCode(ctx, me)) throw conflict("CODE_REQUIRED", "Bu değişiklik e-postanıza gelen onay koduyla yapılır.");
+  const data = validateSecretChange(ctx, targetId, input);
+  if (targetId === me.id) {
+    const current = (input as { currentPassword?: unknown } | null)?.currentPassword;
+    const row = findOwnerByUsername(ctx.db, me.username ?? "");
+    if (typeof current !== "string" || !row || !verifySecret(current, row.passwordHash)) {
+      throw badRequest("WRONG_PASSWORD", "Mevcut şifreniz hatalı.");
+    }
+  }
+  return writeSecret(ctx, targetId, data, "e-posta bağlı değil");
+}
+
+function writeSecret(ctx: Ctx, targetId: number, data: z.infer<typeof secretChangeSchema>, how: string): User {
   const { nowIso } = stamp(ctx);
   const hash = hashSecret(data.secret);
   return ctx.db
@@ -244,7 +264,7 @@ export function applySecretChange(ctx: Ctx, row: VerificationRow, targetId: numb
       audit(
         ctx,
         "user.secret",
-        `${describe(u)}: ${u.role === "cashier" ? "PIN" : "şifre"} ${self ? "(kendi) " : ""}değiştirildi${data.activate && !u.isActive ? ", tekrar aktif yapıldı" : ""} (e-posta onaylı)`,
+        `${describe(u)}: ${u.role === "cashier" ? "PIN" : "şifre"} ${self ? "(kendi) " : ""}değiştirildi${data.activate && !u.isActive ? ", tekrar aktif yapıldı" : ""} (${how})`,
         { entityType: "user", entityId: targetId },
       );
       return getUserById(ctx.db, targetId)!;
@@ -256,10 +276,10 @@ export function applySecretChange(ctx: Ctx, row: VerificationRow, targetId: numb
 export function prepareForgotPassword(ctx: Ctx, username: string): { email: string; userId: number; action: string } {
   const u = findOwnerByUsername(ctx.db, String(username ?? "").trim());
   if (!u || !u.isActive) throw notFound("USER_NOT_FOUND", "Bu kullanıcı adında aktif bir yönetici yok.");
-  if (!u.email) {
+  if (!u.email || !isMailConfigured(ctx.db)) {
     throw badRequest(
       "EMAIL_REQUIRED",
-      "Bu hesapta e-posta adresi yok. Kasa bilgisayarında 'Yönetici Şifresi Sıfırla' ile şifrenizi yenileyin.",
+      "Bu programda e-posta bağlı olmadığı için şifre e-postayla sıfırlanamaz. Kasa bilgisayarında 'Yönetici Şifresi Sıfırla'yı açın (Windows: Başlat menüsü → Market Kasa; Mac: market-pos klasörü).",
     );
   }
   return { email: u.email, userId: u.id, action: `${u.name} (${u.username}) için şifre sıfırlama` };

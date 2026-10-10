@@ -13,7 +13,7 @@ Arkadaşınızın / dükkânın **Windows** bilgisayarına klasik bir kurulum do
 3. `windows/build.mjs` ile dosyaları toplar: sunucu, Node.js (`node.exe`), veritabanı şeması, şifre sıfırlama ve yedek araçları. Veritabanı, yedek ve `.env` gibi kişisel dosyalar pakete giremez (betik kontrol eder).
 4. Başlatıcıyı (`Market Kasa.exe`, `launcher/MarketKasa.cs`) Windows'un kendi C# derleyicisiyle derler.
 5. Inno Setup ile `Market-Kasa-Setup.exe`'yi oluşturur (`installer.iss`).
-6. **Gerçek kurulum testi** (`smoke-test.ps1`): sessiz kurar, açar, e-posta onay koduyla yönetici hesabı (test modunda posta dosyaya yazılır), Kasiyer No'lu kasiyer ve ürün oluşturur, satış yapar, sayfaları, barkodu, Excel'i ve yedeği dener, kapatıp yeniden açar, kaldırır ve bilgilerin silinmediğini doğrular.
+6. **Gerçek kurulum testi** (`smoke-test.ps1`): sessiz kurar, açar, tek adımda yönetici hesabı, Kasiyer No'lu kasiyer (PIN'i e-postasız değiştirir) ve ürün oluşturur, satış yapar, sayfaları, barkodu, Excel'i ve yedeği dener, kapatıp yeniden açar, kaldırır ve bilgilerin silinmediğini doğrular.
    Güncellemeyi de dener: yerel deneme sunucusu (`smoke-update-server.js`) "99.0.0" sürümünü sunar; program yeni sürümü görür, yedek alıp
    indirir, parmak izini doğrular, `Market Kasa.exe --install-update` sessiz kurulumu başlatır ve program yeniden açılınca bilgilerin yerinde olduğu kontrol edilir.
 7. Hepsi geçerse kurulum dosyasını ve **`latest.json`**'u (sürüm, boyut, SHA-256 — `write-latest.mjs`) **Releases** sayfasında "en son sürüm" olarak yayınlar.

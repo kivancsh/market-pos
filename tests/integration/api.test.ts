@@ -12,8 +12,6 @@ import * as voidRoute from "@/app/api/sales/[id]/void/route";
 import * as salesRoute from "@/app/api/sales/route";
 import * as settingsRoute from "@/app/api/settings/route";
 import * as setupRoute from "@/app/api/setup/route";
-import * as setupStartRoute from "@/app/api/setup/start/route";
-import * as setupVerifyRoute from "@/app/api/setup/verify/route";
 import * as secretStartRoute from "@/app/api/users/[id]/secret/start/route";
 import * as secretVerifyRoute from "@/app/api/users/[id]/secret/verify/route";
 import * as adjustRoute from "@/app/api/stock/adjust/route";
@@ -59,42 +57,29 @@ const json = async (r: Response) => (await r.json()) as Record<string, unknown>;
 const ownerLogin = (password = TEST_OWNER.password) => ({ mode: "owner", username: TEST_OWNER.username, password });
 const cashierLogin = (pin = TEST_CASHIER.pin, cashierNo = "1001") => ({ mode: "cashier", cashierNo, pin });
 
-describe("ilk kurulum (e-posta onaylı)", () => {
-  it("giriş 409; bilgiler → e-postaya kod → doğru kodla yönetici oluşur ve oturum açılır; ikinci kurulum reddedilir", async () => {
-    expect(await json(await setupRoute.GET(req("/api/setup")))).toMatchObject({ needsSetup: true, mail: { configured: true } });
+describe("ilk kurulum (tek adım, e-postasız)", () => {
+  it("giriş 409; ad + kullanıcı adı + şifre → yönetici hemen oluşur ve oturum açılır; ikinci kurulum reddedilir", async () => {
+    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: true });
     expect((await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }))).status).toBe(409);
 
-    const bad = await setupStartRoute.POST(req("/api/setup/start", { body: { name: "A", username: "ay", email: "x@y.com", password: "kisa", passwordConfirm: "kisa" } }));
+    const bad = await setupRoute.POST(req("/api/setup", { body: { name: "A", username: "ay", password: "kisa", passwordConfirm: "kisa" } }));
     expect(bad.status).toBe(400);
-    const noMail = await setupStartRoute.POST(req("/api/setup/start", { body: { ...TEST_OWNER, email: "gecersiz", passwordConfirm: TEST_OWNER.password } }));
-    expect(noMail.status).toBe(400);
-    expect(mail.sent).toHaveLength(0);
+    const mismatch = await setupRoute.POST(req("/api/setup", { body: { name: "A", username: "ayse", password: "uzun-sifre-1", passwordConfirm: "baska-sifre-1" } }));
+    expect(mismatch.status).toBe(400);
 
-    const start = await setupStartRoute.POST(req("/api/setup/start", { body: { ...TEST_OWNER, passwordConfirm: TEST_OWNER.password } }));
-    expect(start.status).toBe(200);
-    const ch = (await json(start)) as { token: string; emailMasked: string };
-    expect(ch.emailMasked).toBe("y******@test.local");
-    expect(mail.sent).toHaveLength(1);
-    expect(mail.sent[0]!.to).toBe(TEST_OWNER.email);
-    expect(mail.sent[0]!.text).toContain("Yönetici hesabı oluşturma");
-    // şifre e-postada ve veritabanında açık metin olarak durmaz
-    expect(JSON.stringify(mail.sent[0])).not.toContain(TEST_OWNER.password);
-    expect(JSON.stringify(env.db.prepare("SELECT payload_json FROM verification_codes").all())).not.toContain(TEST_OWNER.password);
-
-    const wrong = await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: "000000" } }));
-    expect(wrong.status).toBe(400);
-    expect(await setupRoute.GET(req("/api/setup")).then(json)).toMatchObject({ needsSetup: true });
-
-    const ok = await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: mail.lastCode() } }));
+    const ok = await setupRoute.POST(
+      req("/api/setup", { body: { name: TEST_OWNER.name, username: TEST_OWNER.username, password: TEST_OWNER.password, passwordConfirm: TEST_OWNER.password } }),
+    );
     expect(ok.status).toBe(200);
     expect(ok.headers.get("set-cookie")).toContain(`${SESSION_COOKIE}=`);
+    expect(mail.sent).toHaveLength(0); // e-posta gönderilmez
     expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: false });
-    const owner = env.db.prepare("SELECT email FROM users WHERE role = 'owner'").get() as { email: string };
-    expect(owner.email).toBe(TEST_OWNER.email);
+    const owner = env.db.prepare("SELECT email, password_hash FROM users WHERE role = 'owner'").get() as { email: string | null; password_hash: string };
+    expect(owner.email).toBeNull();
+    expect(owner.password_hash).not.toContain(TEST_OWNER.password);
+    expect((await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }))).status).toBe(200);
 
-    // aynı kod ikinci kez kullanılamaz; ikinci kurulum reddedilir
-    expect((await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: mail.lastCode() } }))).status).toBe(400);
-    const again = await setupStartRoute.POST(req("/api/setup/start", { body: { name: "Kötü", username: "kotu", email: "k@k.com", password: "baska-sifre-1", passwordConfirm: "baska-sifre-1" } }));
+    const again = await setupRoute.POST(req("/api/setup", { body: { name: "Kötü", username: "kotu", password: "baska-sifre-1", passwordConfirm: "baska-sifre-1" } }));
     expect(again.status).toBe(403);
   });
 });
