@@ -7,12 +7,13 @@
  * bu değişkeni ayarlamaz; gerçek kullanımda her zaman SMTP kullanılır.
  */
 import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
+import { mailServiceUrl, serviceRecipientConfirm, serviceRecipientStart, serviceSend } from "./service";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import nodemailer from "nodemailer";
 import { getSessionSecret } from "../auth/secret";
-import { readMailConfig, writeMailConfig } from "../db/repositories/mailConfig";
+import { readMailConfig, readServiceCreds, writeMailConfig } from "../db/repositories/mailConfig";
 import type { DB } from "../db/types";
 import { AppError } from "../errors";
 
@@ -23,6 +24,8 @@ export const MAIL_PROVIDERS = {
   icloud: { label: "iCloud", host: "smtp.mail.me.com", port: 587 },
   yandex: { label: "Yandex", host: "smtp.yandex.com", port: 465 },
   custom: { label: "Diğer (SMTP)", host: "", port: 465 },
+  /** Merkezi Market Kasa e-posta servisi (mail/service.ts): Gmail/şifre gerekmez */
+  service: { label: "Market Kasa e-posta servisi", host: "", port: 0 },
 } as const;
 export type MailProvider = keyof typeof MAIL_PROVIDERS;
 
@@ -125,6 +128,7 @@ function transportFor(s: { host: string; port: number; user: string; pass: strin
 
 /** SMTP girişini dener; başarılıysa ayarları kaydeder. */
 export async function saveMailSettings(db: DB, input: MailSettingsInput): Promise<MailStatus> {
+  if (input.provider === "service") throw new AppError("BAD_PROVIDER", "E-posta servisi adres doğrulamasıyla bağlanır.", 400);
   if (input.provider === "outlook" || (input.provider !== "custom" && isMicrosoftPersonal(input.user))) {
     throw new AppError("MAIL_PROVIDER_UNSUPPORTED", MICROSOFT_UNSUPPORTED, 400);
   }
@@ -184,6 +188,10 @@ export async function sendMail(db: DB, msg: MailMessage): Promise<void> {
       409,
     );
   }
+  if (c.provider === "service") {
+    await serviceSend(pass, msg);
+    return;
+  }
   try {
     await transportFor({ host: c.host, port: c.port, user: c.user, pass }).sendMail({
       from: { name: "Market Kasa", address: c.user },
@@ -203,4 +211,26 @@ export function maskEmail(email: string): string {
   const [local, domain] = email.split("@");
   if (!local || !domain) return email;
   return `${local[0]}${"*".repeat(Math.max(2, Math.min(6, local.length - 1)))}@${domain}`;
+}
+
+// ------------------------------------------------------------------ merkezi e-posta servisi
+const secretBox = { encrypt: encryptSecret, decrypt: decryptSecret };
+
+/** Servis üzerinden adrese kod gönderir (adres bu kurulum için doğrulanacak). */
+export async function startServiceVerification(db: DB, email: string): Promise<void> {
+  await serviceRecipientStart(db, secretBox, email);
+}
+
+/** Servis kodu doğruysa adres doğrulanır. connect=true: e-posta gönderimi bu servise bağlanır. */
+export async function confirmServiceVerification(db: DB, email: string, code: string, connect: boolean): Promise<MailStatus> {
+  await serviceRecipientConfirm(db, secretBox, email, code);
+  if (connect) {
+    const creds = readServiceCreds(db)!;
+    writeMailConfig(db, { provider: "service", host: mailServiceUrl(), port: 0, user: email, passEnc: creds });
+  }
+  return getMailStatus(db);
+}
+
+export function usesMailService(db: DB): boolean {
+  return readMailConfig(db)?.provider === "service";
 }

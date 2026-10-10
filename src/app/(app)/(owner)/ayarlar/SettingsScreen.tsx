@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { formatIstanbulDateTime } from "@/lib/businessDate";
 import { formatKurusPlain, formatTRY, parseTRYToKurus } from "@/lib/money";
 import { api, ApiError } from "@/client/api";
+import { CodeEntry, type Challenge } from "@/client/components/CodeEntry";
 import { Notice, type NoticeKind } from "@/client/components/Notice";
 import { beepError, beepSuccess } from "@/client/sound";
 import type { Settings } from "@/server/db/repositories/settings";
@@ -30,7 +31,18 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint?: stri
   );
 }
 
-export function SettingsScreen({ initial, initialMail, initialUpdate }: { initial: Settings; initialMail: MailStatus; initialUpdate: UpdateInfo }) {
+export function SettingsScreen({
+  initial,
+  initialMail,
+  initialUpdate,
+  mailService,
+}: {
+  initial: Settings;
+  initialMail: MailStatus;
+  initialUpdate: UpdateInfo;
+  /** Merkezi Market Kasa e-posta servisi açık mı (açıksa e-posta bağlamak adres + kod kadar basit) */
+  mailService: boolean;
+}) {
   const [s, setS] = useState(initial);
   const [opening, setOpening] = useState(formatKurusPlain(initial.openingCashKurus));
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
@@ -167,7 +179,7 @@ export function SettingsScreen({ initial, initialMail, initialUpdate }: { initia
         </div>
       </form>
 
-      <MailSection initial={initialMail} />
+      <MailSection initial={initialMail} serviceAvailable={mailService} />
       <ImportSection />
       <BackupSection />
       <UpdateSection initial={initialUpdate} />
@@ -429,9 +441,14 @@ const PROVIDERS = [
 ] as const;
 
 /** E-posta gönderim hesabı: durum, değiştir, deneme e-postası, raporu şimdi gönder. */
-function MailSection({ initial }: { initial: MailStatus }) {
+function MailSection({ initial, serviceAvailable }: { initial: MailStatus; serviceAvailable: boolean }) {
   const [status, setStatus] = useState(initial);
   const [editing, setEditing] = useState(false);
+  // Merkezi servisle bağlama: adres → kod → bağla. "advanced" = kendi Gmail/SMTP hesabıyla
+  const [advanced, setAdvanced] = useState(false);
+  const [svcEmail, setSvcEmail] = useState("");
+  const [svcChallenge, setSvcChallenge] = useState<Challenge | null>(null);
+  const [svcCode, setSvcCode] = useState("");
   const [provider, setProvider] = useState<(typeof PROVIDERS)[number]["key"]>((initial.provider as "gmail") ?? "gmail");
   const [user, setUser] = useState(initial.user ?? "");
   const [pass, setPass] = useState("");
@@ -467,16 +484,34 @@ function MailSection({ initial }: { initial: MailStatus }) {
       router.refresh(); // üstteki "e-posta ayarlanmamış" şeridi kalksın
       return `Bağlandı: e-postalar ${r.mail.user} hesabından gönderilecek.`;
     });
+  const svcStart = () =>
+    run(async () => {
+      const ch = await api<Challenge>("/api/settings/mail/service/start", { body: { email: svcEmail } });
+      setSvcChallenge(ch);
+      setSvcCode("");
+      return `Kod gönderildi: ${ch.emailMasked}. Gelen kutunuza (ve Gereksiz klasörüne) bakın.`;
+    });
+  const svcConfirm = () =>
+    run(async () => {
+      const r = await api<{ mail: MailStatus }>("/api/settings/mail/service/confirm", { body: { email: svcEmail, code: svcCode } });
+      setStatus(r.mail);
+      setEditing(false);
+      setSvcChallenge(null);
+      router.refresh();
+      return `Bağlandı. Gün sonu raporu ve onay kodları ${svcEmail} adresine gelecek.`;
+    });
   const test = () => run(async () => `Deneme e-postası gönderildi: ${(await api<{ to: string }>("/api/settings/mail/test", { body: {} })).to}`);
   const sendReport = () =>
     run(async () => `Bugünün raporu gönderildi: ${(await api<{ recipients: string[] }>("/api/reports/daily-email", { body: {} })).recipients.join(", ")}`);
 
   return (
-    <section className="rounded-2xl bg-white p-4 shadow-sm" aria-label="E-posta">
+    <section id="eposta" className="scroll-mt-20 rounded-2xl bg-white p-4 shadow-sm" aria-label="E-posta">
       <h2 className="text-lg font-semibold">E-posta gönderimi (isteğe bağlı)</h2>
       <p className="mt-1 text-sm text-slate-600">
         Bağlarsanız: şifrenizi unutunca e-postayla yenileyebilir, her akşam günlük raporu e-postayla alırsınız; şifre değişiklikleri e-posta koduyla yapılır.
-        E-postalar bu hesaptan gönderilir; alıcı, yöneticilerin Hesabım&apos;daki e-posta adresleridir.
+        {status.provider === "service" || (serviceAvailable && !status.configured)
+          ? " Sadece e-posta adresinizi yazmanız yeter; e-postalar “Market Kasa” adına gönderilir."
+          : " E-postalar bu hesaptan gönderilir; alıcı, yöneticilerin Hesabım'daki e-posta adresleridir."}
       </p>
       {notice && (
         <div className="mt-2">
@@ -485,7 +520,52 @@ function MailSection({ initial }: { initial: MailStatus }) {
           </Notice>
         </div>
       )}
-      {!editing && !status.configured ? (
+      {editing && serviceAvailable && !advanced ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void (svcChallenge ? svcConfirm() : svcStart());
+          }}
+          className="mt-3 flex flex-col gap-3"
+          data-testid="mail-service-form"
+        >
+          {!svcChallenge ? (
+            <label className="text-sm font-medium text-slate-700">
+              E-posta adresiniz (gün sonu raporu buraya gelecek)
+              <div className="mt-1 flex flex-wrap gap-2">
+                <input
+                  type="email"
+                  autoCapitalize="none"
+                  autoFocus
+                  value={svcEmail}
+                  onChange={(e) => setSvcEmail(e.target.value)}
+                  className={`${field} mt-0 min-w-[16rem] flex-1`}
+                  placeholder="ornek@gmail.com, …@hotmail.com — hepsi olur"
+                  data-testid="mail-service-email"
+                />
+                <button type="submit" disabled={busy || !svcEmail} className="h-11 rounded-xl bg-slate-900 px-5 font-bold text-white disabled:bg-slate-300" data-testid="mail-service-send">
+                  {busy ? "Gönderiliyor…" : "Kod gönder"}
+                </button>
+              </div>
+            </label>
+          ) : (
+            <>
+              <CodeEntry challenge={svcChallenge} code={svcCode} onCode={setSvcCode} onResend={() => void svcStart()} busy={busy} />
+              <button type="submit" disabled={busy || svcCode.length !== 6} className="h-11 rounded-xl bg-emerald-600 px-5 font-bold text-white disabled:bg-slate-300" data-testid="mail-service-confirm">
+                {busy ? "Bağlanılıyor…" : "Bağla"}
+              </button>
+            </>
+          )}
+          <div className="flex flex-wrap gap-3 text-sm">
+            <button type="button" onClick={() => { setEditing(false); setSvcChallenge(null); }} className="text-slate-600 underline">
+              Vazgeç
+            </button>
+            <button type="button" onClick={() => setAdvanced(true)} className="text-slate-600 underline">
+              Kendi Gmail hesabımla göndereyim (gelişmiş)
+            </button>
+          </div>
+        </form>
+      ) : !editing && !status.configured ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="flex-1 text-sm text-slate-600" data-testid="mail-status">
             Bağlı değil. Program e-postasız da tam çalışır.
@@ -497,7 +577,7 @@ function MailSection({ initial }: { initial: MailStatus }) {
       ) : !editing && status.configured ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="flex-1 font-medium" data-testid="mail-status">
-            ✓ Bağlı: {status.user}
+            ✓ Bağlı: {status.provider === "service" ? `Market Kasa e-posta servisi → ${status.user}` : status.user}
           </span>
           <button type="button" disabled={busy} onClick={() => void test()} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
             Deneme e-postası gönder

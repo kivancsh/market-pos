@@ -3,6 +3,7 @@ import { formatBusinessDate, formatIstanbulDateTime } from "@/lib/businessDate";
 import { formatPermille, formatTRY, mulDivRound } from "@/lib/money";
 import { requirePageUser } from "@/server/auth/pageSession";
 import { getDb } from "@/server/db/connection";
+import { isMailConfigured } from "@/server/mail";
 import { getOverview, isOverviewPeriod, type OverviewPeriod } from "@/server/services/overview";
 import { cashierLabel } from "@/server/services/reports";
 import { OverviewTrend } from "./OverviewTrend";
@@ -94,7 +95,9 @@ export default async function OwnerOverview(props: PageProps<"/yonetim">) {
   const me = await requirePageUser("owner");
   const sp = await props.searchParams;
   const period: OverviewPeriod = isOverviewPeriod(sp.donem) ? sp.donem : "bugun";
-  const o = getOverview({ db: getDb(), now: () => new Date() }, period);
+  const db = getDb();
+  const o = getOverview({ db, now: () => new Date() }, period);
+  const emailReady = isMailConfigured(db) && Boolean(me.email);
   const p = PERIODS.find((x) => x.key === period)!;
   const s = o.summary;
   const prev = o.previous;
@@ -131,6 +134,19 @@ export default async function OwnerOverview(props: PageProps<"/yonetim">) {
           <Link href="/ayarlar" className="underline">işletme adını girin</Link> ve <Link href="/urunler/yeni" className="underline">ürünlerinizi ekleyin</Link>. Bütün
           yönetim ekranları soldaki menüde.
         </div>
+      )}
+
+      {!emailReady && (
+        <Link
+          href="/ayarlar#eposta"
+          className="flex items-center justify-between gap-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-900 hover:bg-sky-100"
+          data-testid="overview-email-cta"
+        >
+          <span>
+            📧 <strong>Gün sonu raporunu e-postayla alın.</strong> Her akşam ciro, kâr ve kasiyer performansı e-postanıza gelsin.
+          </span>
+          <span className="shrink-0 font-semibold">E-posta bağla →</span>
+        </Link>
       )}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="overview-kpis">

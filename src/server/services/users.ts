@@ -318,13 +318,19 @@ export function prepareEmailChange(ctx: Ctx, input: unknown): { email: string; u
 export function applyEmailChange(ctx: Ctx, row: VerificationRow): User {
   if (row.userId !== ctx.actor?.userId) throw badRequest("CODE_INVALID", "Bu kod bu işlem için değil. Yeni kod isteyin.");
   const p = JSON.parse(row.payloadJson ?? "{}") as { email: string };
+  return setVerifiedOwnEmail(ctx, p.email);
+}
+
+/** İşlemi yapan yöneticinin e-postasını (kodla doğrulanmış) kaydeder. */
+export function setVerifiedOwnEmail(ctx: Ctx, emailInput: string): User {
+  const me = actorOwner(ctx);
+  const email = parseInput(emailSchema, emailInput);
   const { nowIso } = stamp(ctx);
   return ctx.db
     .transaction((): User => {
-      const u = getUserById(ctx.db, row.userId!)!;
-      setUserEmail(ctx.db, u.id, p.email, nowIso);
-      audit(ctx, "user.update", `${u.name}: e-posta ${u.email ?? "(yok)"} → ${p.email} (e-posta onaylı)`, { entityType: "user", entityId: u.id });
-      return getUserById(ctx.db, u.id)!;
+      setUserEmail(ctx.db, me.id, email, nowIso);
+      audit(ctx, "user.update", `${me.name}: e-posta ${me.email ?? "(yok)"} → ${email} (e-posta onaylı)`, { entityType: "user", entityId: me.id });
+      return getUserById(ctx.db, me.id)!;
     })
     .immediate();
 }

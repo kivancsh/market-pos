@@ -29,3 +29,13 @@ export function writeMailConfig(db: DB, c: MailConfigRow): void {
   stmt.run(KEYS.user, c.user);
   stmt.run(KEYS.passEnc, c.passEnc);
 }
+
+/** Merkezi e-posta servisi kurulum kimliği (şifrelenmiş "installId.token"); bağlantı tamamlanmadan önce de saklanır. */
+export function readServiceCreds(db: DB): string | null {
+  const r = db.prepare("SELECT value FROM settings WHERE key = 'mail_service_creds'").get() as { value: string } | undefined;
+  return r?.value ?? null;
+}
+
+export function writeServiceCreds(db: DB, enc: string): void {
+  db.prepare("INSERT INTO settings (key, value) VALUES ('mail_service_creds', ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(enc);
+}
