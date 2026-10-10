@@ -81,7 +81,9 @@ if (-not $ch.token) { Fail 'Onay kodu isteği başarısız' }
 $setupCode = LastMailCode
 PostJson '/api/setup/verify' @{ token = $ch.token; code = $setupCode } $s | Out-Null
 $me = Invoke-RestMethod "$base/api/auth/me" -WebSession $s
-if ($me.user.email -ne 'test@market-kasa.local') { Fail "Yönetici e-postası kaydedilmedi: $($me.user.email)" }
+if ($me.user.role -ne 'owner') { Fail 'Kodla kurulumdan sonra yönetici oturumu açılmadı' }
+$owner = (Invoke-RestMethod "$base/api/users" -WebSession $s).items | Where-Object { $_.username -eq 'test' }
+if ($owner.email -ne 'test@market-kasa.local') { Fail "Yönetici e-postası kaydedilmedi: $($owner.email)" }
 
 Step 'Kasiyer: otomatik Kasiyer No, No + PIN ile giriş'
 $k = PostJson '/api/users' @{ role = 'cashier'; name = 'Test Kasiyer'; pin = '4826' } $s
