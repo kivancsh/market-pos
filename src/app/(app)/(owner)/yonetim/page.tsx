@@ -23,12 +23,38 @@ function delta(cur: number, prev: number): { text: string; tone: "up" | "down" |
   return { text: `${p > 0 ? "▲" : "▼"} ${formatPermille(Math.abs(p))}`, tone: p > 0 ? "up" : "down" };
 }
 
-function Kpi({ label, value, cur, prev, vs, inverse = false, testId }: { label: string; value: string; cur?: number; prev?: number; vs: string; inverse?: boolean; testId?: string }) {
+function Kpi({
+  label,
+  value,
+  cur,
+  prev,
+  vs,
+  inverse = false,
+  testId,
+  href,
+}: {
+  label: string;
+  value: string;
+  cur?: number;
+  prev?: number;
+  vs: string;
+  inverse?: boolean;
+  testId?: string;
+  href?: string;
+}) {
   const d = cur !== undefined && prev !== undefined ? delta(cur, prev) : null;
   const good = d && d.tone !== "flat" ? (d.tone === "up") !== inverse : null;
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm" data-testid={testId}>
-      <p className="text-sm text-slate-500">{label}</p>
+      <p className="text-sm text-slate-500">
+        {href ? (
+          <Link href={href} className="hover:underline">
+            {label}
+          </Link>
+        ) : (
+          label
+        )}
+      </p>
       <p className="mt-1 text-2xl font-bold tabular-nums">{value}</p>
       {d && (
         <p className={`mt-1 text-xs font-medium ${good === null ? "text-slate-500" : good ? "text-emerald-700" : "text-red-700"}`}>
@@ -107,9 +133,19 @@ export default async function OwnerOverview(props: PageProps<"/yonetim">) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6" data-testid="overview-kpis">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4" data-testid="overview-kpis">
         <Kpi label="Ciro (KDV dahil)" value={formatTRY(s.revenueGrossKurus)} cur={s.revenueGrossKurus} prev={prev.revenueGrossKurus} vs={p.vs} testId="kpi-revenue" />
         <Kpi label="Brüt kâr (KDV hariç)" value={formatTRY(s.grossProfitKurus)} cur={s.grossProfitKurus} prev={prev.grossProfitKurus} vs={p.vs} />
+        <Kpi label="Giderler (KDV hariç)" value={formatTRY(o.expensesNetKurus)} cur={o.expensesNetKurus} prev={o.previousExpensesNetKurus} vs={p.vs} inverse href="/yonetim/giderler" />
+        <Kpi
+          label="Net kâr"
+          value={formatTRY(s.grossProfitKurus - o.expensesNetKurus)}
+          cur={s.grossProfitKurus - o.expensesNetKurus}
+          prev={prev.grossProfitKurus - o.previousExpensesNetKurus}
+          vs={p.vs}
+          href="/yonetim/kar-zarar"
+          testId="kpi-net"
+        />
         <Kpi label="Kâr marjı" value={formatPermille(s.marginPermille)} vs={p.vs} />
         <Kpi label="Satış sayısı" value={s.saleCount.toLocaleString("tr-TR")} cur={s.saleCount} prev={prev.saleCount} vs={p.vs} />
         <Kpi label="Ortalama sepet" value={s.avgBasketKurus === null ? "—" : formatTRY(s.avgBasketKurus)} cur={s.avgBasketKurus ?? 0} prev={prev.avgBasketKurus ?? 0} vs={p.vs} />

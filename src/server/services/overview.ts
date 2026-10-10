@@ -5,6 +5,7 @@
 import { addDays, startOfMonth, startOfWeek } from "@/lib/businessDate";
 import type { Ctx } from "../context";
 import { listAudit } from "../db/repositories/audit";
+import { expenseTotals } from "../db/repositories/expenses";
 import { listProducts } from "../db/repositories/products";
 import { getCashierAggregates, getDailyRows, getPeriodSummary, getStockAlerts } from "../db/repositories/reports";
 import { listUsers } from "../db/repositories/users";
@@ -44,6 +45,9 @@ export function getOverview(ctx: Ctx, period: OverviewPeriod) {
     range: { from: r.from, to: r.to },
     summary: getPeriodSummary(ctx.db, r.from, r.to),
     previous: getPeriodSummary(ctx.db, r.prevFrom, r.prevTo),
+    /** Giderler (KDV hariç) — net kâr = brüt kâr − gider */
+    expensesNetKurus: expenseTotals(ctx.db, r.from, r.to).netKurus,
+    previousExpensesNetKurus: expenseTotals(ctx.db, r.prevFrom, r.prevTo).netKurus,
     trend: getDailyRows(ctx.db, trendDays).map((d) => ({
       date: d.businessDate,
       revenueGrossKurus: d.revenueGrossKurus,

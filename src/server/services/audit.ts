@@ -27,6 +27,9 @@ export const AUDIT_ACTIONS = {
   "backup.create": "Yedek alındı",
   "update.download": "Güncelleme indirildi",
   "update.install": "Güncelleme kuruluyor",
+  "expense.create": "Gider eklendi",
+  "expense.update": "Gider düzeltildi",
+  "expense.delete": "Gider silindi",
 } as const;
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
 

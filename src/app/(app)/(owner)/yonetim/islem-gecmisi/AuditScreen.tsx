@@ -36,6 +36,7 @@ const GROUPS: { key: string; label: string }[] = [
   { key: "user.", label: "Kullanıcılar" },
   { key: "settings.", label: "Ayarlar" },
   { key: "backup.", label: "Yedek" },
+  { key: "expense.", label: "Giderler" },
   { key: "update.", label: "Program güncellemesi" },
 ];
 

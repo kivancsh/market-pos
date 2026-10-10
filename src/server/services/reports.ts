@@ -15,7 +15,10 @@ import {
   listActiveProductRows,
 } from "../db/repositories/reports";
 import { badRequest, notFound } from "../errors";
+import { expenseCategoryLabel } from "@/lib/expenses";
+import { listExpenses } from "../db/repositories/expenses";
 import { todayOf } from "./dayClosing";
+import { getProfitLoss } from "./expenses";
 
 export type ColumnType = "text" | "int" | "money" | "permille" | "date";
 
@@ -40,7 +43,7 @@ export interface ReportResult {
   totals: ReportRow | null;
 }
 
-export const REPORT_KEYS = ["daily", "cashiers", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
+export const REPORT_KEYS = ["daily", "cashiers", "profit-loss", "expenses", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
 export type ReportKey = (typeof REPORT_KEYS)[number];
 
 export const MAX_RANGE_DAYS = 366;
@@ -82,6 +85,68 @@ export function cashierLabel(a: { name: string; role: "owner" | "cashier" | null
 type Builder = (ctx: Ctx, from: string, to: string) => Omit<ReportResult, "key" | "from" | "to">;
 
 const BUILDERS: Record<ReportKey, Builder> = {
+  "profit-loss": (ctx, from, to) => {
+    const p = getProfitLoss(ctx, from, to);
+    const line = (item: string, amountKurus: number | null, ratioPermille: number | null = null) => ({ item, amountKurus, ratioPermille });
+    const rows = [
+      line("Satışlar (KDV dahil)", p.salesGrossKurus),
+      line("İadeler (KDV dahil)", -p.refundsKurus),
+      line("Net satış (KDV dahil)", p.revenueGrossKurus),
+      line("Net satış (KDV hariç)", p.revenueNetKurus),
+      line("Satılan malın maliyeti (KDV hariç)", -p.costNetKurus),
+      line("BRÜT KÂR", p.grossProfitKurus, p.grossMarginPermille),
+      ...p.expenses.byCategory.map((c) => line(`Gider: ${expenseCategoryLabel(c.category)} (KDV hariç)`, -c.netKurus)),
+      line("Toplam gider (KDV hariç)", -p.expenses.netKurus),
+      line("NET KÂR", p.netProfitKurus, p.netMarginPermille),
+      line("KDV: satıştan hesaplanan", p.vat.salesVatKurus),
+      line("KDV: mal alışları (yaklaşık)", -p.vat.purchaseVatKurus),
+      line("KDV: giderler", -p.vat.expenseVatKurus),
+      line("KDV farkı (yaklaşık; + ödenecek, − devreden)", p.vat.balanceKurus),
+    ];
+    return {
+      title: "Kâr-zarar",
+      description:
+        "Net satış − satılan malın maliyeti = brüt kâr; brüt kâr − giderler = net kâr (hepsi KDV hariç). İadeler yapıldığı dönemden düşülür. " +
+        "KDV satırları bilgi amaçlıdır, resmi beyan değildir; mal alışı KDV'si ürünün bugünkü oranıyla hesaplanır.",
+      usesRange: true,
+      columns: [
+        { key: "item", label: "Kalem", type: "text" },
+        { key: "amountKurus", label: "Tutar", type: "money" },
+        { key: "ratioPermille", label: "Oran (net satışa)", type: "permille" },
+      ],
+      rows,
+      totals: null,
+    };
+  },
+
+  expenses: (ctx, from, to) => {
+    const rows = listExpenses(ctx.db, from, to).map((e) => ({
+      businessDate: e.businessDate,
+      category: expenseCategoryLabel(e.category),
+      description: e.description ?? "",
+      vatRate: e.vatRate,
+      amountKurus: e.amountKurus,
+      netKurus: e.netKurus,
+      vatKurus: e.vatKurus,
+    }));
+    return {
+      title: "Giderler",
+      description: "Seçilen dönemdeki giderler (kira, personel, faturalar…). Tutar KDV dahil ödenen; kâr-zararda KDV hariç tutar kullanılır.",
+      usesRange: true,
+      columns: [
+        { key: "businessDate", label: "Tarih", type: "date" },
+        { key: "category", label: "Kategori", type: "text" },
+        { key: "description", label: "Açıklama", type: "text" },
+        { key: "vatRate", label: "KDV %", type: "int" },
+        { key: "amountKurus", label: "Tutar (KDV dahil)", type: "money" },
+        { key: "netKurus", label: "KDV hariç", type: "money" },
+        { key: "vatKurus", label: "KDV", type: "money" },
+      ],
+      rows,
+      totals: { businessDate: "", category: "Toplam", description: "", vatRate: null, amountKurus: sum(rows, "amountKurus"), netKurus: sum(rows, "netKurus"), vatKurus: sum(rows, "vatKurus") },
+    };
+  },
+
   cashiers: (ctx, from, to) => {
     const rows = getCashierAggregates(ctx.db, from, to).map((a) => ({
       name: cashierLabel(a),

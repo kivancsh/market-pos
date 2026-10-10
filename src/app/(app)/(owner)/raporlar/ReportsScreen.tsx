@@ -11,6 +11,8 @@ import type { ReportColumn, ReportKey, ReportResult, ReportRow } from "@/server/
 const TABS: { key: ReportKey; label: string }[] = [
   { key: "daily", label: "Günlük özet" },
   { key: "cashiers", label: "Kasiyer performansı" },
+  { key: "profit-loss", label: "Kâr-zarar" },
+  { key: "expenses", label: "Giderler" },
   { key: "products", label: "Ürün kârlılığı" },
   { key: "categories", label: "Kategori kârlılığı" },
   { key: "low-margin", label: "Düşük marjlı" },

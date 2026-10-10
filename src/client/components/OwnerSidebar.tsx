@@ -39,6 +39,13 @@ export const OWNER_MENU: { title: string; items: Item[] }[] = [
     ],
   },
   {
+    title: "Muhasebe",
+    items: [
+      { href: "/yonetim/kar-zarar", label: "Kâr-zarar", icon: "💰" },
+      { href: "/yonetim/giderler", label: "Giderler", icon: "🧾" },
+    ],
+  },
+  {
     title: "Raporlar",
     items: [{ href: "/raporlar", label: "Raporlar ve Excel", icon: "📊" }],
   },
