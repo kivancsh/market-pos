@@ -8,7 +8,7 @@ import { updateProduct } from "@/server/services/products";
 import { completeSale } from "@/server/services/sales";
 import { updateSettings } from "@/server/services/settings";
 import { voidSale } from "@/server/services/voids";
-import { authenticateCashier, authenticateOwner, changeOwnPassword, createUser, resetOwnerPassword, updateUser } from "@/server/services/users";
+import { authenticateCashier, authenticateOwner, createUser, resetOwnerPassword, updateUser } from "@/server/services/users";
 import { TEST_OWNER, ensureUsers } from "../apiHelpers";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
@@ -36,19 +36,25 @@ function catchErr(fn: () => unknown): AppError {
 const lastAudit = () => listAudit(env.db, { from: "2000-01-01", to: "2100-01-01", limit: 1, offset: 0 }).items[0]!;
 
 describe("kullanıcı yönetimi", () => {
-  it("kasiyer ekler; aynı PIN ikinci kasiyere verilemez", () => {
+  it("kasiyer ekler (sıradaki Kasiyer No ile); No + PIN ile girer; aynı PIN ikinci kasiyere verilemez", () => {
+    const { cashier } = ensureUsers(env);
+    expect(cashier.cashierNo).toBe(1001);
     const k = createUser(ctx, { role: "cashier", name: "Ali", pin: "1357" });
-    expect(k).toMatchObject({ role: "cashier", name: "Ali", isActive: true });
-    expect(authenticateCashier(ctx, "1357")?.id).toBe(k.id);
+    expect(k).toMatchObject({ role: "cashier", name: "Ali", isActive: true, cashierNo: 1002 });
+    expect(authenticateCashier(ctx, "1002", "1357")?.id).toBe(k.id);
+    expect(authenticateCashier(ctx, "1001", "1357")).toBeNull(); // başkasının numarasıyla olmaz
+    expect(authenticateCashier(ctx, "9999", "1357")).toBeNull();
     expect(catchErr(() => createUser(ctx, { role: "cashier", name: "Veli", pin: "1357" })).code).toBe("PIN_TAKEN");
     expect(catchErr(() => createUser(ctx, { role: "cashier", name: "Veli", pin: "12" })).status).toBe(400);
-    expect(lastAudit().summary).toContain("Kasiyer eklendi: Ali");
+    expect(lastAudit().summary).toContain("Kasiyer eklendi: Ali (Kasiyer No 1002)");
   });
 
-  it("ikinci yönetici eklenir; kullanıcı adı benzersiz (büyük/küçük harf duyarsız)", () => {
-    createUser(ctx, { role: "owner", name: "Can", username: "can", password: "sifre-12345" });
+  it("ikinci yönetici e-postasıyla eklenir; kullanıcı adı benzersiz (büyük/küçük harf duyarsız)", () => {
+    const can = createUser(ctx, { role: "owner", name: "Can", username: "can", email: "Can@Ornek.com", password: "sifre-12345" });
+    expect(can.email).toBe("can@ornek.com");
     expect(authenticateOwner(ctx, "CAN", "sifre-12345")?.name).toBe("Can");
-    expect(catchErr(() => createUser(ctx, { role: "owner", name: "X", username: "Yonetici", password: "sifre-12345" })).code).toBe("USERNAME_TAKEN");
+    expect(catchErr(() => createUser(ctx, { role: "owner", name: "X", username: "Yonetici", email: "x@ornek.com", password: "sifre-12345" })).code).toBe("USERNAME_TAKEN");
+    expect(catchErr(() => createUser(ctx, { role: "owner", name: "Y", username: "yy", email: "e-posta-degil", password: "sifre-12345" })).status).toBe(400);
   });
 
   it("kendini ve son yöneticiyi pasife alamaz; tekrar aktif edilen kasiyere yeni PIN zorunlu", () => {
@@ -58,19 +64,15 @@ describe("kullanıcı yönetimi", () => {
     expect(catchErr(() => updateUser(other, owner.id, { isActive: false })).code).toBe("LAST_OWNER");
 
     updateUser(ctx, cashier.id, { isActive: false });
+    expect(authenticateCashier(ctx, "1001", "8765")).toBeNull(); // pasif kasiyer giremez
     expect(catchErr(() => updateUser(ctx, cashier.id, { isActive: true })).code).toBe("PIN_REQUIRED");
-    expect(updateUser(ctx, cashier.id, { isActive: true, pin: "2468" }).isActive).toBe(true);
+    // PIN/şifre artık bu yolla değişmez (e-posta onaylı akış: tests/integration/email.test.ts)
+    expect(catchErr(() => updateUser(ctx, cashier.id, { pin: "2468" } as never)).status).toBe(400);
   });
 
-  it("kendi şifresini değiştirir (mevcut şifre doğrulanır); bilgisayardan sıfırlanabilir", () => {
-    expect(catchErr(() => changeOwnPassword(ctx, { currentPassword: "yanlis", newPassword: "yeni-sifre-1", newPasswordConfirm: "yeni-sifre-1" })).code).toBe(
-      "WRONG_PASSWORD",
-    );
-    expect(catchErr(() => changeOwnPassword(ctx, { currentPassword: TEST_OWNER.password, newPassword: "yeni-sifre-1", newPasswordConfirm: "farkli" })).status).toBe(400);
-    changeOwnPassword(ctx, { currentPassword: TEST_OWNER.password, newPassword: "yeni-sifre-1", newPasswordConfirm: "yeni-sifre-1" });
-    expect(authenticateOwner(ctx, TEST_OWNER.username, TEST_OWNER.password)).toBeNull();
-    expect(authenticateOwner(ctx, TEST_OWNER.username, "yeni-sifre-1")).not.toBeNull();
+  it("yönetici şifresi bilgisayardan (komut satırı) sıfırlanabilir", () => {
     resetOwnerPassword(env.ctx, TEST_OWNER.username, "kurtarma-sifre-9");
+    expect(authenticateOwner(ctx, TEST_OWNER.username, TEST_OWNER.password)).toBeNull();
     expect(authenticateOwner(ctx, TEST_OWNER.username, "kurtarma-sifre-9")).not.toBeNull();
   });
 

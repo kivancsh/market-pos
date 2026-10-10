@@ -1,13 +1,10 @@
-import { apiRoute, readJson } from "@/server/http/api";
-import { createFirstOwner, hasOwner } from "@/server/services/users";
-import { startSession } from "@/server/auth/startSession";
+import { apiRoute } from "@/server/http/api";
+import { getMailStatus } from "@/server/mail";
+import { hasOwner } from "@/server/services/users";
 
-/** İlk kurulum durumu. */
-export const GET = apiRoute("public", ({ ctx }) => ({ needsSetup: !hasOwner(ctx) }));
-
-/** İlk yönetici hesabını oluşturur ve oturum açar (sadece hiç yönetici yokken). */
-export const POST = apiRoute("public", async ({ req, ctx, session }) => {
-  const user = createFirstOwner(ctx, (await readJson(req)) as never);
-  await startSession(session, user, ctx.now());
-  return { role: user.role, name: user.name };
+/** İlk kurulum durumu: yönetici var mı, e-posta gönderimi ayarlı mı. */
+export const GET = apiRoute("public", ({ ctx }) => {
+  const needsSetup = !hasOwner(ctx);
+  const mail = getMailStatus(ctx.db);
+  return { needsSetup, mail: needsSetup ? { configured: mail.configured, provider: mail.provider, user: mail.user } : undefined };
 });

@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { formatIstanbulDateTime } from "@/lib/businessDate";
 import { formatKurusPlain, formatTRY, parseTRYToKurus } from "@/lib/money";
 import { api, ApiError } from "@/client/api";
 import { Notice, type NoticeKind } from "@/client/components/Notice";
 import { beepError, beepSuccess } from "@/client/sound";
 import type { Settings } from "@/server/db/repositories/settings";
+import type { MailStatus } from "@/server/mail";
+import { errText } from "@/client/errors";
 import type { BackupInfo } from "@/server/services/backup";
 import type { ImportPreview, ImportResult } from "@/server/services/productImport";
 
@@ -24,7 +27,7 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint?: stri
   );
 }
 
-export function SettingsScreen({ initial }: { initial: Settings }) {
+export function SettingsScreen({ initial, initialMail }: { initial: Settings; initialMail: MailStatus }) {
   const [s, setS] = useState(initial);
   const [opening, setOpening] = useState(formatKurusPlain(initial.openingCashKurus));
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
@@ -140,6 +143,20 @@ export function SettingsScreen({ initial }: { initial: Settings }) {
           <p className="mt-1 text-xs text-slate-500">A4 etiket kağıdınızdaki etiket düzenine göre (ör. 3 × 8 = 24 etiket).</p>
         </section>
 
+        <section className="rounded-2xl bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold">Günlük rapor e-postası</h2>
+          <Toggle
+            label="Her gün rapor e-postası gönderilsin"
+            hint="Günü Kapat'ta hemen gider. Gün kapatılmazsa aşağıdaki saatte gönderilir (o saatte bilgisayar kapalıysa ertesi açılışta)."
+            checked={s.dailyReportEnabled}
+            onChange={(v) => set("dailyReportEnabled", v)}
+          />
+          <label className="mt-1 block text-sm font-medium text-slate-700">
+            Gün kapatılmazsa gönderim saati
+            <input type="time" value={s.dailyReportTime} onChange={(e) => set("dailyReportTime", e.target.value)} className={`${field} w-40`} data-testid="set-report-time" />
+          </label>
+        </section>
+
         <div className="flex items-end lg:col-span-2">
           <button type="submit" disabled={busy} className="h-12 w-full rounded-xl bg-emerald-600 text-lg font-bold text-white disabled:bg-slate-300 sm:w-auto sm:px-10" data-testid="save-settings">
             {busy ? "Kaydediliyor…" : "Ayarları kaydet"}
@@ -147,6 +164,7 @@ export function SettingsScreen({ initial }: { initial: Settings }) {
         </div>
       </form>
 
+      <MailSection initial={initialMail} />
       <ImportSection />
       <BackupSection />
     </main>
@@ -394,6 +412,141 @@ function BackupSection() {
             </li>
           ))}
         </ul>
+      )}
+    </section>
+  );
+}
+
+const PROVIDERS = [
+  { key: "gmail", label: "Gmail" },
+  { key: "outlook", label: "Outlook / Hotmail" },
+  { key: "icloud", label: "iCloud" },
+  { key: "yandex", label: "Yandex" },
+  { key: "custom", label: "Diğer (SMTP)" },
+] as const;
+
+/** E-posta gönderim hesabı: durum, değiştir, deneme e-postası, raporu şimdi gönder. */
+function MailSection({ initial }: { initial: MailStatus }) {
+  const [status, setStatus] = useState(initial);
+  const [editing, setEditing] = useState(!initial.configured);
+  const [provider, setProvider] = useState<(typeof PROVIDERS)[number]["key"]>((initial.provider as "gmail") ?? "gmail");
+  const [user, setUser] = useState(initial.user ?? "");
+  const [pass, setPass] = useState("");
+  const [host, setHost] = useState(initial.provider === "custom" ? (initial.host ?? "") : "");
+  const [port, setPort] = useState(String(initial.port ?? 465));
+  const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+
+  async function run(fn: () => Promise<string>) {
+    setBusy(true);
+    setNotice(null);
+    try {
+      setNotice({ kind: "success", text: await fn() });
+    } catch (e) {
+      setNotice({ kind: "error", text: errText(e, "İşlem yapılamadı.") });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const save = () =>
+    run(async () => {
+      const body: Record<string, unknown> = { provider, user, pass };
+      if (provider === "custom") {
+        body.host = host;
+        body.port = Number(port);
+      }
+      const r = await api<{ mail: MailStatus }>("/api/settings/mail", { method: "PUT", body });
+      setStatus(r.mail);
+      setEditing(false);
+      setPass("");
+      router.refresh(); // üstteki "e-posta ayarlanmamış" şeridi kalksın
+      return `Bağlandı: e-postalar ${r.mail.user} hesabından gönderilecek.`;
+    });
+  const test = () => run(async () => `Deneme e-postası gönderildi: ${(await api<{ to: string }>("/api/settings/mail/test", { body: {} })).to}`);
+  const sendReport = () =>
+    run(async () => `Bugünün raporu gönderildi: ${(await api<{ recipients: string[] }>("/api/reports/daily-email", { body: {} })).recipients.join(", ")}`);
+
+  return (
+    <section className="rounded-2xl bg-white p-4 shadow-sm" aria-label="E-posta">
+      <h2 className="text-lg font-semibold">E-posta gönderimi</h2>
+      <p className="mt-1 text-sm text-slate-600">Onay kodları ve günlük rapor bu hesaptan gönderilir. Alıcı, yöneticilerin Hesabım&apos;daki e-posta adresleridir.</p>
+      {notice && (
+        <div className="mt-2">
+          <Notice kind={notice.kind} onClose={() => setNotice(null)}>
+            {notice.text}
+          </Notice>
+        </div>
+      )}
+      {!editing && status.configured ? (
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <span className="flex-1 font-medium" data-testid="mail-status">
+            ✓ Bağlı: {status.user}
+          </span>
+          <button type="button" disabled={busy} onClick={() => void test()} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
+            Deneme e-postası gönder
+          </button>
+          <button type="button" disabled={busy} onClick={() => void sendReport()} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold" data-testid="send-report-now">
+            Bugünün raporunu şimdi gönder
+          </button>
+          <button type="button" disabled={busy} onClick={() => setEditing(true)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
+            Hesabı değiştir
+          </button>
+        </div>
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void save();
+          }}
+          className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          <label className="text-sm font-medium text-slate-700">
+            E-posta hizmeti
+            <select value={provider} onChange={(e) => setProvider(e.target.value as typeof provider)} className={field}>
+              {PROVIDERS.map((p) => (
+                <option key={p.key} value={p.key}>
+                  {p.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            E-posta adresi
+            <input type="email" autoCapitalize="none" value={user} onChange={(e) => setUser(e.target.value)} className={field} />
+          </label>
+          <label className="text-sm font-medium text-slate-700">
+            {provider === "gmail" ? "Uygulama şifresi (16 harf)" : "Şifre / uygulama şifresi"}
+            <input type="password" autoComplete="off" value={pass} onChange={(e) => setPass(e.target.value)} className={field} />
+          </label>
+          {provider === "custom" && (
+            <div className="flex gap-2">
+              <label className="flex-1 text-sm font-medium text-slate-700">
+                SMTP sunucusu
+                <input autoCapitalize="none" value={host} onChange={(e) => setHost(e.target.value)} className={field} />
+              </label>
+              <label className="w-24 text-sm font-medium text-slate-700">
+                Port
+                <input inputMode="numeric" value={port} onChange={(e) => setPort(e.target.value)} className={field} />
+              </label>
+            </div>
+          )}
+          <p className="text-xs text-slate-500 sm:col-span-2">
+            Gmail için normal şifre değil, Google hesabınızdan alınan <b>uygulama şifresi</b> gerekir (myaccount.google.com → Güvenlik → 2 Adımlı Doğrulama → Uygulama
+            şifreleri).
+          </p>
+          <div className="flex gap-2 sm:col-span-2">
+            {status.configured && (
+              <button type="button" onClick={() => setEditing(false)} className="h-11 rounded-xl border border-slate-300 px-5 font-semibold">
+                Vazgeç
+              </button>
+            )}
+            <button type="submit" disabled={busy || !user || !pass} className="h-11 rounded-xl bg-slate-900 px-5 font-bold text-white disabled:bg-slate-300">
+              {busy ? "Bağlanılıyor…" : "Bağlan ve kaydet"}
+            </button>
+          </div>
+        </form>
       )}
     </section>
   );

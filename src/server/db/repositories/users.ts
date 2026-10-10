@@ -6,6 +6,10 @@ export interface User {
   role: Role;
   name: string;
   username: string | null;
+  /** Yönetici e-postası (onay kodları, günlük rapor). */
+  email: string | null;
+  /** Kasiyer numarası (girişte No + PIN). */
+  cashierNo: number | null;
   isActive: boolean;
   sessionVersion: number;
   createdAt: string;
@@ -18,7 +22,8 @@ interface UserRaw extends Omit<User, "isActive"> {
   pinHash: string | null;
 }
 
-const SELECT = `SELECT id, role, name, username, password_hash AS passwordHash, pin_hash AS pinHash,
+const SELECT = `SELECT id, role, name, username, email, cashier_no AS cashierNo,
+                       password_hash AS passwordHash, pin_hash AS pinHash,
                        is_active AS isActive, session_version AS sessionVersion,
                        created_at AS createdAt, updated_at AS updatedAt
                   FROM users`;
@@ -29,6 +34,8 @@ const toUser = (r: UserRaw): User => ({
   role: r.role,
   name: r.name,
   username: r.username,
+  email: r.email,
+  cashierNo: r.cashierNo,
   isActive: r.isActive === 1,
   sessionVersion: r.sessionVersion,
   createdAt: r.createdAt,
@@ -52,6 +59,33 @@ export function findOwnerByUsername(db: DB, username: string): (User & { passwor
   return r && { ...toUser(r), passwordHash: r.passwordHash };
 }
 
+/** Kasiyer girişi için: numarası verilen aktif kasiyer (PIN hash'iyle). */
+export function findActiveCashierByNo(db: DB, cashierNo: number): (User & { pinHash: string }) | undefined {
+  const r = db.prepare(`${SELECT} WHERE role = 'cashier' AND is_active = 1 AND cashier_no = ?`).get(cashierNo) as
+    | UserRaw
+    | undefined;
+  return r && { ...toUser(r), pinHash: r.pinHash! };
+}
+
+/** Yeni kasiyere verilecek numara (1001'den başlar, hiç tekrar kullanılmaz). Transaction içinde çağrılmalı. */
+export function nextCashierNo(db: DB): number {
+  const r = db.prepare("SELECT MAX(cashier_no) AS m FROM users").get() as { m: number | null };
+  return Math.max(1000, r.m ?? 1000) + 1;
+}
+
+/** E-postası olan aktif yöneticiler (günlük rapor alıcıları). */
+export function listActiveOwnerEmails(db: DB): string[] {
+  return (
+    db.prepare("SELECT DISTINCT email FROM users WHERE role = 'owner' AND is_active = 1 AND email IS NOT NULL AND email <> ''").all() as {
+      email: string;
+    }[]
+  ).map((r) => r.email);
+}
+
+export function setUserEmail(db: DB, id: number, email: string, nowIso: string): void {
+  db.prepare("UPDATE users SET email = ?, updated_at = ? WHERE id = ?").run(email, nowIso, id);
+}
+
 export function listActiveCashiersWithPins(db: DB): (User & { pinHash: string })[] {
   return (db.prepare(`${SELECT} WHERE role = 'cashier' AND is_active = 1 ORDER BY id`).all() as UserRaw[]).map((r) => ({
     ...toUser(r),
@@ -73,16 +107,25 @@ export function usernameTaken(db: DB, username: string, exceptId?: number): bool
 
 export function insertUser(
   db: DB,
-  u: { role: Role; name: string; username: string | null; passwordHash: string | null; pinHash: string | null },
+  u: {
+    role: Role;
+    name: string;
+    username: string | null;
+    passwordHash: string | null;
+    pinHash: string | null;
+    email?: string | null;
+    cashierNo?: number | null;
+  },
   nowIso: string,
 ): number {
   return Number(
     db
       .prepare(
-        `INSERT INTO users (role, name, username, password_hash, pin_hash, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        `INSERT INTO users (role, name, username, password_hash, pin_hash, email, cashier_no, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       )
-      .run(u.role, u.name, u.username, u.passwordHash, u.pinHash, nowIso, nowIso).lastInsertRowid,
+      .run(u.role, u.name, u.username, u.passwordHash, u.pinHash, u.email ?? null, u.cashierNo ?? null, nowIso, nowIso)
+      .lastInsertRowid,
   );
 }
 

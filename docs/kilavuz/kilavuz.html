@@ -201,7 +201,7 @@
     <div><b>3</b>Mac'e kurulum</div>
     <div><b>4</b>Açmak ve kapatmak (Mac)</div>
     <div><b>5</b>Windows'a kurulum ve kullanım</div>
-    <div><b>6</b>İlk açılış: yönetici hesabı</div>
+    <div><b>6</b>İlk açılış: e-posta ve yönetici hesabı</div>
     <div><b>7</b>Giriş yapmak</div>
     <div><b>8</b>Ekranları tanıyalım</div>
     <div><b>9</b>Satış yapmak (Kasa)</div>
@@ -410,7 +410,7 @@
       <ol class="steps">
         <li>"Market Kasa başlatılıyor…" penceresi çıkar. İlk açılışta bir dakika kadar sürebilir; bekleyin.</li>
         <li>Hazır olunca Market Kasa <b>kendi penceresinde</b> açılır (tarayıcı gerekmez).</li>
-        <li><b>Yönetici hesabı oluşturma</b> ekranı gelir (Bölüm 6). Bundan sonrası Mac ile aynıdır.</li>
+        <li><b>Kurulum ekranı</b> gelir: e-posta hesabı, yönetici hesabı ve onay kodu (Bölüm 6). Bundan sonrası Mac ile aynıdır.</li>
       </ol>
     </div>
     <div class="wmock wdlg">
@@ -527,23 +527,66 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 
 <!-- ============================================================ 5 İLK AÇILIŞ -->
 <section class="flow-sec">
-  <h2 class="sec"><span class="num">6</span>İlk açılış: yönetici hesabı</h2>
+  <h2 class="sec"><span class="num">6</span>İlk açılış: e-posta ve yönetici hesabı</h2>
   <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
-  <p class="lead">Program ilk kez açıldığında, dükkân sahibinin hesabını oluşturmanızı ister. Bu ekran <b>sadece bir kez</b> gelir.</p>
-  <div class="fig" data-shot="kurulum" data-crop="300,0,680,800">
-    <ul class="legend">
-      <li><i>1</i><span><b>Adınız:</b> Ekranlarda ve kayıtlarda görünür.</span></li>
-      <li><i>2</i><span><b>Kullanıcı adı:</b> Girişte yazacağınız kısa ad. Türkçe harf ve boşluk kullanmayın (ör. <b>ayse</b>).</span></li>
-      <li><i>3</i><span><b>Şifre:</b> En az 8 karakter. Kolay tahmin edilmeyen bir şey seçin.</span></li>
-      <li><i>4</i><span><b>Şifre (tekrar):</b> Aynı şifreyi bir daha yazın.</span></li>
-      <li><i>5</i><span><span class="ui">Yönetici hesabını oluştur</span>'a basın.</span></li>
+  <p class="lead">Program ilk kez açıldığında 3 adımlık bir kurulum ekranı gelir: <b>① e-posta hesabını bağlamak ② yönetici bilgileri ③ e-postanıza gelen onay kodu</b>. Bu ekran <b>sadece bir kez</b> gelir.</p>
+  <p>Program; onay kodlarını ve her akşam <b>günün raporunu</b> e-postayla gönderir. Bunun için dükkânın bir e-posta hesabı gerekir. En kolayı <b>Gmail</b>'dir. Başlamadan önce Gmail'den bir <b>uygulama şifresi</b> alın:</p>
+  <ol class="steps">
+    <li>Telefonda ya da bilgisayarda <b>myaccount.google.com</b> adresine girin (dükkânın Gmail hesabıyla).</li>
+    <li><b>Güvenlik</b> → <b>2 Adımlı Doğrulama</b>'yı açın (kapalıysa).</li>
+    <li>Üstteki arama kutusuna <b>Uygulama şifreleri</b> yazın ve açın.</li>
+    <li>Ad olarak <b>Market Kasa</b> yazıp <span class="ui">Oluştur</span>'a basın. Çıkan <b>16 harfli şifreyi</b> bir kâğıda yazın.</li>
+  </ol>
+  <div class="box warn"><span class="t">Normal Gmail şifreniz burada çalışmaz</span><p>Google güvenlik için programlara ayrı "uygulama şifresi" verir. Bu şifreyi yalnızca Market Kasa'ya yazın; kimseyle paylaşmayın. Outlook/Hotmail, iCloud ve Yandex hesapları da seçilebilir.</p></div>
+
+  <div class="side">
+    <div>
+      <h3 style="margin-top:0">6.1 E-posta hesabını bağlamak</h3>
+      <div class="fig" data-shot="kurulum-eposta" data-crop="400,95,480,850">
+    <ul class="legend one">
+      <li><i>1</i><span><b>E-posta hizmeti:</b> Gmail (önerilen).</span></li>
+      <li><i>2</i><span>Dükkânın e-posta adresi (ör. <b>dukkan@gmail.com</b>).</span></li>
+      <li><i>3</i><span>Az önce aldığınız <b>16 harfli uygulama şifresi</b>. Boşluklar önemli değil.</span></li>
+      <li><i>4</i><span>Uygulama şifresinin nasıl alınacağı ekranda da yazar.</span></li>
+      <li><i>5</i><span><span class="ui">Bağlan ve devam et</span>. Program hesaba bağlanmayı hemen dener; olmazsa nedenini Türkçe söyler.</span></li>
     </ul>
   </div>
-  <div class="box warn"><span class="t">Şifrenizi bir kâğıda yazıp güvenli bir yerde saklayın</span><p>Unutursanız bilgisayardaki <b>Yönetici Şifresi Sıfırla</b> dosyasıyla yenisini belirleyebilirsiniz (Bölüm 21).</p></div>
+    </div>
+    <div>
+      <h3 style="margin-top:0">6.2 Yönetici bilgileri</h3>
+      <div class="fig" data-shot="kurulum" data-crop="400,110,480,830">
+    <ul class="legend one">
+      <li><i>1</i><span>E-postaların hangi hesaptan gideceği. Yanlışsa <span class="ui">Değiştir</span>.</span></li>
+      <li><i>2</i><span><b>Adınız:</b> Ekranlarda ve kayıtlarda görünür.</span></li>
+      <li><i>3</i><span><b>Kullanıcı adı:</b> Girişte yazacağınız kısa ad. Türkçe harf ve boşluk kullanmayın (ör. <b>ayse</b>).</span></li>
+      <li><i>4</i><span><b>E-posta adresiniz:</b> Onay kodları ve günlük rapor buraya gelir. Dükkânın adresi de olabilir, kendi adresiniz de.</span></li>
+      <li><i>5</i><span><b>Şifre:</b> En az 8 karakter. Kolay tahmin edilmeyen bir şey seçin.</span></li>
+      <li><i>6</i><span><b>Şifre (tekrar):</b> Aynı şifreyi bir daha yazın.</span></li>
+      <li><i>7</i><span><span class="ui">Onay kodu gönder</span>'e basın.</span></li>
+    </ul>
+  </div>
+    </div>
+  </div>
+
+  <h3>6.3 Onay kodunu girmek</h3>
+  <div class="side">
+    <div class="fig" data-shot="kurulum-kod" data-crop="400,235,480,580">
+      <ul class="legend one">
+        <li><i>1</i><span>E-postanıza gelen <b>6 haneli kodu</b> yazın.</span></li>
+        <li><i>2</i><span>Kod gelmediyse 60 saniye sonra <span class="ui">Kodu tekrar gönder</span>.</span></li>
+        <li><i>3</i><span><span class="ui">Yönetici hesabını oluştur</span>. Hesap <b>ancak kod doğruysa</b> oluşur.</span></li>
+      </ul>
+    </div>
+    <div>
+      <div class="box tip"><span class="t">E-posta gelmedi mi?</span><p>Birkaç saniye bekleyin, <b>Gereksiz / Spam</b> klasörüne de bakın. E-postanın konusu "<b>Market Kasa onay kodu: …</b>" şeklindedir.</p></div>
+      <div class="box tip"><span class="t">Kodun kuralları</span><p>Kod <b>10 dakika</b> geçerlidir ve bir kez kullanılır. <b>5 kez</b> yanlış yazılırsa iptal olur; yeni kod isteyin. Yeni kod istenince eskisi geçersiz olur.</p></div>
+      <div class="box warn"><span class="t">Şifrenizi bir yere not edin</span><p>Unutursanız giriş ekranındaki <span class="ui">Şifremi unuttum</span> ile e-postanıza kod gelir (Bölüm 7.3).</p></div>
+    </div>
+  </div>
 
   <h3>Sonra ne yapmalı?</h3>
   <p>Hesap oluşunca <b>Yönetim Paneli</b> açılır ve yeşil bir kutuda sırada ne olduğu yazar:</p>
-  <div class="fig" data-shot="yonetim-hosgeldin" data-only="1">
+  <div class="fig" data-shot="yonetim-hosgeldin" data-only="1" data-crop="0,0,1280,420">
     <ul class="legend one"><li><i>1</i><span>Bağlantılara tıklayarak sırayla: <b>kasiyer ekleyin</b> (Bölüm 21), <b>işletme adını girin</b> (Bölüm 23) ve <b>ürünlerinizi ekleyin</b> (Bölüm 10).</span></li></ul>
   </div>
 </section>
@@ -554,18 +597,20 @@ Devam etmek için bir tuşa basın . . .</pre></div>
   <div class="who"><span class="tag all">HERKES</span></div>
   <div class="side">
     <div>
-      <h3 style="margin-top:0">Kasiyer girişi (PIN)</h3>
+      <h3 style="margin-top:0">7.1 Kasiyer girişi (No + PIN)</h3>
       <div class="fig" data-shot="giris-kasiyer" data-crop="420,80,440,700">
         <ul class="legend one">
-          <li><i>1</i><span><span class="ui">Kasiyer</span> sekmesi seçili olsun.</span></li>
+          <li><i>1</i><span>Program <span class="ui">Kasiyer</span> sekmesiyle açılır.</span></li>
           <li><i>2</i><span>Yönetici iseniz bu sekmeye geçin.</span></li>
-          <li><i>3</i><span>PIN'inizi ekrandaki tuşlarla ya da klavyeyle girin. Her rakam bir nokta olarak görünür.</span></li>
-          <li><i>4</i><span><span class="ui">Giriş</span>'e basın (ya da <span class="key">Enter</span>).</span></li>
+          <li><i>3</i><span><b>Kasiyer No</b>'nuz (ör. <b>1001</b>). 4 rakamı yazınca imleç kendiliğinden PIN'e geçer. Program o bilgisayarda en son girilen numarayı hatırlar.</span></li>
+          <li><i>4</i><span><b>PIN</b>'iniz. Her rakam bir nokta olarak görünür.</span></li>
+          <li><i>5</i><span>Rakamları ekrandaki tuşlarla ya da klavyeyle girin.</span></li>
+          <li><i>6</i><span><span class="ui">Giriş</span>'e basın (ya da <span class="key">Enter</span>).</span></li>
         </ul>
       </div>
     </div>
     <div>
-      <h3 style="margin-top:0">Yönetici girişi</h3>
+      <h3 style="margin-top:0">7.2 Yönetici girişi</h3>
       <div class="fig" data-shot="giris-yonetici" data-crop="420,140,440,540">
         <ul class="legend one">
           <li><i>1</i><span><span class="ui">Yönetici</span> sekmesine tıklayın.</span></li>
@@ -580,7 +625,29 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <li>Kasiyer girince doğrudan <b>Kasa</b> ekranı, yönetici girince <b>Panel</b> açılır.</li>
     <li><b>5 kez yanlış</b> PIN ya da şifre girilirse giriş <b>5 dakika kilitlenir</b>. Bekleyip tekrar deneyin.</li>
     <li>İşiniz bitince sağ üstteki <span class="ui">Çıkış</span>'a basın. Özellikle kasiyer değişirken çıkış yapın; satışlar kimin adına yazılıyorsa o görünür.</li>
+    <li>Her kasiyerin <b>kendi numarası ve hesabı</b> vardır; satışlar o kasiyerin adına kaydedilir. Kasiyer No'yu ve PIN'i yönetici verir (Bölüm 21).</li>
   </ul>
+
+  <h3>7.3 Yönetici: Şifremi unuttum</h3>
+  <div class="side">
+    <div><ol class="steps">
+      <li>Giriş ekranında <span class="ui">Yönetici</span> → <span class="ui">Şifremi unuttum</span>.</li>
+      <li>Kullanıcı adınızı yazıp <span class="ui">Onay kodu gönder</span>'e basın.</li>
+      <li>Hesabınızdaki e-postaya gelen <b>6 haneli kodu</b> yazın.</li>
+      <li>Yeni şifreyi iki kez yazın, <span class="ui">Şifreyi değiştir</span>'e basın.</li>
+      <li>"Şifreniz değiştirildi" yazınca yeni şifrenizle girin.</li>
+    </ol>
+    <div class="box tip"><span class="t">E-postanıza ulaşamıyorsanız</span><p>Son çare kasa bilgisayarındaki <b>Yönetici Şifresi Sıfırla</b> (Bölüm 21.4).</p></div></div>
+    <div class="fig" data-shot="sifremi-unuttum" data-crop="430,35,420,780">
+      <ul class="legend one">
+        <li><i>1</i><span>E-postaya gelen kod.</span></li>
+        <li><i>2</i><span>Yeni şifre (en az 8 karakter).</span></li>
+        <li><i>3</i><span>Yeni şifre (tekrar).</span></li>
+        <li><i>4</i><span><span class="ui">Şifreyi değiştir</span>.</span></li>
+      </ul>
+    </div>
+  </div>
+  <p>Kasiyerler PIN'lerini kendileri değiştiremez; PIN'ini unutan kasiyer yöneticiye söyler.</p>
 </section>
 
 <!-- ============================================================ 7 EKRANLAR -->
@@ -980,7 +1047,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 
   <h2 class="sec" style="margin-top:6mm"><span class="num">18</span>Gün sonu (Günü kapat)</h2>
   <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
-  <p>Her akşam dükkânı kapatırken yapın. Kasadaki parayı kontrol eder ve <b>otomatik yedek</b> alır.</p>
+  <p>Her akşam dükkânı kapatırken yapın. Kasadaki parayı kontrol eder, <b>otomatik yedek</b> alır ve <b>günün raporunu</b> yöneticinin e-postasına gönderir.</p>
   <div class="side3">
     <div><ol class="steps">
       <li>Panel'de <span class="ui">Günü Kapat</span>'a basın.</li>
@@ -998,6 +1065,20 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     </div>
   </div>
   <div class="box warn"><span class="t">Gün kapanınca o güne satış ve iade yapılamaz</span><p>Unutulan bir satış varsa: Panel → <span class="ui">Günü yeniden aç</span> → gerekçe yazın (ör. "unutulan satış"). Mal girişi ve stok sayımı kapalı güne de yapılabilir.</p></div>
+
+  <h3>18.1 Günlük rapor e-postası</h3>
+  <div class="side">
+    <div>
+      <ul class="dots">
+        <li><b>Günü Kapat</b>'a basınca rapor hemen gider; pencerede "Günün raporu … adresine gönderildi" yazar.</li>
+        <li>Günü kapatmayı unutursanız rapor <b>Ayarlar'daki saatte</b> (varsayılan <b>23:30</b>) kendiliğinden gider. O saatte bilgisayar kapalıysa ertesi açılışta dünün raporu gönderilir.</li>
+        <li>Hiç satış ve iade olmayan günlerde rapor gönderilmez.</li>
+        <li>Raporda: ciro, brüt kâr, marj, nakit/kart, iadeler, kasa sayımı ve en çok satan ürünler. Ekinde <b>ürün kârlılığı Excel</b> dosyası vardır.</li>
+        <li>Rapor, e-posta adresi olan bütün yöneticilere gider. Ayarlar'dan kapatılabilir ya da saati değiştirilebilir (Bölüm 23.2).</li>
+      </ul>
+    </div>
+    <div class="fig" data-shot="rapor-eposta" data-maxh="150"><figcaption>Gelen raporun görünümü (örnek).</figcaption></div>
+  </div>
 </section>
 
 <!-- ============================================================ 18 RAPOR -->
@@ -1044,26 +1125,57 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 <section class="page">
   <h2 class="sec"><span class="num">21</span>Kasiyerler ve şifreler</h2>
   <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
+  <p class="lead">Şifreleri ve PIN'leri <b>sadece yönetici</b> değiştirir ya da sıfırlar (kasiyerlerinki dahil). Her değişiklikte yöneticinin e-postasına bir <b>onay kodu</b> gider; kod doğru girilmeden değişiklik yapılmaz.</p>
   <h3 style="margin-top:0">21.1 Kasiyer eklemek</h3>
   <p><b>Yönetim Paneli → Kullanıcılar</b></p>
   <div class="fig" data-shot="kullanici-ekle" data-crop="100,60,1080,330">
     <ul class="legend">
-      <li><i>1</i><span><b>Tür:</b> Kasiyer (ya da ikinci bir yönetici).</span></li>
+      <li><i>1</i><span><b>Tür:</b> Kasiyer (ya da ikinci bir yönetici; yöneticiye e-posta adresi de yazılır).</span></li>
       <li><i>2</i><span>Kasiyerin <b>adı</b>.</span></li>
       <li><i>3</i><span><b>PIN:</b> 4–8 rakam. Her kasiyerin PIN'i farklı olmalı.</span></li>
-      <li><i>4</i><span><span class="ui">Ekle</span>. PIN'i kasiyere söyleyin.</span></li>
+      <li><i>4</i><span><span class="ui">Ekle</span>.</span></li>
     </ul>
   </div>
-  <div class="fig" data-shot="kullanicilar" data-crop="100,60,1080,420">
+  <div class="fig" data-shot="kullanicilar" data-crop="100,60,1080,520">
     <ul class="legend">
-      <li><i>1</i><span>Bütün hesaplar.</span></li>
-      <li><i>2</i><span><span class="ui">PIN değiştir</span>: Kasiyer PIN'ini unutursa yenisini verin.</span></li>
-      <li><i>3</i><span><span class="ui">Pasife al</span>: İşten ayrılan kasiyer artık giremez. Eski satışlarında adı kalır.</span></li>
+      <li><i>1</i><span>Program kasiyere otomatik bir <b>Kasiyer No</b> verir (1001, 1002…). <b>Numarayı ve PIN'i kasiyere söyleyin</b>; girişte ikisini de yazacak.</span></li>
+      <li><i>2</i><span>Her kasiyerin numarası listede yazar. Numara bir daha başkasına verilmez.</span></li>
+      <li><i>3</i><span><span class="ui">PIN değiştir</span>: Kasiyer PIN'ini unutursa yenisini verin (21.2).</span></li>
+      <li><i>4</i><span><span class="ui">Pasife al</span>: İşten ayrılan kasiyer artık giremez. Eski satışlarında adı kalır. Tekrar aktif yaparken yeni PIN istenir.</span></li>
     </ul>
   </div>
-  <h3>21.2 Kendi şifrenizi değiştirmek</h3>
-  <p><b>Yönetim Paneli → Hesabım</b>: Adınızı, kullanıcı adınızı ve şifrenizi değiştirirsiniz. Şifre değişince önce mevcut şifrenizi yazmanız istenir.</p>
-  <h3>21.3 Yönetici şifresini unuttuysanız</h3>
+</section>
+
+<section class="flow-sec">
+  <h3 style="margin-top:0">21.2 PIN ya da şifre değiştirmek (e-posta onaylı)</h3>
+  <div class="side">
+    <div class="fig" data-shot="pin-degistir">
+      <ul class="legend one"><li><i>1</i><span><span class="ui">Onay kodu gönder</span>: Kod <b>sizin (yöneticinin)</b> e-postanıza gider.</span></li></ul>
+    </div>
+    <div class="fig" data-shot="pin-degistir-kod">
+      <ul class="legend one">
+        <li><i>1</i><span>E-postaya gelen 6 haneli kod.</span></li>
+        <li><i>2</i><span>Yeni PIN (yöneticide: yeni şifre).</span></li>
+        <li><i>3</i><span>Yeni PIN (tekrar).</span></li>
+        <li><i>4</i><span><span class="ui">Kaydet</span>. Kod yanlışsa kaç deneme hakkı kaldığı yazar.</span></li>
+      </ul>
+    </div>
+  </div>
+  <p>Aynı pencere başka bir yöneticinin şifresi için de kullanılır (Kullanıcılar → <span class="ui">Şifre değiştir</span>).</p>
+
+  <h3>21.3 Kendi şifreniz ve e-postanız</h3>
+  <div class="fig" data-shot="hesabim" data-crop="100,60,1080,600">
+      <ul class="legend one">
+        <li><i>1</i><span><span class="ui">Şifremi değiştir</span>: Aynı kodlu pencere açılır.</span></li>
+        <li><i>2</i><span>Kodların ve günlük raporun geldiği adres.</span></li>
+        <li><i>3</i><span>Yeni adres yazıp kod isteyin. Kod <b>yeni adrese</b> gider; doğru girilince adres değişir.</span></li>
+      </ul>
+    </div>
+  <p><b>Yönetim Paneli → Hesabım</b>: Adınızı ve kullanıcı adınızı da buradan değiştirirsiniz.</p>
+    <div class="box warn"><span class="t">Ekranın üstünde sarı şerit mi var?</span><p>"E-posta gönderimi ayarlanmamış" ya da "Hesabınızda e-posta adresi yok" yazıyorsa onay kodları ve rapor gönderilemez. Şeritteki bağlantıya tıklayıp eksik olanı tamamlayın.</p></div>
+
+  <h3>21.4 E-postaya ulaşılamıyorsa: Yönetici Şifresi Sıfırla</h3>
+  <p>Önce giriş ekranındaki <span class="ui">Şifremi unuttum</span>'u deneyin (Bölüm 7.3). E-postanıza da ulaşamıyorsanız, kasa bilgisayarının başında:</p>
   <ol class="steps">
     <li>Kasa bilgisayarında <b>market-pos</b> klasörünü açın.</li>
     <li><b>Yönetici Şifresi Sıfırla</b> dosyasına çift tıklayın.</li>
@@ -1114,6 +1226,24 @@ Devam etmek için bir tuşa basın . . .</pre></div>
   <div class="box warn"><span class="t">Okuyucu harfleri yanlış yazıyorsa (Türkçe klavye)</span><p>Rakamlar her zaman doğru gelir; programın ürettiği barkodlar da bu yüzden sadece rakamdır. Harf içeren barkodlar yanlış geliyorsa okuyucunun kılavuzundaki ayar barkoduyla klavye dilini <b>Turkish Q</b> yapın.</p></div>
 </section>
 
+<section class="flow-sec">
+  <h3 style="margin-top:0">23.2 Günlük rapor ve e-posta gönderimi</h3>
+  <div class="fig" data-shot="ayarlar-rapor" style="width:120mm;margin-left:auto;margin-right:auto">
+      <ul class="legend one">
+        <li><i>1</i><span>Günlük rapor e-postası açık/kapalı.</span></li>
+        <li><i>2</i><span>Gün kapatılmazsa raporun gideceği saat. Değiştirince <span class="ui">Ayarları kaydet</span>.</span></li>
+      </ul>
+    </div>
+  <div class="fig" data-shot="ayarlar-eposta">
+      <ul class="legend one">
+        <li><i>1</i><span>E-postaların gittiği hesap.</span></li>
+        <li><i>2</i><span>Kendinize bir deneme e-postası gönderin.</span></li>
+        <li><i>3</i><span>Bugünün raporunu hemen gönderin.</span></li>
+        <li><i>4</i><span>Gmail uygulama şifresi değiştiyse ya da başka hesaba geçecekseniz.</span></li>
+      </ul>
+    </div>
+</section>
+
 <!-- ============================================================ 23 YEDEK -->
 <section class="page">
   <h2 class="sec"><span class="num">24</span>Yedekleme ve geri yükleme</h2>
@@ -1149,9 +1279,13 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <tr><td>Windows: "Market Kasa başlatılamadı"</td><td>Bilgisayarı yeniden başlatıp tekrar deneyin. Olmazsa kurulum dosyasını yeniden çalıştırın (bilgiler silinmez). Sorun sürerse <b>%LOCALAPPDATA%\Market Kasa\logs</b> klasöründeki <b>server.log</b> dosyasını saklayın.</td></tr>
     <tr><td>Windows: telefondan açılmıyor</td><td>Güvenlik duvarı sorusunda "İptal" denmiş olabilir. Windows Güvenlik → Güvenlik duvarı → "Bir uygulamaya güvenlik duvarından izin ver" → <b>Node.js</b> için "Özel" ağ kutusunu işaretleyin.</td></tr>
     <tr><td>Simgeye tıkladım, açılmıyor</td><td>İlk açılışta ya da güncellemeden sonra 1–2 dakika sürebilir; bekleyin. "Başlatılamadı" derse <b>Kurulum</b> dosyasını bir kez daha çalıştırın.</td></tr>
-    <tr><td>PIN / şifre kabul edilmiyor</td><td>Kasiyer sekmesi mi, yönetici sekmesi mi seçili, kontrol edin. <b>Caps Lock</b> açık olmasın. 5 hatalı denemeden sonra 5 dakika bekleyin.</td></tr>
-    <tr><td>Yönetici şifremi unuttum</td><td><b>Yönetici Şifresi Sıfırla</b> dosyası (Bölüm 21.3).</td></tr>
-    <tr><td>Kasiyer PIN'ini unuttu</td><td>Yönetici: Kullanıcılar → <span class="ui">PIN değiştir</span>.</td></tr>
+    <tr><td>PIN / şifre kabul edilmiyor</td><td>Kasiyer sekmesi mi, yönetici sekmesi mi seçili, kontrol edin. Kasiyer: <b>Kasiyer No</b> doğru mu? <b>Caps Lock</b> açık olmasın. 5 hatalı denemeden sonra 5 dakika bekleyin.</td></tr>
+    <tr><td>Yönetici şifremi unuttum</td><td>Giriş ekranı → <span class="ui">Şifremi unuttum</span> (Bölüm 7.3). E-postaya ulaşamıyorsanız <b>Yönetici Şifresi Sıfırla</b> (Bölüm 21.4).</td></tr>
+    <tr><td>Kasiyer PIN'ini ya da numarasını unuttu</td><td>Numara: Kullanıcılar listesinde yazar. PIN: Yönetici, Kullanıcılar → <span class="ui">PIN değiştir</span> (e-posta kodlu).</td></tr>
+    <tr><td>Onay kodu e-postası gelmiyor</td><td>1–2 dakika bekleyin, <b>Gereksiz / Spam</b> klasörüne bakın. Ayarlar → E-posta gönderimi → <span class="ui">Deneme e-postası gönder</span> ile gönderimin çalıştığını kontrol edin. Hesabım'daki e-posta adresiniz doğru mu?</td></tr>
+    <tr><td>"Gmail girişi reddedildi"</td><td>Normal Gmail şifresi değil, <b>uygulama şifresi</b> gerekir (Bölüm 6). Google hesabınızın şifresini değiştirdiyseniz uygulama şifresi iptal olur; yenisini alıp Ayarlar → <span class="ui">Hesabı değiştir</span>'e yazın.</td></tr>
+    <tr><td>"Kod hatalı / süresi doldu"</td><td>Kod 10 dakika geçerlidir, 5 yanlışta iptal olur. <span class="ui">Kodu tekrar gönder</span> ile yeni kod isteyin; <b>en son gelen</b> e-postadaki kodu yazın.</td></tr>
+    <tr><td>Günlük rapor gelmedi</td><td>O gün satış yoksa gönderilmez. Ayarlar → Günlük rapor açık mı? <span class="ui">Bugünün raporunu şimdi gönder</span> ile deneyin.</td></tr>
     <tr><td>Okuyucu okuyor ama ürün sepete düşmüyor</td><td>Barkod alanına tıklayın, tekrar okutun. Olmazsa <b>Ayarlar → Okuyucu testi</b> (Bölüm 23.1).</td></tr>
     <tr><td>"Barkod hatalı okundu"</td><td>Barkod buruşuk ya da yarım okundu. Düz tutup tekrar okutun ya da rakamları elle yazın.</td></tr>
     <tr><td>"Yetersiz stok" yüzünden satış yapılamıyor</td><td>Sistemdeki stok yanlış. <b>Stok sayımı</b> ile düzeltin ya da gelen malı <b>Mal girişi</b>'ne girin.</td></tr>
@@ -1182,6 +1316,9 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <tr><td>Pasif ürün</td><td>Satışa kapatılmış ürün. Silinmez, kayıtları durur.</td></tr>
     <tr><td>Gün sonu</td><td>Günü kapatıp kasayı saymak; otomatik yedek alınır.</td></tr>
     <tr><td>Yedek</td><td>Bilgilerinizin kopyası. Sorun olursa ona geri dönülür.</td></tr>
+    <tr><td>Kasiyer No</td><td>Her kasiyere verilen 4 haneli numara (1001, 1002…). Girişte PIN'le birlikte yazılır.</td></tr>
+    <tr><td>Onay kodu</td><td>Yöneticinin e-postasına gelen 6 haneli, 10 dakika geçerli kod. Şifre değişikliklerini onaylar.</td></tr>
+    <tr><td>Uygulama şifresi</td><td>Gmail'in, programların e-posta göndermesi için verdiği 16 harfli ayrı şifre.</td></tr>
   </table>
 </section>
 
@@ -1190,14 +1327,14 @@ Devam etmek için bir tuşa basın . . .</pre></div>
   <h2 class="sec"><span class="num">27</span>Günlük kullanım özeti</h2>
   <p class="lead">Bu sayfayı yazdırıp kasanın yanına asabilirsiniz.</p>
   <div class="cheat">
-    <div><h4>☀ Sabah</h4><ul><li>Bilgisayarı açın.</li><li><b>Market Kasa</b> simgesine tıklayın.</li><li>Kasiyer PIN'iyle girer.</li></ul></div>
+    <div><h4>☀ Sabah</h4><ul><li>Bilgisayarı açın.</li><li><b>Market Kasa</b> simgesine tıklayın.</li><li>Kasiyer <b>No + PIN</b>'iyle girer.</li></ul></div>
     <div><h4>▥ Satış</h4><ul><li>Ürünleri okutun.</li><li><span class="key">F8</span> nakit / <span class="key">F9</span> kart.</li><li>Alınan parayı yazın → <span class="key">Enter</span>.</li><li>Para üstünü verin.</li></ul></div>
     <div><h4>⟲ İade / yanlış satış</h4><ul><li>Bugünkü yanlış satış: Panel → satış → <b>Satışı iptal et</b>.</li><li>Ürün geri geldi: <b>İade</b> → fiş no → <b>İade al</b>.</li></ul></div>
     <div><h4>▤ Mal gelince</h4><ul><li><b>Mal girişi</b>: okut → adet → alış fiyatı → kaydet.</li><li>Barkodsuz ürüne <b>etiket</b> basın.</li></ul></div>
-    <div><h4>☾ Akşam</h4><ul><li>Panel → <b>Günü Kapat</b>.</li><li>Kasadaki parayı sayıp yazın.</li><li>Fark varsa not düşün.</li></ul></div>
+    <div><h4>☾ Akşam</h4><ul><li>Panel → <b>Günü Kapat</b>.</li><li>Kasadaki parayı sayıp yazın.</li><li>Fark varsa not düşün.</li><li>Rapor e-postanıza gelir.</li></ul></div>
     <div><h4>⛁ Haftada bir</h4><ul><li><b>backups</b> klasörünü USB belleğe kopyalayın.</li><li>Raporlar → düşük marjlı ve satmayan ürünlere bakın.</li></ul></div>
     <div><h4>☏ Kısayollar</h4><ul><li><span class="key">F2</span> adet · <span class="key">Delete</span> satırı sil</li><li><span class="key">Esc</span> sepeti temizle</li><li><span class="key">⌘</span>+<span class="key">R</span> sayfayı yenile</li></ul></div>
-    <div><h4>! Sorun olursa</h4><ul><li>Sayfa açılmıyor → simgeye tıkla.</li><li>Şifre unutuldu → <b>Yönetici Şifresi Sıfırla</b>.</li><li>Diğerleri → Bölüm 25.</li></ul></div>
+    <div><h4>! Sorun olursa</h4><ul><li>Sayfa açılmıyor → simgeye tıkla.</li><li>Şifre unutuldu → <b>Şifremi unuttum</b> (e-posta kodu).</li><li>Diğerleri → Bölüm 25.</li></ul></div>
   </div>
   <div class="box danger" style="margin-top:6mm"><span class="t">Unutmayın</span><p>Bu program <b>iç takip</b> içindir. Yasal fişi yazar kasadan kesmeye devam edin.</p></div>
 </section>

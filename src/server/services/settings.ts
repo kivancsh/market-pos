@@ -17,6 +17,8 @@ export const updateSettingsSchema = z
     openingCashKurus: kurusSchema,
     labelCols: z.int().min(1).max(10),
     labelRows: z.int().min(1).max(20),
+    dailyReportEnabled: z.boolean(),
+    dailyReportTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Saati 23:30 gibi yazın."),
   })
   .partial()
   .strict();
@@ -32,6 +34,8 @@ const LABELS: Record<keyof Settings, string> = {
   openingCashKurus: "açılış kasası",
   labelCols: "etiket sütun",
   labelRows: "etiket satır",
+  dailyReportEnabled: "günlük rapor e-postası",
+  dailyReportTime: "günlük rapor saati",
 };
 
 export function updateSettings(ctx: Ctx, input: z.input<typeof updateSettingsSchema>): Settings {

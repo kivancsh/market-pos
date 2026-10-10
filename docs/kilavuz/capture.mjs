@@ -12,7 +12,8 @@ fs.mkdirSync(OUT, { recursive: true });
 const NOTES = {};
 const VP = { width: 1280, height: 800 };
 
-const browser = await chromium.launch();
+// --lang: saat kutusu gibi tarayıcı denetimleri Türkçe (24 saat) görünsün
+const browser = await chromium.launch({ args: ["--lang=tr-TR"] });
 const ctxOpts = { viewport: VP, deviceScaleFactor: 2, locale: "tr-TR", timezoneId: "Europe/Istanbul" };
 
 async function boxOf(page, target) {
@@ -57,16 +58,55 @@ function ean13(base12) {
   return base12 + ((10 - (s % 10)) % 10);
 }
 
+// Demo sunucu MAIL_DEV_DIR ile çalışır: e-postalar gönderilmez, bu klasöre JSON olarak yazılır.
+const MAIL_DIR = process.env.MAIL_DEV_DIR;
+if (!MAIL_DIR) throw new Error("MAIL_DEV_DIR ayarlı değil (sunucuyla aynı klasör olmalı).");
+
+/** sinceMs'ten sonra gelen en yeni e-posta (JSON: to, subject, html, ...). */
+async function lastMail(sinceMs, match = () => true) {
+  for (let i = 0; i < 60; i++) {
+    const files = fs.existsSync(MAIL_DIR)
+      ? fs.readdirSync(MAIL_DIR).filter((f) => f.endsWith(".json")).map((f) => path.join(MAIL_DIR, f))
+      : [];
+    const fresh = files.filter((f) => fs.statSync(f).mtimeMs >= sinceMs).sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+    for (const f of fresh) {
+      const m = JSON.parse(fs.readFileSync(f, "utf8"));
+      if (match(m)) return m;
+    }
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error("Beklenen e-posta gelmedi.");
+}
+const lastCode = async (sinceMs) => (await lastMail(sinceMs, (m) => /onay kodu: \d{6}/.test(m.subject))).subject.match(/(\d{6})/)[1];
+
 // ================================================================= 1. İlk kurulum
 const ctx = await browser.newContext(ctxOpts);
 const p = await ctx.newPage();
 await p.goto(`${BASE}/`);
 await p.waitForURL(/\/kurulum/);
+// ① e-posta gönderim hesabı (test modunda bağlantı denenmez; adres yalnızca görüntü için)
+await p.getByRole("button", { name: "Değiştir" }).click();
+await p.getByTestId("setup-mail-provider").selectOption("gmail");
+await p.getByTestId("setup-mail-user").fill("kosemarket.ornek@gmail.com");
+await p.getByTestId("setup-mail-pass").fill("abcd efgh ijkl mnop");
+await p.setViewportSize({ width: 1280, height: 1000 });
+// Test modunda "değiştirmeden devam et (test@…)" bağlantısı çıkar; gerçek ilk kurulumda yoktur.
+await p.getByRole("button", { name: /Değiştirmeden devam et/ }).evaluate((e) => (e.style.display = "none"));
+await shot(p, "kurulum-eposta", { notes: ['[data-testid="setup-mail-provider"]', '[data-testid="setup-mail-user"]', '[data-testid="setup-mail-pass"]', p.locator(".bg-sky-50").first(), '[data-testid="setup-submit"]'] });
+await p.getByTestId("setup-submit").click();
+// ② yönetici bilgileri
 await p.getByTestId("setup-name").fill("Ayşe Yılmaz");
 await p.getByTestId("setup-username").fill("ayse");
+await p.getByTestId("setup-email").fill("ayse.ornek@gmail.com");
 await p.getByTestId("setup-password").fill("demo-sifre-2026");
 await p.getByTestId("setup-password2").fill("demo-sifre-2026");
-await shot(p, "kurulum", { notes: ['[data-testid="setup-name"]', '[data-testid="setup-username"]', '[data-testid="setup-password"]', '[data-testid="setup-password2"]', '[data-testid="setup-submit"]'] });
+await shot(p, "kurulum", { notes: [p.locator(".bg-emerald-50").first(), '[data-testid="setup-name"]', '[data-testid="setup-username"]', '[data-testid="setup-email"]', '[data-testid="setup-password"]', '[data-testid="setup-password2"]', '[data-testid="setup-submit"]'] });
+// ③ e-postaya gelen kod
+let since = Date.now();
+await p.getByTestId("setup-submit").click();
+await p.getByTestId("code-input").fill(await lastCode(since));
+await shot(p, "kurulum-kod", { notes: ['[data-testid="code-input"]', '[data-testid="code-resend"]', '[data-testid="setup-submit"]'] });
+await p.setViewportSize(VP);
 await p.getByTestId("setup-submit").click();
 await p.waitForURL(/\/yonetim/);
 await p.request.patch(`${BASE}/api/settings`, { data: { businessName: "Köşe Market" } });
@@ -80,10 +120,23 @@ await p.getByTestId("user-pin").fill("2468");
 await shot(p, "kullanici-ekle", { notes: [p.locator("select").first(), '[data-testid="user-name"]', '[data-testid="user-pin"]', '[data-testid="user-add"]'] });
 await p.getByTestId("user-add").click();
 await p.getByTestId("user-list").getByText("Mehmet Kaya").waitFor();
-await shot(p, "kullanicilar", { notes: ['[data-testid="user-list"]', p.getByRole("button", { name: "PIN değiştir" }), p.getByRole("button", { name: "Pasife al" })] });
+await shot(p, "kullanicilar", { notes: [p.getByText(/Kasiyer No: 1001/).first(), p.getByTestId("user-list").getByText("1001", { exact: true }), p.getByRole("button", { name: "PIN değiştir" }), p.getByRole("button", { name: "Pasife al" })] });
+
+// PIN değiştirme: önce yöneticinin e-postasına kod
+await p.getByRole("button", { name: "PIN değiştir" }).click();
+await p.getByTestId("secret-send-code").waitFor();
+await shot(p, "pin-degistir", { clip: p.getByRole("dialog").locator("> div").first(), pad: 0, notes: ['[data-testid="secret-send-code"]'] });
+since = Date.now();
+await p.getByTestId("secret-send-code").click();
+await p.getByTestId("code-input").fill(await lastCode(since));
+await p.getByTestId("secret-new").fill("1357");
+await p.getByTestId("secret-confirm").fill("1357");
+await shot(p, "pin-degistir-kod", { clip: p.getByRole("dialog").locator("> div").first(), pad: 0, notes: ['[data-testid="code-input"]', '[data-testid="secret-new"]', '[data-testid="secret-confirm"]', '[data-testid="secret-save"]'] });
+await p.getByTestId("secret-save").click();
+await p.getByRole("dialog").waitFor({ state: "detached" });
 
 await p.goto(`${BASE}/yonetim/hesabim`);
-await shot(p, "hesabim");
+await shot(p, "hesabim", { notes: ['[data-testid="account-change-password"]', '[data-testid="account-email"]', '[data-testid="account-new-email"]'] });
 
 // ================================================================= 3. Yönetim paneli + menü
 await p.goto(`${BASE}/yonetim`);
@@ -95,10 +148,19 @@ await shot(p, "menu", { clip: { x: 0, y: 0, width: VP.width, height: 64 }, pad: 
 await p.getByRole("button", { name: "Çıkış" }).click();
 await p.waitForURL(/\/login/);
 await p.getByTestId("login-tab-cashier").click();
-await p.keyboard.press("2");
-await p.keyboard.press("4");
-await shot(p, "giris-kasiyer", { notes: ['[data-testid="login-tab-cashier"]', '[data-testid="login-tab-owner"]', p.getByRole("button", { name: "5", exact: true }), p.getByRole("button", { name: "Giriş", exact: true })] });
+for (const d of "100113") await p.keyboard.press(d); // No 1001 → imleç PIN'e geçer
+await shot(p, "giris-kasiyer", { notes: ['[data-testid="login-tab-cashier"]', '[data-testid="login-tab-owner"]', '[data-testid="login-cashier-no"]', '[data-testid="login-pin"]', p.getByRole("button", { name: "5", exact: true }), p.getByRole("button", { name: "Giriş", exact: true })] });
 await p.getByTestId("login-tab-owner").click();
+// Şifremi unuttum (kod gönderilir, şifre değiştirilmeden geri dönülür)
+await p.getByTestId("login-forgot").click();
+await p.getByTestId("forgot-username").fill("ayse");
+since = Date.now();
+await p.getByTestId("forgot-send").click();
+await p.getByTestId("code-input").fill(await lastCode(since));
+await p.getByTestId("forgot-new").fill("yeni-sifre-2026");
+await p.getByTestId("forgot-new2").fill("yeni-sifre-2026");
+await shot(p, "sifremi-unuttum", { notes: ['[data-testid="code-input"]', '[data-testid="forgot-new"]', '[data-testid="forgot-new2"]', '[data-testid="forgot-save"]'] });
+await p.getByRole("button", { name: /Girişe dön/ }).click();
 await p.getByTestId("login-username").fill("ayse");
 await p.getByTestId("login-password").fill("demo-sifre-2026");
 await shot(p, "giris-yonetici", { notes: ['[data-testid="login-tab-owner"]', '[data-testid="login-username"]', '[data-testid="login-password"]', '[data-testid="login-owner-submit"]'] });
@@ -293,9 +355,26 @@ await p.waitForTimeout(900);
 const sec = (txt) => p.locator("section").filter({ hasText: txt }).first();
 await shot(p, "ayarlar-isletme", { clip: sec("İşletme ve kasa"), pad: 8 });
 await shot(p, "ayarlar-okuyucu", { clip: sec("Barkod okuyucu ve ses"), pad: 8 });
+await shot(p, "ayarlar-rapor", { clip: sec("Günlük rapor e-postası"), pad: 8, notes: [sec("Günlük rapor e-postası").locator('input[type="checkbox"]'), '[data-testid="set-report-time"]'] });
+since = Date.now();
+await p.getByTestId("send-report-now").click();
+await p.getByText(/Bugünün raporu gönderildi/).waitFor();
+await shot(p, "ayarlar-eposta", { clip: sec("E-posta gönderimi"), pad: 8, notes: ['[data-testid="mail-status"]', p.getByRole("button", { name: "Deneme e-postası gönder" }), '[data-testid="send-report-now"]', p.getByRole("button", { name: "Hesabı değiştir" })] });
 await shot(p, "ayarlar-ice-aktar", { clip: sec("Excel'den içe aktar"), pad: 8 });
 await shot(p, "ayarlar-yedek", { clip: sec("Yedekler"), pad: 8 });
 await p.setViewportSize(VP);
+
+// Gelen günlük rapor e-postasının görünümü
+{
+  const mail = await lastMail(since, (m) => /günlük rapor/.test(m.subject));
+  const mp = await ctx.newPage();
+  await mp.setViewportSize({ width: 760, height: 200 });
+  await mp.setContent(mail.html, { waitUntil: "load" });
+  const h = await mp.evaluate(() => document.body.scrollHeight);
+  await mp.setViewportSize({ width: 760, height: Math.min(h, 2400) });
+  await shot(mp, "rapor-eposta");
+  await mp.close();
+}
 
 // ================================================================= 12. Telefon
 const phone = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "tr-TR", timezoneId: "Europe/Istanbul", storageState: await ctx.storageState() });
@@ -310,7 +389,8 @@ const cctx = await browser.newContext(ctxOpts);
 const c = await cctx.newPage();
 await c.goto(`${BASE}/login`);
 await c.getByTestId("login-tab-cashier").click();
-for (const d of "2468") await c.keyboard.press(d);
+for (const d of "1001") await c.keyboard.press(d);
+for (const d of "1357") await c.keyboard.press(d); // PIN, kılavuzda e-posta koduyla değiştirildi
 await c.keyboard.press("Enter");
 await c.waitForURL(/\/kasa/);
 await c.getByTestId("barcode-input").waitFor();

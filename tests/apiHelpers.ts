@@ -2,10 +2,11 @@ import { sealData } from "iron-session";
 import { getSessionSecret } from "@/server/auth/secret";
 import { SESSION_COOKIE, SESSION_TTL_SECONDS } from "@/server/auth/session";
 import type { User } from "@/server/db/repositories/users";
+import { setTestMailSender, type MailMessage } from "@/server/mail";
 import { createFirstOwner, createUser } from "@/server/services/users";
 import type { TestEnv } from "./helpers";
 
-export const TEST_OWNER = { name: "Ayşe Yönetici", username: "yonetici", password: "gizli-sifre-123" };
+export const TEST_OWNER = { name: "Ayşe Yönetici", username: "yonetici", password: "gizli-sifre-123", email: "yonetici@test.local" };
 export const TEST_CASHIER = { name: "Mehmet Kasiyer", pin: "8765" };
 
 const cache = new WeakMap<TestEnv, { owner: User; cashier: User }>();
@@ -34,4 +35,19 @@ export async function cookieForUser(user: User): Promise<string> {
 export async function sessionCookie(env: TestEnv, role: "owner" | "cashier"): Promise<string> {
   const u = ensureUsers(env);
   return cookieForUser(role === "owner" ? u.owner : u.cashier);
+}
+
+/** Gönderilen e-postaları yakalar (gerçek gönderim yapılmaz). */
+export function captureMail(): { sent: MailMessage[]; lastCode: () => string; stop: () => void } {
+  const sent: MailMessage[] = [];
+  setTestMailSender({ send: async (m) => void sent.push(m) });
+  return {
+    sent,
+    lastCode: () => {
+      const m = /(\d{6})/.exec(sent.at(-1)?.subject ?? "");
+      if (!m) throw new Error("e-postada kod yok");
+      return m[1]!;
+    },
+    stop: () => setTestMailSender(null),
+  };
 }

@@ -8,7 +8,11 @@ import { authenticateCashier, authenticateOwner, hasOwner } from "@/server/servi
 import { parseInput, z } from "@/server/validation/zod";
 
 const schema = z.discriminatedUnion("mode", [
-  z.object({ mode: z.literal("cashier"), pin: z.string().trim().min(1).max(16) }),
+  z.object({
+    mode: z.literal("cashier"),
+    cashierNo: z.string().trim().min(1, "Kasiyer No'nuzu girin.").max(8),
+    pin: z.string().trim().min(1, "PIN'inizi girin.").max(16),
+  }),
   z.object({ mode: z.literal("owner"), username: z.string().trim().min(1).max(64), password: z.string().min(1).max(128) }),
 ]);
 
@@ -27,15 +31,15 @@ export const POST = apiRoute("public", async ({ req, ctx, session }) => {
   const remaining = lockRemainingMs(key, now.getTime());
   if (remaining > 0) throw lockedError(remaining);
 
-  const user = data.mode === "owner" ? authenticateOwner(ctx, data.username, data.password) : authenticateCashier(ctx, data.pin);
+  const user = data.mode === "owner" ? authenticateOwner(ctx, data.username, data.password) : authenticateCashier(ctx, data.cashierNo, data.pin);
   if (!user) {
     const r = recordFailure(key, now.getTime());
-    const who = data.mode === "owner" ? `yönetici "${data.username}"` : "kasiyer PIN";
+    const who = data.mode === "owner" ? `yönetici "${data.username}"` : `Kasiyer No ${data.cashierNo}`;
     ctx.db.transaction(() => audit(ctx, "auth.login_failed", `Hatalı giriş denemesi (${who})`)).immediate();
     if (r.locked) throw lockedError(5 * 60_000);
     throw new AppError(
       "WRONG_CREDENTIALS",
-      `${data.mode === "owner" ? "Kullanıcı adı veya şifre" : "PIN"} hatalı. Kalan deneme: ${r.remainingAttempts}`,
+      `${data.mode === "owner" ? "Kullanıcı adı veya şifre" : "Kasiyer No veya PIN"} hatalı. Kalan deneme: ${r.remainingAttempts}`,
       401,
       { remainingAttempts: r.remainingAttempts },
     );

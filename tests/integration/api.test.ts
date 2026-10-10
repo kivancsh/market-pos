@@ -1,4 +1,4 @@
-import { afterAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as barcodeRoute from "@/app/api/barcodes/[code]/route";
 import * as catalogRoute from "@/app/api/catalog/route";
 import * as loginRoute from "@/app/api/auth/login/route";
@@ -12,24 +12,31 @@ import * as voidRoute from "@/app/api/sales/[id]/void/route";
 import * as salesRoute from "@/app/api/sales/route";
 import * as settingsRoute from "@/app/api/settings/route";
 import * as setupRoute from "@/app/api/setup/route";
+import * as setupStartRoute from "@/app/api/setup/start/route";
+import * as setupVerifyRoute from "@/app/api/setup/verify/route";
+import * as secretStartRoute from "@/app/api/users/[id]/secret/start/route";
+import * as secretVerifyRoute from "@/app/api/users/[id]/secret/verify/route";
 import * as adjustRoute from "@/app/api/stock/adjust/route";
 import * as todayRoute from "@/app/api/today-stats/route";
 import { resetLimiterForTests } from "@/server/auth/loginLimiter";
 import { SESSION_COOKIE } from "@/server/auth/session";
 import { setTestCtxFactory } from "@/server/http/api";
 import { updateUser } from "@/server/services/users";
-import { TEST_CASHIER, TEST_OWNER, cookieForUser, ensureUsers, sessionCookie } from "../apiHelpers";
+import { TEST_CASHIER, TEST_OWNER, captureMail, cookieForUser, ensureUsers, sessionCookie } from "../apiHelpers";
 import { createEnv, expectIntegrity, seedSample, uuid, type TestEnv } from "../helpers";
 
 let env: TestEnv;
 let p: ReturnType<typeof seedSample>;
 
+let mail: ReturnType<typeof captureMail>;
 beforeEach(() => {
   env = createEnv();
   p = seedSample(env);
   setTestCtxFactory(() => env.ctx);
   resetLimiterForTests();
+  mail = captureMail();
 });
+afterEach(() => mail.stop());
 afterAll(() => setTestCtxFactory(undefined));
 
 function cookieFor(role: "owner" | "cashier"): Promise<string> {
@@ -50,25 +57,44 @@ function req(path: string, opts: { method?: string; body?: unknown; cookie?: str
 const params = <T>(v: T) => ({ params: Promise.resolve(v) });
 const json = async (r: Response) => (await r.json()) as Record<string, unknown>;
 const ownerLogin = (password = TEST_OWNER.password) => ({ mode: "owner", username: TEST_OWNER.username, password });
-const cashierLogin = (pin = TEST_CASHIER.pin) => ({ mode: "cashier", pin });
+const cashierLogin = (pin = TEST_CASHIER.pin, cashierNo = "1001") => ({ mode: "cashier", cashierNo, pin });
 
-describe("ilk kurulum", () => {
-  it("hiç yönetici yokken: giriş 409 (kurulum gerekli), kurulum ilk yöneticiyi oluşturup oturum açar", async () => {
-    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: true });
-    const login = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }));
-    expect(login.status).toBe(409);
+describe("ilk kurulum (e-posta onaylı)", () => {
+  it("giriş 409; bilgiler → e-postaya kod → doğru kodla yönetici oluşur ve oturum açılır; ikinci kurulum reddedilir", async () => {
+    expect(await json(await setupRoute.GET(req("/api/setup")))).toMatchObject({ needsSetup: true, mail: { configured: true } });
+    expect((await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }))).status).toBe(409);
 
-    const bad = await setupRoute.POST(req("/api/setup", { body: { name: "A", username: "ay", password: "kisa", passwordConfirm: "kisa" } }));
+    const bad = await setupStartRoute.POST(req("/api/setup/start", { body: { name: "A", username: "ay", email: "x@y.com", password: "kisa", passwordConfirm: "kisa" } }));
     expect(bad.status).toBe(400);
-    const r = await setupRoute.POST(
-      req("/api/setup", { body: { ...TEST_OWNER, passwordConfirm: TEST_OWNER.password } }),
-    );
-    expect(r.status).toBe(200);
-    expect(r.headers.get("set-cookie")).toContain(`${SESSION_COOKIE}=`);
-    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: false });
+    const noMail = await setupStartRoute.POST(req("/api/setup/start", { body: { ...TEST_OWNER, email: "gecersiz", passwordConfirm: TEST_OWNER.password } }));
+    expect(noMail.status).toBe(400);
+    expect(mail.sent).toHaveLength(0);
 
-    // ikinci kurulum reddedilir (biri sonradan yönetici olamaz)
-    const again = await setupRoute.POST(req("/api/setup", { body: { name: "Kötü", username: "kotu", password: "baska-sifre-1", passwordConfirm: "baska-sifre-1" } }));
+    const start = await setupStartRoute.POST(req("/api/setup/start", { body: { ...TEST_OWNER, passwordConfirm: TEST_OWNER.password } }));
+    expect(start.status).toBe(200);
+    const ch = (await json(start)) as { token: string; emailMasked: string };
+    expect(ch.emailMasked).toBe("y******@test.local");
+    expect(mail.sent).toHaveLength(1);
+    expect(mail.sent[0]!.to).toBe(TEST_OWNER.email);
+    expect(mail.sent[0]!.text).toContain("Yönetici hesabı oluşturma");
+    // şifre e-postada ve veritabanında açık metin olarak durmaz
+    expect(JSON.stringify(mail.sent[0])).not.toContain(TEST_OWNER.password);
+    expect(JSON.stringify(env.db.prepare("SELECT payload_json FROM verification_codes").all())).not.toContain(TEST_OWNER.password);
+
+    const wrong = await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: "000000" } }));
+    expect(wrong.status).toBe(400);
+    expect(await setupRoute.GET(req("/api/setup")).then(json)).toMatchObject({ needsSetup: true });
+
+    const ok = await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: mail.lastCode() } }));
+    expect(ok.status).toBe(200);
+    expect(ok.headers.get("set-cookie")).toContain(`${SESSION_COOKIE}=`);
+    expect(await json(await setupRoute.GET(req("/api/setup")))).toEqual({ needsSetup: false });
+    const owner = env.db.prepare("SELECT email FROM users WHERE role = 'owner'").get() as { email: string };
+    expect(owner.email).toBe(TEST_OWNER.email);
+
+    // aynı kod ikinci kez kullanılamaz; ikinci kurulum reddedilir
+    expect((await setupVerifyRoute.POST(req("/api/setup/verify", { body: { token: ch.token, code: mail.lastCode() } }))).status).toBe(400);
+    const again = await setupStartRoute.POST(req("/api/setup/start", { body: { name: "Kötü", username: "kotu", email: "k@k.com", password: "baska-sifre-1", passwordConfirm: "baska-sifre-1" } }));
     expect(again.status).toBe(403);
   });
 });
@@ -76,7 +102,7 @@ describe("ilk kurulum", () => {
 describe("giriş", () => {
   beforeEach(() => ensureUsers(env));
 
-  it("yönetici: kullanıcı adı + şifre; kasiyer: PIN. HttpOnly çerez yazılır", async () => {
+  it("yönetici: kullanıcı adı + şifre; kasiyer: Kasiyer No + PIN. HttpOnly çerez yazılır", async () => {
     const r = await loginRoute.POST(req("/api/auth/login", { body: ownerLogin() }));
     expect(r.status).toBe(200);
     expect(await json(r)).toEqual({ role: "owner", name: TEST_OWNER.name });
@@ -86,6 +112,8 @@ describe("giriş", () => {
 
     const r2 = await loginRoute.POST(req("/api/auth/login", { body: cashierLogin() }));
     expect(await json(r2)).toEqual({ role: "cashier", name: TEST_CASHIER.name });
+    // doğru PIN ama yanlış Kasiyer No → giremez
+    expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin(TEST_CASHIER.pin, "1002") }))).status).toBe(401);
 
     // kullanıcı adı büyük/küçük harf duyarsız
     const r3 = await loginRoute.POST(req("/api/auth/login", { body: { ...ownerLogin(), username: "YONETICI" } }));
@@ -120,7 +148,14 @@ describe("giriş", () => {
     const oldCashierCookie = await cookieForUser(cashier);
     const ownerCtx = { ...env.ctx, actor: { userId: owner.id, name: owner.name, role: "owner" as const } };
     expect((await catalogRoute.GET(req("/api/catalog", { cookie: oldCashierCookie }))).status).toBe(200);
-    updateUser(ownerCtx, cashier.id, { pin: "5555" });
+    const ownerCookie = await cookieForUser(owner);
+    const st = await secretStartRoute.POST(req(`/api/users/${cashier.id}/secret/start`, { body: {}, cookie: ownerCookie }), params({ id: String(cashier.id) }));
+    const { token } = (await json(st)) as { token: string };
+    const ver = await secretVerifyRoute.POST(
+      req(`/api/users/${cashier.id}/secret/verify`, { body: { token, code: mail.lastCode(), secret: "5555", secretConfirm: "5555" }, cookie: ownerCookie }),
+      params({ id: String(cashier.id) }),
+    );
+    expect(ver.status).toBe(200);
     expect((await catalogRoute.GET(req("/api/catalog", { cookie: oldCashierCookie }))).status).toBe(401);
     expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin() }))).status).toBe(401);
     expect((await loginRoute.POST(req("/api/auth/login", { body: cashierLogin("5555") }))).status).toBe(200);

@@ -11,6 +11,10 @@ export interface Settings {
   openingCashKurus: number;
   labelCols: number;
   labelRows: number;
+  /** Günlük rapor e-postası (Günü Kapat'ta ve gün kapatılmazsa bu saatte) */
+  dailyReportEnabled: boolean;
+  /** "HH:MM", İstanbul saati */
+  dailyReportTime: string;
 }
 
 export const SETTING_KEYS = {
@@ -24,6 +28,8 @@ export const SETTING_KEYS = {
   openingCashKurus: "opening_cash_kurus",
   labelCols: "label_cols",
   labelRows: "label_rows",
+  dailyReportEnabled: "daily_report_enabled",
+  dailyReportTime: "daily_report_time",
 } as const satisfies Record<keyof Settings, string>;
 
 const INTERNAL_BARCODE_SEQ = "internal_barcode_seq";
@@ -51,6 +57,10 @@ export function getSettings(db: DB): Settings {
     openingCashKurus: toInt(m.get(SETTING_KEYS.openingCashKurus), 0),
     labelCols: toInt(m.get(SETTING_KEYS.labelCols), 3),
     labelRows: toInt(m.get(SETTING_KEYS.labelRows), 8),
+    dailyReportEnabled: m.get(SETTING_KEYS.dailyReportEnabled) !== "false",
+    dailyReportTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(m.get(SETTING_KEYS.dailyReportTime) ?? "")
+      ? m.get(SETTING_KEYS.dailyReportTime)!
+      : "23:30",
   };
 }
 

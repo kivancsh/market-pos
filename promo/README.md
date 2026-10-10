@@ -27,9 +27,10 @@ W=/tmp/promo-work; mkdir -p $W
 # 1) Demo veritabanı + hesaplar + sunucu (gerçek veriden ayrı)
 export DB_PATH=data/promo/store.db BACKUP_DIR=data/promo/backups
 npx tsx scripts/seed.ts
-npx tsx scripts/users-cli.ts create-owner ayse demo-sifre-2026 Ayşe Yılmaz
-npx tsx scripts/users-cli.ts create-cashier "Mehmet Kaya" 2468
-SESSION_SECRET=promo-only-secret-0123456789abcdef0123456789 node node_modules/next/dist/bin/next start -p 3200 &
+npx tsx scripts/users-cli.ts create-owner ayse demo-sifre-2026 --email=ayse.ornek@gmail.com Ayşe Yılmaz
+npx tsx scripts/users-cli.ts create-cashier "Mehmet Kaya" 2468   # Kasiyer No 1001
+# MAIL_DEV_DIR: e-posta gönderimi test modunda (sarı "e-posta ayarlanmamış" uyarısı çıkmasın)
+SESSION_SECRET=promo-only-secret-0123456789abcdef0123456789 MAIL_DEV_DIR=data/promo/mail MARKET_KASA_NO_SCHEDULER=1 node node_modules/next/dist/bin/next start -p 3200 &
 # 2) Ekranlar (PROMO_DAY: panelde gösterilecek dolu bir gün)
 PROMO_DAY=2026-10-09 node promo/capture.mjs $W/shots
 # 3) Müzik, kareler, video

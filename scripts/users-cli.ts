@@ -2,8 +2,8 @@
  * Kullanıcı hesapları için bilgisayardan (Terminal) yapılan işlemler.
  *
  *   npm run users -- reset-password                        → yönetici şifresini sıfırla (sorarak, şifre ekranda görünmez)
- *   npm run users -- create-owner <kullanıcıAdı> <şifre> [ad] → yönetici ekle (ilk kurulum dahil)
- *   npm run users -- create-cashier <ad> <pin>               → kasiyer ekle
+ *   npm run users -- create-owner <kullanıcıAdı> <şifre> [--email=adres] [ad] → yönetici ekle (ilk kurulum dahil)
+ *   npm run users -- create-cashier <ad> <pin>               → kasiyer ekle (Kasiyer No'su yazılır)
  *   npm run users -- list                                    → hesapları listele
  *
  * Şifreyi unutan yönetici bu dosyayla (veya "Yönetici Şifresi Sıfırla" kısayoluyla) yeni şifre belirler.
@@ -88,7 +88,9 @@ async function resetPassword(ctx: Ctx) {
 }
 
 async function main() {
-  const [cmd, ...args] = process.argv.slice(2);
+  const [cmd, ...rawArgs] = process.argv.slice(2);
+  const emailArg = rawArgs.find((a) => a.startsWith("--email="))?.slice("--email=".length) || null;
+  const args = rawArgs.filter((a) => !a.startsWith("--email="));
   const db = openDatabase(resolveDbPath());
   const ctx: Ctx = { db, now: () => new Date() };
   try {
@@ -99,25 +101,27 @@ async function main() {
       case "create-owner": {
         const [username = "", password = "", ...nameParts] = args;
         const name = nameParts.join(" ") || "Yönetici";
+        if (hasOwner(ctx) && !emailArg) throw new AppError("EMAIL_REQUIRED", "Yeni yönetici için --email=adres gerekli.", 400);
         const u = hasOwner(ctx)
-          ? createUser(ctx, { role: "owner", name, username, password })
-          : createFirstOwner(ctx, { name, username, password, passwordConfirm: password });
-        console.log(`✅ Yönetici eklendi: ${u.name} (${u.username})`);
+          ? createUser(ctx, { role: "owner", name, username, password, email: emailArg! })
+          : createFirstOwner(ctx, { name, username, password, passwordConfirm: password, email: emailArg });
+        console.log(`✅ Yönetici eklendi: ${u.name} (${u.username})${u.email ? `, ${u.email}` : ""}`);
         break;
       }
       case "create-cashier": {
         const [name = "", pin = ""] = args;
         const u = createUser(ctx, { role: "cashier", name, pin });
-        console.log(`✅ Kasiyer eklendi: ${u.name}`);
+        console.log(`✅ Kasiyer eklendi: ${u.name} — Kasiyer No: ${u.cashierNo}`);
         break;
       }
       case "list":
         for (const u of listUsers(db)) {
-          console.log(`${u.id}\t${u.role === "owner" ? "yönetici" : "kasiyer"}\t${u.isActive ? "aktif" : "pasif"}\t${u.name}${u.username ? ` (${u.username})` : ""}`);
+          const ident = u.role === "owner" ? `${u.username}${u.email ? `, ${u.email}` : ""}` : `Kasiyer No ${u.cashierNo}`;
+          console.log(`${u.id}\t${u.role === "owner" ? "yönetici" : "kasiyer"}\t${u.isActive ? "aktif" : "pasif"}\t${u.name} (${ident})`);
         }
         break;
       default:
-        console.log("Kullanım: npm run users -- reset-password | create-owner <kullanıcıAdı> <şifre> [ad] | create-cashier <ad> <pin> | list");
+        console.log("Kullanım: npm run users -- reset-password | create-owner <kullanıcıAdı> <şifre> [--email=adres] [ad] | create-cashier <ad> <pin> | list");
         process.exitCode = 1;
     }
   } catch (e) {

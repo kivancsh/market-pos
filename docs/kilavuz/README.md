@@ -1,6 +1,6 @@
 # Kullanma kılavuzu (kaynak dosyalar)
 
-Hazır kılavuz: [`docs/Market Kasa Kullanma Kılavuzu.pdf`](../Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 50 sayfa, resimli; Mac ve Windows kurulumu dahil).
+Hazır kılavuz: [`docs/Market Kasa Kullanma Kılavuzu.pdf`](../Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 55 sayfa, resimli; Mac ve Windows kurulumu, e-posta onay kodları ve günlük rapor dahil).
 
 Bu klasör, PDF'i yeniden üretmek içindir (ör. ekranlar değişince):
 
@@ -17,9 +17,10 @@ export PATH="$HOME/.local/node/bin:$PATH"
 npm run build
 # 1) Demo veritabanı + sunucu (gerçek veriden ayrı)
 DB_PATH=data/guide/store.db BACKUP_DIR=data/guide/backups npx tsx scripts/seed.ts
-DB_PATH=data/guide/store.db BACKUP_DIR=data/guide/backups SESSION_SECRET=guide-only-secret-0123456789abcdef0123456789 node node_modules/next/dist/bin/next start -p 3300 &
+# MAIL_DEV_DIR: e-postalar gönderilmez, klasöre yazılır (onay kodları oradan okunur)
+DB_PATH=data/guide/store.db BACKUP_DIR=data/guide/backups SESSION_SECRET=guide-only-secret-0123456789abcdef0123456789 MAIL_DEV_DIR=data/guide/mail MARKET_KASA_NO_SCHEDULER=1 node node_modules/next/dist/bin/next start -p 3300 &
 # 2) Ekran görüntüleri (GUIDE_DAY: panelde gösterilecek dolu bir gün, genelde dün)
-GUIDE_DAY=2026-10-09 node docs/kilavuz/capture.mjs /tmp/kilavuz-shots
+GUIDE_DAY=2026-10-09 MAIL_DEV_DIR=data/guide/mail node docs/kilavuz/capture.mjs /tmp/kilavuz-shots
 # 3) Görselleri küçült (PNG → JPG, en fazla 2000 px) ve simgeyi ekle
 python3 -c "
 from PIL import Image; import glob, os, shutil

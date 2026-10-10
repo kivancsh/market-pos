@@ -270,7 +270,7 @@ const phone = el("div", "phone", steps, '<div class="island"></div><div class="s
 phone.querySelector("img").src = `${ASSETS}/shots/phone-panel.png`;
 
 const CAPS = [
-  { n: 1, t: "Giriş yap", s: "Kasiyer PIN'iyle, yönetici kendi şifresiyle girer.", a: 8.1, b: 11.65 },
+  { n: 1, t: "Giriş yap", s: "Kasiyer kendi No + PIN'iyle, yönetici şifresiyle girer.", a: 8.1, b: 11.65 },
   { n: 2, t: "Okut, {sepete} {düşsün}", s: "Barkod okuyucu ürünü anında tanır. Aynı ürünü okutunca adet artar.", a: 12.05, b: 17.65 },
   { n: 3, t: "Nakit ya da kart", s: "Tek tuş: F8 nakit, F9 kart. Para üstünü program hesaplar.", a: 18.05, b: 21.55 },
   { n: 4, t: "Kârını {anlık} gör", s: "Ciro, KDV hariç kâr, marj ve saatlik satışlar. Telefondan da.", a: 22.35, b: 25.65 },
@@ -415,8 +415,8 @@ function renderSteps(t) {
 
   // --- ekran + kamera
   let shot = "login-pin-0", url = "/login", cam = [0, 0, 1440, 900], cp = 0, punch = 1;
-  const pinCard = [528, 111, 384, 678];
-  const keys = [[668, 393], [552, 469], [784, 469], [668, 545]].map(([x, y]) => [x, y, 104, 63]);
+  const pinCard = [528, 103, 384, 694];
+  const keys = [[668, 361], [552, 437], [784, 437], [668, 513]].map(([x, y]) => [x, y, 104, 64]);
   const tapT = [9.0, 9.5, 10.0, 10.5];
   ringA.style.opacity = 0; ringB.style.opacity = 0; toast.style.opacity = 0;
   let curVis = 0;

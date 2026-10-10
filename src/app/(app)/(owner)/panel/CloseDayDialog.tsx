@@ -32,10 +32,24 @@ export function CloseDayDialog({
     setBusy(true);
     setError(null);
     try {
-      const r = await api<{ backup: { ok: boolean; file?: string; error?: string } }>("/api/day-closings", {
+      const r = await api<{
+        backup: { ok: boolean; file?: string; error?: string };
+        report: { status: "sent"; recipients: string[] } | { status: "skipped"; reason: string } | { status: "failed"; message: string };
+      }>("/api/day-closings", {
         body: { businessDate: data.date, countedCashKurus: countedK, note: note || null },
       });
-      onDone(r.backup.ok ? `Gün kapatıldı. Yedek alındı: ${r.backup.file}` : (r.backup.error ?? "Gün kapatıldı."));
+      const backup = r.backup.ok ? `Gün kapatıldı. Yedek alındı: ${r.backup.file}` : (r.backup.error ?? "Gün kapatıldı.");
+      const report =
+        r.report.status === "sent"
+          ? ` Günlük rapor e-postayla gönderildi (${r.report.recipients.join(", ")}).`
+          : r.report.status === "failed"
+            ? ` Günlük rapor e-postası gönderilemedi: ${r.report.message}`
+            : r.report.reason === "not_configured"
+              ? " (Günlük rapor e-postası için Ayarlar → E-posta'yı ayarlayın.)"
+              : r.report.reason === "no_recipients"
+                ? " (Günlük rapor için Hesabım'dan e-posta adresinizi ekleyin.)"
+                : "";
+      onDone(backup + report);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Gün kapatılamadı.");
       setBusy(false);

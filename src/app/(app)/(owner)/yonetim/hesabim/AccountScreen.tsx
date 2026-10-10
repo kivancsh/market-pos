@@ -1,25 +1,36 @@
 "use client";
 
 import { useState } from "react";
-import { api, ApiError } from "@/client/api";
+import { useRouter } from "next/navigation";
+import { api } from "@/client/api";
+import { CodeEntry, type Challenge } from "@/client/components/CodeEntry";
 import { Notice, type NoticeKind } from "@/client/components/Notice";
+import { SecretChangeDialog } from "@/client/components/SecretChangeDialog";
+import { errText } from "@/client/errors";
 
 const field = "mt-1 h-12 w-full rounded-lg border border-slate-300 px-3 text-lg";
 
-function errText(e: unknown, fallback: string) {
-  if (!(e instanceof ApiError)) return fallback;
-  const d = e.details as { issues?: { message: string }[] } | undefined;
-  return d?.issues?.map((i) => i.message).join(" ") || e.message;
-}
-
-export function AccountScreen({ id, initialName, initialUsername }: { id: number; initialName: string; initialUsername: string }) {
+export function AccountScreen({
+  id,
+  initialName,
+  initialUsername,
+  initialEmail,
+}: {
+  id: number;
+  initialName: string;
+  initialUsername: string;
+  initialEmail: string | null;
+}) {
   const [name, setName] = useState(initialName);
   const [username, setUsername] = useState(initialUsername);
-  const [current, setCurrent] = useState("");
-  const [next, setNext] = useState("");
-  const [next2, setNext2] = useState("");
+  const [email, setEmail] = useState(initialEmail);
+  const [newEmail, setNewEmail] = useState("");
+  const [challenge, setChallenge] = useState<Challenge | null>(null);
+  const [code, setCode] = useState("");
+  const [pwDialog, setPwDialog] = useState(false);
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
   async function saveProfile() {
     setBusy(true);
@@ -33,17 +44,31 @@ export function AccountScreen({ id, initialName, initialUsername }: { id: number
     }
   }
 
-  async function savePassword() {
-    if (next !== next2) return setNotice({ kind: "error", text: "Yeni şifreler aynı değil." });
+  async function sendEmailCode() {
     setBusy(true);
     try {
-      await api("/api/account/password", { body: { currentPassword: current, newPassword: next, newPasswordConfirm: next2 } });
-      setCurrent("");
-      setNext("");
-      setNext2("");
-      setNotice({ kind: "success", text: "Şifreniz değiştirildi. Diğer cihazlardaki oturumlarınız kapandı." });
+      setChallenge(await api<Challenge>("/api/account/email/start", { body: { email: newEmail } }));
+      setCode("");
+      setNotice(null);
     } catch (e) {
-      setNotice({ kind: "error", text: errText(e, "Şifre değiştirilemedi.") });
+      setNotice({ kind: "error", text: errText(e, "Kod gönderilemedi.") });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function confirmEmail() {
+    if (!challenge) return;
+    setBusy(true);
+    try {
+      const r = await api<{ user: { email: string } }>("/api/account/email/verify", { body: { token: challenge.token, code } });
+      setEmail(r.user.email);
+      router.refresh(); // üstteki "e-posta adresi yok" şeridi kalksın
+      setChallenge(null);
+      setNewEmail("");
+      setNotice({ kind: "success", text: `E-posta adresiniz ${r.user.email} olarak kaydedildi. Onay kodları ve günlük rapor buraya gelecek.` });
+    } catch (e) {
+      setNotice({ kind: "error", text: errText(e, "Onaylanamadı.") });
     } finally {
       setBusy(false);
     }
@@ -78,34 +103,72 @@ export function AccountScreen({ id, initialName, initialUsername }: { id: number
             Kaydet
           </button>
         </form>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void savePassword();
-          }}
-          className="space-y-3 rounded-2xl bg-white p-4 shadow-sm"
-        >
-          <h2 className="text-lg font-semibold">Şifre değiştir</h2>
-          <label className="block text-sm font-medium text-slate-700">
-            Mevcut şifre
-            <input type="password" autoComplete="current-password" value={current} onChange={(e) => setCurrent(e.target.value)} className={field} />
-          </label>
-          <label className="block text-sm font-medium text-slate-700">
-            Yeni şifre (en az 8 karakter)
-            <input type="password" autoComplete="new-password" value={next} onChange={(e) => setNext(e.target.value)} className={field} />
-          </label>
-          <label className="block text-sm font-medium text-slate-700">
-            Yeni şifre (tekrar)
-            <input type="password" autoComplete="new-password" value={next2} onChange={(e) => setNext2(e.target.value)} className={field} />
-          </label>
-          <button type="submit" disabled={busy || !current || !next} className="h-12 w-full rounded-xl bg-slate-900 font-bold text-white disabled:bg-slate-300">
-            Şifreyi değiştir
+
+        <div className="space-y-3 rounded-2xl bg-white p-4 shadow-sm">
+          <h2 className="text-lg font-semibold">Şifre</h2>
+          <p className="text-sm text-slate-600">Şifre değiştirirken e-posta adresinize onay kodu gönderilir.</p>
+          <button
+            type="button"
+            disabled={busy || !email}
+            onClick={() => setPwDialog(true)}
+            className="h-12 w-full rounded-xl bg-slate-900 font-bold text-white disabled:bg-slate-300"
+            data-testid="account-change-password"
+          >
+            Şifremi değiştir
           </button>
-        </form>
+          {!email && <p className="text-sm text-amber-700">Önce aşağıdan e-posta adresinizi ekleyin.</p>}
+        </div>
       </div>
+
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void (challenge ? confirmEmail() : sendEmailCode());
+        }}
+        className="space-y-3 rounded-2xl bg-white p-4 shadow-sm"
+      >
+        <h2 className="text-lg font-semibold">E-posta adresim</h2>
+        <p className="text-sm text-slate-600">
+          Şu an: <b data-testid="account-email">{email ?? "— (eklenmemiş)"}</b>. Onay kodları ve günlük rapor bu adrese gelir. Değiştirirken yeni adrese bir kod
+          gönderilir; adresin size ait olduğu böyle doğrulanır.
+        </p>
+        {!challenge ? (
+          <div className="flex flex-wrap gap-2">
+            <input type="email" autoCapitalize="none" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="yeni@ornek.com" className={`${field} mt-0 flex-1`} data-testid="account-new-email" />
+            <button type="submit" disabled={busy || !newEmail} className="h-12 rounded-xl bg-slate-900 px-5 font-bold text-white disabled:bg-slate-300">
+              {email ? "Değiştir" : "Ekle"} (kod gönder)
+            </button>
+          </div>
+        ) : (
+          <>
+            <CodeEntry challenge={challenge} code={code} onCode={setCode} onResend={() => void sendEmailCode()} busy={busy} />
+            <div className="flex gap-2">
+              <button type="button" disabled={busy} onClick={() => setChallenge(null)} className="h-12 flex-1 rounded-xl border border-slate-300 font-semibold">
+                Vazgeç
+              </button>
+              <button type="submit" disabled={busy || code.length !== 6} className="h-12 flex-1 rounded-xl bg-emerald-600 font-bold text-white disabled:bg-slate-300">
+                Onayla
+              </button>
+            </div>
+          </>
+        )}
+      </form>
+
       <p className="text-sm text-slate-500">
-        Şifrenizi unutursanız: bilgisayardaki <strong>market-pos</strong> klasöründe <strong>Yönetici Şifresi Sıfırla</strong> dosyasına çift tıklayın.
+        Şifrenizi unutursanız: giriş ekranında <strong>Şifremi unuttum</strong> (e-postanıza kod gelir) ya da kasa bilgisayarında <strong>Yönetici Şifresi Sıfırla</strong>.
       </p>
+
+      {pwDialog && (
+        <SecretChangeDialog
+          self
+          target={{ id, name, role: "owner", cashierNo: null, isActive: true }}
+          onClose={() => setPwDialog(false)}
+          onDone={(msg) => {
+            setPwDialog(false);
+            setNotice({ kind: "success", text: msg });
+          }}
+        />
+      )}
     </main>
   );
 }

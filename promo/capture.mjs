@@ -12,7 +12,7 @@ const OWNER = { username: "ayse", password: "demo-sifre-2026" };
 const CASHIER_PIN = "2468";
 const YESTERDAY = process.env.PROMO_DAY; // panel için dolu bir gün
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({ args: ["--lang=tr-TR"] });
 const desktop = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 2, locale: "tr-TR", timezoneId: "Europe/Istanbul" };
 
 // Videoda kamera yakınlaştırması için önemli öğelerin konumları (CSS px)
@@ -136,6 +136,8 @@ await shot(ph, "phone-panel");
 
 // ---- Kasiyer oturumu: giriş + satış akışı
 const cashCtx = await browser.newContext(desktop);
+// Kasiyer No (1001) bu bilgisayarda daha önce girilmiş gibi: ekranda hazır gelir, video sadece PIN'i gösterir
+await cashCtx.addInitScript(() => window.localStorage.setItem("marketKasa.lastCashierNo", "1001"));
 const c = await cashCtx.newPage();
 await c.goto(`${BASE}/login`);
 await c.getByTestId("login-tab-cashier").click();

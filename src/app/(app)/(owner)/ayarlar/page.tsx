@@ -1,9 +1,11 @@
 import { getDb } from "@/server/db/connection";
 import { getSettings } from "@/server/db/repositories/settings";
+import { getMailStatus } from "@/server/mail";
 import { SettingsScreen } from "./SettingsScreen";
 
 export const metadata = { title: "Ayarlar · Market Kasa" };
 
 export default function SettingsPage() {
-  return <SettingsScreen initial={getSettings(getDb())} />;
+  const db = getDb();
+  return <SettingsScreen initial={getSettings(db)} initialMail={getMailStatus(db)} />;
 }

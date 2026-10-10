@@ -5,13 +5,42 @@ import { E2E } from "../../playwright.config";
 export { E2E };
 
 /** Kasiyer girişi: PIN tuş takımına klavyeden PIN girer. */
-export async function loginCashier(page: Page, pin: string = E2E.cashierPin, expectPath: RegExp = /\/kasa/) {
+/** Kasiyer girişi: Kasiyer No + PIN (tuş takımına klavyeden). */
+export async function loginCashier(page: Page, pin: string = E2E.cashierPin, expectPath: RegExp = /\/kasa/, cashierNo: string = E2E.cashierNo) {
   await page.goto("/login");
   await page.getByTestId("login-tab-cashier").click();
   await expect(page.getByRole("button", { name: "Giriş", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Kasiyer No" }).click();
+  await page.keyboard.press("Escape"); // önceki girişten hatırlanan No'yu temizle
+  for (const d of cashierNo) await page.keyboard.press(d);
+  await page.keyboard.press("Enter"); // PIN alanına geç
   for (const d of pin) await page.keyboard.press(d);
   await page.keyboard.press("Enter");
   await page.waitForURL(expectPath);
+}
+
+/** Test sunucusunun e-posta klasöründeki (MAIL_DEV_DIR) son e-postadan onay kodu. */
+export async function latestMailCode(page: Page, sinceMs: number): Promise<string> {
+  let code: string | null = null;
+  await expect
+    .poll(
+      () => {
+        if (!fs.existsSync(E2E.mailDir)) return null;
+        const files = fs
+          .readdirSync(E2E.mailDir)
+          .filter((f) => f.endsWith(".json") && Number(f.split("-")[0]) >= sinceMs)
+          .sort();
+        const last = files.at(-1);
+        if (!last) return null;
+        const m = /(\d{6})/.exec(JSON.parse(fs.readFileSync(`${E2E.mailDir}/${last}`, "utf8")).subject);
+        code = m ? m[1]! : null;
+        return code;
+      },
+      { timeout: 8000 },
+    )
+    .not.toBeNull();
+  void page;
+  return code!;
 }
 
 /** Yönetici girişi: "Yönetici" sekmesinde kullanıcı adı + şifre. */
