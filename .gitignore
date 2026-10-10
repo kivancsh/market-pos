@@ -54,3 +54,6 @@ next-env.d.ts
 
 # Windows paketi için ayrı derleme klasörü
 /.next-win/
+
+# Kurulumdaki sürüm bilgisi (GitHub yayınında pakete eklenir; geliştirme kopyasında yok)
+/version.json

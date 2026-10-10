@@ -92,6 +92,12 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   (Mac) kanal "dev", denetim yok. Yayında `latest.json` (sürüm, boyut, SHA-256). Denetim açılışta + 6 saatte bir; yönetici
   Ayarlar → Güncelle: yedek → indir (`MARKET_UPDATE_DIR`, başlatıcı verir) → SHA-256 doğrula → sayfa `market-kasa:install-update`
   mesajı → `Market Kasa.exe` sessiz kurulumu `/relaunch=1` ile başlatıp kapanır → kurulum programı yeniden açar. Asla kendiliğinden kurulmaz.
+  Mac (kullanıcı kararı): yayında `Market-Kasa-Mac.zip` (git archive, promo hariç, `version.json` kanal "mac"; `windows/check-mac-zip.py` denetler,
+  CRLF/izin). `scripts/service.sh` version.json'u `MARKET_KASA_VERSION_INFO` ile verir; Güncelle → `/api/update/install` →
+  `scripts/mac-update.sh` (arka planda): durdur → eskiyi `data/updates/previous`'a al → yeni dosyalar (data/backups/.env asla) →
+  paketler değiştiyse `npm ci` → derle → başlat; hata olursa eskiye döner, sonucu `data/updates/last-result.json`'a yazar.
+  Güncelleme sürerken `service.sh start` bekler (`data/updates/updating.pid`). `.git` olan klasör = geliştirme kopyası, güncellenmez.
+  Bu Mac'te proje iCloud'la eşitlenen Masaüstü'nde: derleme/kopyalama takılabiliyor (deneme kurulumlarını scratchpad'de yap).
   İndirme adresi sabit (GitHub); `MARKET_KASA_UPDATE_BASE` yalnızca testler içindir.
 - Sunucu kodunda değişken yolla dosya işlemi (`path.join(dir, x)`) Next'e bütün proje klasörünü Windows paketine ekletir
   (derleme uyarısı "Dynamic filesystem access…"; paket 37 → 82 MB olmuştu). `path.join(/*turbopackIgnore: true*/ …)` kullan;

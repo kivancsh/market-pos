@@ -92,9 +92,20 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Get-Item build\dist\Market-Kasa-Setup.exe | Format-List Name, Length
 
+      - name: Mac paketi (Market-Kasa-Mac.zip — Mac kurulumu ve Mac güncellemesi)
+        shell: bash
+        run: |
+          mkdir -p build/mac
+          node -e "require('fs').writeFileSync('build/mac/version.json', JSON.stringify({ version: process.env.MARKET_KASA_VERSION, channel: 'mac', commit: process.env.GITHUB_SHA, builtAt: new Date().toISOString() }, null, 1))"
+          # Proje dosyaları (tanıtım videosu hariç) + version.json; kişisel dosyalar depoda zaten yok
+          # autocrlf kapalı: Windows'ta satır sonları CRLF'e çevrilirse Mac betikleri (.sh, .command) çalışmaz
+          git -c core.autocrlf=false -c core.eol=lf archive --format=zip --prefix=market-pos/ --add-file=build/mac/version.json \
+            -o build/dist/Market-Kasa-Mac.zip HEAD -- . ':(exclude)promo'
+          python windows/check-mac-zip.py build/dist/Market-Kasa-Mac.zip
+
       - name: En son sürüm bilgisi (latest.json — programlar güncellemeyi buradan öğrenir)
         shell: bash
-        run: node windows/write-latest.mjs build/dist/Market-Kasa-Setup.exe build/dist/latest.json "$(git log -1 --format=%s)"
+        run: node windows/write-latest.mjs build/dist/Market-Kasa-Setup.exe build/dist/latest.json "$(git log -1 --format=%s)" build/dist/Market-Kasa-Mac.zip
 
       - name: Gerçek kurulum testi (kur, aç, kullan, kaldır)
         timeout-minutes: 15
@@ -115,8 +126,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete windows -y --cleanup-tag || true
-          gh release create windows build/dist/Market-Kasa-Setup.exe build/dist/latest.json \
+          gh release create windows build/dist/Market-Kasa-Setup.exe build/dist/Market-Kasa-Mac.zip build/dist/latest.json \
             --target "$GITHUB_SHA" \
-            --title "Market Kasa $MARKET_KASA_VERSION — Windows kurulum" \
+            --title "Market Kasa $MARKET_KASA_VERSION — Windows ve Mac" \
             --notes-file windows/RELEASE_NOTES.md \
             --latest

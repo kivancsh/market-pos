@@ -16,6 +16,21 @@ echo "  Market Kasa — Kurulum"
 echo "=============================================="
 echo
 
+# 0) Klasörün yeri: iCloud ile eşitlenen Masaüstü/Belgeler'de veritabanı bozulabilir, program yavaşlar
+case "$(pwd)/" in
+  "$HOME/Desktop/"* | "$HOME/Documents/"*)
+    if xattr "$HOME/Desktop" 2>/dev/null | grep -q "com.apple.file-provider-domain-id" ||
+      [ -d "$HOME/Library/Mobile Documents/com~apple~CloudDocs/Desktop" ]; then
+      echo "⚠️  Bu klasör iCloud ile eşitlenen Masaüstü/Belgeler içinde."
+      echo "   Satış bilgileri (veritabanı) iCloud eşitlemesinde bozulabilir ve program yavaşlar."
+      echo "   Önerilen: 'market-pos' klasörünü kullanıcı klasörünüze (Finder → Git → Ana Klasör)"
+      echo "   taşıyıp Kurulum'a oradan tekrar çift tıklayın."
+      echo
+      read -r -p "Yine de burada devam etmek için Enter'a, çıkmak için Ctrl+C'ye basın..." _
+    fi
+    ;;
+esac
+
 # 1) Node.js
 if ! command -v node >/dev/null 2>&1; then
   echo "❌ Node.js bulunamadı."
@@ -65,8 +80,10 @@ echo "    Program kendi penceresinde açılır; sunucu arka planda çalışır."
 echo "  • Pencereyi kapatmak programı kapatmaz (telefondan takip sürer)."
 echo "    Tamamen kapatmak için üst menü: Market Kasa → Programı tamamen kapat."
 echo "  • Dock'a eklemek için simgeyi Dock'a sürükleyin."
-echo "  • İlk açılışta YÖNETİCİ HESABI oluşturma ekranı gelir (ad, kullanıcı adı, şifre)."
-echo "    Kasiyerleri sonra Yönetim Paneli → Kullanıcılar'dan eklersiniz."
+echo "  • İlk açılışta kurulum ekranı gelir: dükkânın e-posta hesabı (Gmail uygulama şifresi),"
+echo "    yönetici bilgileri ve e-postanıza gelen onay kodu. Kasiyerleri sonra"
+echo "    Yönetim Paneli → Kullanıcılar'dan eklersiniz (her kasiyere bir Kasiyer No verilir)."
+echo "  • Yeni sürüm çıkınca program haber verir: Ayarlar → Güncelle (önce yedek alınır)."
 echo "  • Yönetici şifresini unutursanız: 'Yönetici Şifresi Sıfırla' dosyasına çift tıklayın."
 echo "=============================================="
 finish 0

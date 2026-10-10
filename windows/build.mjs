@@ -76,7 +76,7 @@ if (!version && process.env.CI) {
   process.exit(1);
 }
 if (version) {
-  const info = { version, commit: process.env.GITHUB_SHA ?? null, builtAt: new Date().toISOString() };
+  const info = { version, channel: "windows", commit: process.env.GITHUB_SHA ?? null, builtAt: new Date().toISOString() };
   fs.writeFileSync(path.join(app, "version.json"), JSON.stringify(info, null, 1));
   console.log(`Sürüm: ${version}`);
 }

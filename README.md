@@ -31,7 +31,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 56 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 57 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -68,13 +68,15 @@ Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → 
 
 Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında otomatik üretilir ve **gerçekten kurulup açılarak test edilir**. Ayrıntılar: [`windows/README.md`](windows/README.md).
 
-### Güncelleme (Windows)
+### Güncelleme (Windows ve Mac)
 
 - Her yayında **sürüm numarası** kendiliğinden artar: `1.1.<derleme no>` (ilk iki sayı `package.json`'dan). Çalışan sürüm **Ayarlar → Program sürümü ve güncelleme**'de yazar.
 - Program açılıştan kısa süre sonra ve **6 saatte bir** GitHub'daki en son sürüme bakar. Yeni sürüm varsa yöneticiye yeşil bir şerit çıkar: "Yeni sürüm var".
 - **Ayarlar → Güncelle**: önce **otomatik yedek** alınır, yeni kurulum dosyası indirilir ve boyutu + parmak izi (SHA-256) doğrulanır. Sonra pencere kapanır, kurulum sessizce yapılır ve program 1–2 dakika içinde **kendiliğinden yeniden açılır**. Bilgiler yerinde kalır; veritabanı değişikliği gerekiyorsa ilk açılışta otomatik yapılır.
 - Güncelleme **kendiliğinden kurulmaz**; satış sırasında program kapanmasın diye yönetici düğmeye basınca yapılır. Kasiyerler bildirimi görmez.
-- Güncelle düğmesi yalnızca kasa bilgisayarındaki **Market Kasa penceresinde** çalışır (telefonda/tarayıcıda ne yapılacağı yazar).
+- Windows'ta Güncelle düğmesi yalnızca kasa bilgisayarındaki **Market Kasa penceresinde** çalışır (telefonda/tarayıcıda ne yapılacağı yazar).
+- **Mac**'te (GitHub'dan indirilen `Market-Kasa-Mac.zip` kurulumu) aynı düğme: yedek → Mac paketi indirilip doğrulanır → program birkaç dakika kapanır, yeni sürüm kurulup derlenir ve başlatılır; sayfa kendiliğinden yenilenir. Bir adım başarısız olursa **eski sürüme kendiliğinden geri dönülür** ve Ayarlar'da nedeni yazar (ayrıntı: `data/updates/update.log`). Bilgiler (`data/`, `backups/`, `.env`) hiç değişmez.
+- Geliştirme kopyasında (git ile alınmış klasör) güncelleme denetlenmez; orada kod doğrudan değişir.
 - Sürüm notu olarak kod gönderiminin başlığı gösterilir.
 - Bu özellikten **önceki** sürümleri kullananlar bir kereliğine yeni Setup.exe'yi indirip kurmalıdır; sonrakiler programın içinden güncellenir.
 
@@ -82,7 +84,11 @@ Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında oto
 
 ## Kolay kurulum: masaüstü simgesi (Mac)
 
-1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
+🍎 **[Market-Kasa-Mac.zip'i indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Market-Kasa-Mac.zip)** — açınca `market-pos` klasörü çıkar.
+
+> **Klasörü nereye koymalı?** Kullanıcı klasörünüze (Finder → Git → Ana Klasör). iCloud'da "Masaüstü ve Belgeler" eşitlemesi açıksa klasörü **Masaüstü'ne veya Belgeler'e koymayın**: satış bilgilerinin tutulduğu veritabanı eşitleme sırasında bozulabilir ve program yavaşlar. Kurulum böyle bir yerde çalıştırılırsa uyarır.
+
+1. Klasördeki **Kurulum** dosyasına çift tıklayın (ilk seferde macOS "doğrulanamadı" derse: dosyaya sağ tıklayın → **Aç** → **Aç**). Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
 2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **kendi penceresinde** açılır (tarayıcı gerekmez; adres çubuğu/sekme yok, Dock'ta kendi simgesi). Sunucu arka planda çalışır. Simgeyi Dock'a da sürükleyebilirsiniz.
 3. Pencerenin üst menüsü: **Market Kasa** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetim Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
 4. **İlk açılışta** kurulum ekranı gelir: ① dükkânın e-posta hesabını bağlayın (Gmail uygulama şifresi, bkz. [E-posta](#e-posta-onay-kodları-ve-günlük-rapor)) ② adınızı, kullanıcı adınızı, e-postanızı ve en az 8 karakterlik şifrenizi yazın ③ e-postanıza gelen 6 haneli kodu girin; hesap ancak o zaman oluşur. Sonra **Yönetim Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin; her kasiyere otomatik bir **Kasiyer No** verilir (1001, 1002…).

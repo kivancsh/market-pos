@@ -8,14 +8,17 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import * as updateRoute from "@/app/api/update/route";
 import * as checkRoute from "@/app/api/update/check/route";
 import * as downloadRoute from "@/app/api/update/download/route";
+import * as installRoute from "@/app/api/update/install/route";
 import { setTestCtxFactory } from "@/server/http/api";
-import { cleanupUpdates, compareVersions, getUpdateInfo, manifestSchema, setTestAppVersion } from "@/server/update";
+import { cleanupUpdates, compareVersions, getUpdateInfo, manifestSchema, setTestAppVersion, setTestSpawn } from "@/server/update";
 import { cookieForUser, ensureUsers } from "../apiHelpers";
 import { createEnv, type TestEnv } from "../helpers";
 
 // GitHub yerine yerel deneme sunucusu: latest.json + Market-Kasa-Setup.exe
 const SETUP = crypto.randomBytes(300_000);
 const SHA = crypto.createHash("sha256").update(SETUP).digest("hex");
+const MACZIP = crypto.randomBytes(120_000);
+const MACSHA = crypto.createHash("sha256").update(MACZIP).digest("hex");
 let manifest: Record<string, unknown>;
 let setupBody: Buffer = SETUP;
 let requests: string[] = [];
@@ -27,6 +30,7 @@ beforeAll(async () => {
     requests.push(req.url ?? "");
     if (req.url === "/latest.json") res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(manifest));
     else if (req.url === "/Market-Kasa-Setup.exe") res.writeHead(200, { "content-length": setupBody.length }).end(setupBody);
+    else if (req.url === "/Market-Kasa-Mac.zip") res.writeHead(200, { "content-length": MACZIP.length }).end(MACZIP);
     else res.writeHead(404).end();
   });
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
@@ -49,12 +53,13 @@ beforeEach(() => {
   process.env.MARKET_UPDATE_DIR = path.join(tmp, "updates");
   process.env.BACKUP_DIR = path.join(tmp, "backups");
   setTestAppVersion({ version: "1.1.40", channel: "windows", commit: null, builtAt: null });
-  manifest = { version: "1.1.42", sha256: SHA, size: SETUP.length, notes: "Yeni özellikler" };
+  manifest = { version: "1.1.42", sha256: SHA, size: SETUP.length, notes: "Yeni özellikler", mac: { sha256: MACSHA, size: MACZIP.length } };
   setupBody = SETUP;
   requests = [];
 });
 afterEach(() => {
   setTestAppVersion(null);
+  setTestSpawn(null);
   for (const k of ["MARKET_KASA_UPDATE_BASE", "MARKET_UPDATE_DIR", "BACKUP_DIR"]) {
     if (saved[k] === undefined) delete process.env[k];
     else process.env[k] = saved[k];
@@ -185,5 +190,88 @@ describe("güncellemeyi indirme", () => {
     expect(fs.existsSync(setupFile())).toBe(false);
     expect(fs.existsSync(`${setupFile()}.part`)).toBe(false);
     expect(getUpdateInfo().current).toBe("1.1.40");
+  });
+});
+
+describe("Mac kurulum klasörü", () => {
+  const macZip = () => path.join(tmp, "updates", "Market-Kasa-Mac.zip");
+  let spawned: { script: string; args: string[] }[];
+  beforeEach(() => {
+    setTestAppVersion({ version: "1.1.40", channel: "mac", commit: null, builtAt: null });
+    spawned = [];
+    setTestSpawn((script, args) => void spawned.push({ script, args }));
+  });
+
+  it("Mac paketini indirir (Windows dosyasını değil), doğrular ve güncelleme betiğini başlatır", async () => {
+    const cookie = await ownerCookie();
+    const c = await json(await checkRoute.POST(req("/api/update/check", cookie, {})));
+    expect(c.update).toMatchObject({ channel: "mac", available: true, canDownload: true });
+
+    // indirmeden kurulum olmaz
+    const early = await installRoute.POST(req("/api/update/install", cookie, {}));
+    expect(early.status).toBe(409);
+    expect((await json(early)).error.code).toBe("NOT_DOWNLOADED");
+
+    const d = await downloadRoute.POST(req("/api/update/download", cookie, {}));
+    expect(d.status).toBe(200);
+    expect(fs.readFileSync(macZip()).equals(MACZIP)).toBe(true);
+    expect(fs.existsSync(setupFile())).toBe(false);
+    expect(requests).toContain("/Market-Kasa-Mac.zip");
+    expect(requests).not.toContain("/Market-Kasa-Setup.exe");
+
+    const r = await installRoute.POST(req("/api/update/install", cookie, {}));
+    expect(r.status).toBe(200);
+    expect((await json(r)).version).toBe("1.1.42");
+    expect(spawned).toHaveLength(1);
+    expect(spawned[0]!.script).toMatch(/scripts[\\/]mac-update\.sh$/);
+    expect(spawned[0]!.args).toEqual([macZip(), "1.1.42"]);
+    const log = env.db.prepare("SELECT summary FROM audit_log WHERE action = 'update.install'").all() as { summary: string }[];
+    expect(log[0]!.summary).toContain("1.1.40 → 1.1.42");
+
+    const cashier = await cookieForUser(ensureUsers(env).cashier);
+    expect((await installRoute.POST(req("/api/update/install", cashier, {}))).status).toBe(403);
+  });
+
+  it("yayında Mac paketi yoksa indirme yapılmaz", async () => {
+    manifest.mac = null;
+    const cookie = await ownerCookie();
+    const c = await json(await checkRoute.POST(req("/api/update/check", cookie, {})));
+    expect(c.update).toMatchObject({ available: true, canDownload: false });
+    const d = await downloadRoute.POST(req("/api/update/download", cookie, {}));
+    expect(d.status).toBe(409);
+    expect((await json(d)).error.code).toBe("UPDATE_UNSUPPORTED");
+  });
+
+  it("Mac paketi bozuk inerse kurulmaz", async () => {
+    manifest.mac = { sha256: "0".repeat(64), size: MACZIP.length };
+    const cookie = await ownerCookie();
+    await checkRoute.POST(req("/api/update/check", cookie, {}));
+    expect((await downloadRoute.POST(req("/api/update/download", cookie, {}))).status).toBe(502);
+    expect(fs.existsSync(macZip())).toBe(false);
+  });
+
+  it("Windows kurulumunda bu uç kullanılmaz (orada pencere kurar)", async () => {
+    setTestAppVersion({ version: "1.1.40", channel: "windows", commit: null, builtAt: null });
+    const r = await installRoute.POST(req("/api/update/install", await ownerCookie(), {}));
+    expect(r.status).toBe(409);
+    expect((await json(r)).error.code).toBe("UPDATE_UNSUPPORTED");
+    expect(spawned).toHaveLength(0);
+  });
+
+  it("son güncelleme sonucunu gösterir (başarısızsa nedeni)", async () => {
+    fs.mkdirSync(path.join(tmp, "updates"), { recursive: true });
+    fs.writeFileSync(
+      path.join(tmp, "updates", "last-result.json"),
+      JSON.stringify({ ok: false, version: "1.1.42", error: "Yeni sürüm derlenemedi.", at: "2026-10-10T10:00:00.000Z" }),
+    );
+    const r = await json(await updateRoute.GET(req("/api/update", await ownerCookie())));
+    expect(r.update.lastInstall).toMatchObject({ ok: false, error: "Yeni sürüm derlenemedi." });
+  });
+
+  it("geliştirme kopyasında (version.json yok) güncelleme kapalı", async () => {
+    delete process.env.MARKET_KASA_UPDATE_BASE;
+    setTestAppVersion({ version: "1.1.0", channel: "dev", commit: null, builtAt: null });
+    const r = await json(await updateRoute.GET(req("/api/update", await ownerCookie())));
+    expect(r.update).toMatchObject({ enabled: false, canDownload: false, lastInstall: null });
   });
 });

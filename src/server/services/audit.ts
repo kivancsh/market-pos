@@ -26,6 +26,7 @@ export const AUDIT_ACTIONS = {
   "settings.update": "Ayarlar değişti",
   "backup.create": "Yedek alındı",
   "update.download": "Güncelleme indirildi",
+  "update.install": "Güncelleme kuruluyor",
 } as const;
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
 

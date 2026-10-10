@@ -9,10 +9,28 @@
 cd "$(dirname "$0")/.." || exit 1
 export PATH="$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-PORT=3000
+PORT="${MARKET_KASA_PORT:-3000}" # MARKET_KASA_PORT: sadece test için (ayrı deneme kurulumu)
 LOGDIR="data/logs"
 PIDFILE="data/server.pid"
+UPDATE_LOCK="data/updates/updating.pid"
 mkdir -p "$LOGDIR"
+
+# Güncelleme (scripts/mac-update.sh) için: sürüm bilgisi ve indirme klasörü sunucuya verilir.
+# version.json yalnızca GitHub'dan indirilen kurulumda var; geliştirme kopyasında güncelleme denetlenmez.
+export MARKET_UPDATE_DIR="$PWD/data/updates"
+if [ -f version.json ]; then
+  MARKET_KASA_VERSION_INFO="$(cat version.json)"
+  export MARKET_KASA_VERSION_INFO
+fi
+
+# Programın içinden güncelleme sürüyorsa bitmesini bekle (en fazla 20 dk); başlatmayı o yapar.
+wait_for_update() {
+  [ -n "${MARKET_KASA_UPDATER:-}" ] && return 0
+  for _ in $(seq 1 600); do
+    [ -f "$UPDATE_LOCK" ] && kill -0 "$(cat "$UPDATE_LOCK" 2>/dev/null)" 2>/dev/null || return 0
+    sleep 2
+  done
+}
 
 port_pids() { lsof -nP -t -iTCP:$PORT -sTCP:LISTEN 2>/dev/null; }
 is_running() { [ -n "$(port_pids)" ]; }
@@ -23,6 +41,7 @@ needs_build() {
 }
 
 start() {
+  wait_for_update
   if is_running; then exit 0; fi
   command -v node >/dev/null 2>&1 || exit 10
   if [ ! -d node_modules ]; then
