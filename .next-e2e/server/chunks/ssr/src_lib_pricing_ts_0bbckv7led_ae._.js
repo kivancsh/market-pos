@@ -1,0 +1,3 @@
+module.exports=[66916,a=>{"use strict";var b=a.i(21935);function c(a,c){return(0,b.l)(a,100,100+c)}a.s(["I",0,function(a,c,d,e){var f;return f=d+e,(0,b.l)(a,f,c)-(0,b.l)(a,d,c)},"H",0,function(a,c){let d;if(!c)return 0;if(!Number.isSafeInteger(c.value)||c.value<0)throw RangeError("İndirim değeri geçersiz");if("percent"===c.type){if(c.value>100)throw RangeError("İndirim yüzdesi 100'den büyük olamaz");d=(0,b.l)(a,c.value,100)}else d=c.value;if(d>a)throw RangeError("İndirim ara toplamdan büyük olamaz");return d},"x",0,function(a,b,d){let e=c(a,d),f=c(b,d);return{netPriceKurus:e,netCostKurus:f,profitKurus:e-f}}])}];
+
+//# sourceMappingURL=src_lib_pricing_ts_0bbckv7led_ae._.js.map

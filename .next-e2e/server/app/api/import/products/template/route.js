@@ -1,0 +1,10 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/import/products/template/route.js")
+R.c("server/chunks/[externals]_exceljs_1a-wtz07j5jxo._.js")
+R.c("server/chunks/src_server_excel_ts_1582a8_yxhdlc._.js")
+R.c("server/chunks/[root-of-the-server]__022df6zsywegh._.js")
+R.c("server/chunks/[root-of-the-server]__15bjnu5yieigz._.js")
+R.c("server/chunks/_1cxe68f4fyc3v._.js")
+R.c("server/chunks/src_server_09118-qozn2o9._.js")
+R.c("server/chunks/1oeh_server_app_api_import_products_template_route_actions_023azxy7e8va2.js")
+R.m(42667)
+module.exports=R.m(42667).exports

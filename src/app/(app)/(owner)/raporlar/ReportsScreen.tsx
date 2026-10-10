@@ -10,6 +10,7 @@ import type { ReportColumn, ReportKey, ReportResult, ReportRow } from "@/server/
 
 const TABS: { key: ReportKey; label: string }[] = [
   { key: "daily", label: "Günlük özet" },
+  { key: "cashiers", label: "Kasiyer performansı" },
   { key: "products", label: "Ürün kârlılığı" },
   { key: "categories", label: "Kategori kârlılığı" },
   { key: "low-margin", label: "Düşük marjlı" },
@@ -43,9 +44,9 @@ function fmt(col: ReportColumn, v: string | number | null | undefined): string {
 
 const numeric = (c: ReportColumn) => c.type !== "text" && c.type !== "date";
 
-export function ReportsScreen() {
+export function ReportsScreen({ initialTab = "daily" }: { initialTab?: ReportKey }) {
   const today = getBusinessDate();
-  const [tab, setTab] = useState<ReportKey>("daily");
+  const [tab, setTab] = useState<ReportKey>(initialTab);
   const [preset, setPreset] = useState<RangePreset | "custom">("this_month");
   const [range, setRange] = useState(() => presetRange("this_month", today));
   const [data, setData] = useState<ReportResult | null>(null);

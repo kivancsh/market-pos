@@ -1,0 +1,12 @@
+var R=require("../../../../../chunks/[turbopack]_runtime.js")("server/app/api/products/bulk-price/apply/route.js")
+R.c("server/chunks/src_lib_money_ts_05are8ndi8uhg._.js")
+R.c("server/chunks/src_lib_pricing_ts_1p44z3w9dx61j._.js")
+R.c("server/chunks/[root-of-the-server]__022df6zsywegh._.js")
+R.c("server/chunks/src_server_services_bulkPrice_ts_02emk-e7-ipng._.js")
+R.c("server/chunks/[root-of-the-server]__15bjnu5yieigz._.js")
+R.c("server/chunks/src_server_09118-qozn2o9._.js")
+R.c("server/chunks/_0zgvuzxms1hj0._.js")
+R.c("server/chunks/src_server_09uluq8w9qyec._.js")
+R.c("server/chunks/1oeh_server_app_api_products_bulk-price_apply_route_actions_1v-i1efs4ywi-.js")
+R.m(6647)
+module.exports=R.m(6647).exports

@@ -378,3 +378,185 @@ export function getLastSaleDates(db: DB): Map<number, string> {
     .all() as { productId: number; last: string }[];
   return new Map(rows.map((r) => [r.productId, r.last]));
 }
+
+// ------------------------------------------------------------------ kasiyer performansı
+
+export interface CashierAggregate {
+  /** Satışı yapan kullanıcı (eski satışlarda boş olabilir) */
+  userId: number | null;
+  name: string;
+  role: "owner" | "cashier" | null;
+  cashierNo: number | null;
+  isActive: boolean;
+  saleCount: number;
+  /** Tamamlanan satışların KDV dahil toplamı (iadeler düşülmeden) */
+  salesTotalKurus: number;
+  salesNetKurus: number;
+  discountKurus: number;
+  /** Satışlarının brüt kârı − bu satışlardan yapılan iadelerin kâr payı */
+  grossProfitKurus: number;
+  cashKurus: number;
+  cardKurus: number;
+  itemsSold: number;
+  voidCount: number;
+  voidTotalKurus: number;
+  /** Bu kasiyerin satışlarından (aralıkta) yapılan iadeler */
+  returnCount: number;
+  refundKurus: number;
+  refundNetKurus: number;
+  activeDays: number;
+  /** Her gün ilk satıştan son satışa geçen süre (dakika, toplam) */
+  activeMinutes: number;
+}
+
+/**
+ * Kasiyer (ve satış yapan yönetici) başına satış özeti. Aralıkta hiç satış yapmamış aktif kasiyerler de sıfırla listelenir.
+ * İptal edilen satışlar ciroya girmez, ayrıca sayılır; iadeler, iadenin yapıldığı gün aralıktaysa satışı yapanın hanesine yazılır.
+ */
+/** Grup anahtarı: kullanıcı kaydı olan satışlar kullanıcıya, olmayanlar (eski/örnek veri) kasiyer adına göre. */
+function keyOf(userId: number | null, userName: string | null): string {
+  return userId !== null ? `u:${userId}` : `n:${userName ?? ""}`;
+}
+
+export function getCashierAggregates(db: DB, from: string, to: string): CashierAggregate[] {
+  const sales = db
+    .prepare(
+      `SELECT s.user_id AS userId, MAX(s.user_name) AS userName,
+              COALESCE(SUM(s.status = 'completed'), 0) AS saleCount,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' THEN s.total_kurus END), 0) AS total,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' THEN s.net_total_kurus END), 0) AS net,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' THEN s.discount_kurus END), 0) AS discount,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' THEN s.gross_profit_kurus END), 0) AS profit,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' AND s.payment_method = 'cash' THEN s.total_kurus END), 0) AS cash,
+              COALESCE(SUM(CASE WHEN s.status = 'completed' AND s.payment_method = 'card' THEN s.total_kurus END), 0) AS card,
+              COALESCE(SUM(s.status = 'voided'), 0) AS voidCount,
+              COALESCE(SUM(CASE WHEN s.status = 'voided' THEN s.total_kurus END), 0) AS voidTotal,
+              COUNT(DISTINCT CASE WHEN s.status = 'completed' THEN s.business_date END) AS activeDays
+         FROM sales s WHERE s.business_date BETWEEN ? AND ?
+        GROUP BY s.user_id, CASE WHEN s.user_id IS NULL THEN s.user_name END`,
+    )
+    .all(from, to) as {
+    userId: number | null;
+    userName: string | null;
+    saleCount: number;
+    total: number;
+    net: number;
+    discount: number;
+    profit: number;
+    cash: number;
+    card: number;
+    voidCount: number;
+    voidTotal: number;
+    activeDays: number;
+  }[];
+  const items = new Map(
+    (
+      db
+        .prepare(
+          `SELECT s.user_id AS userId, s.user_name AS userName, COALESCE(SUM(i.qty), 0) AS q FROM sale_items i JOIN sales s ON s.id = i.sale_id
+            WHERE s.status = 'completed' AND s.business_date BETWEEN ? AND ?
+            GROUP BY s.user_id, CASE WHEN s.user_id IS NULL THEN s.user_name END`,
+        )
+        .all(from, to) as { userId: number | null; userName: string | null; q: number }[]
+    ).map((r) => [keyOf(r.userId, r.userName), r.q]),
+  );
+  const returns = new Map(
+    (
+      db
+        .prepare(
+          `SELECT s.user_id AS userId, s.user_name AS userName, COUNT(*) AS n, COALESCE(SUM(r.refund_total_kurus), 0) AS refund,
+                  COALESCE(SUM(r.net_total_kurus), 0) AS net, COALESCE(SUM(r.profit_reversal_kurus), 0) AS profit,
+                  COALESCE(SUM((SELECT SUM(ri.qty) FROM return_items ri WHERE ri.return_id = r.id)), 0) AS qty
+             FROM returns r JOIN sales s ON s.id = r.sale_id WHERE r.business_date BETWEEN ? AND ?
+            GROUP BY s.user_id, CASE WHEN s.user_id IS NULL THEN s.user_name END`,
+        )
+        .all(from, to) as { userId: number | null; userName: string | null; n: number; refund: number; net: number; profit: number; qty: number }[]
+    ).map((r) => [keyOf(r.userId, r.userName), r]),
+  );
+  const spans = db
+    .prepare(
+      `SELECT user_id AS userId, user_name AS userName, MIN(created_at) AS first, MAX(created_at) AS last FROM sales
+        WHERE status = 'completed' AND business_date BETWEEN ? AND ?
+        GROUP BY user_id, CASE WHEN user_id IS NULL THEN user_name END, business_date`,
+    )
+    .all(from, to) as { userId: number | null; userName: string | null; first: string; last: string }[];
+  const minutes = new Map<string, number>();
+  for (const s of spans) {
+    const k = keyOf(s.userId, s.userName);
+    const m = Math.round((Date.parse(s.last) - Date.parse(s.first)) / 60_000);
+    minutes.set(k, (minutes.get(k) ?? 0) + Math.max(0, m));
+  }
+  const users = new Map(
+    (
+      db.prepare("SELECT id, name, role, cashier_no AS cashierNo, is_active AS isActive FROM users").all() as {
+        id: number;
+        name: string;
+        role: "owner" | "cashier";
+        cashierNo: number | null;
+        isActive: number;
+      }[]
+    ).map((u) => [u.id, u]),
+  );
+
+  const out = new Map<string, CashierAggregate>();
+  const base = (userId: number | null, fallbackName: string | null): CashierAggregate => {
+    const u = userId !== null ? users.get(userId) : undefined;
+    return {
+      userId,
+      name: u?.name ?? fallbackName ?? "Bilinmiyor (eski satış)",
+      role: u?.role ?? null,
+      cashierNo: u?.cashierNo ?? null,
+      isActive: u ? u.isActive === 1 : false,
+      saleCount: 0,
+      salesTotalKurus: 0,
+      salesNetKurus: 0,
+      discountKurus: 0,
+      grossProfitKurus: 0,
+      cashKurus: 0,
+      cardKurus: 0,
+      itemsSold: 0,
+      voidCount: 0,
+      voidTotalKurus: 0,
+      returnCount: 0,
+      refundKurus: 0,
+      refundNetKurus: 0,
+      activeDays: 0,
+      activeMinutes: 0,
+    };
+  };
+  for (const s of sales) {
+    const k = keyOf(s.userId, s.userName);
+    const a = base(s.userId, s.userName);
+    const r = returns.get(k);
+    Object.assign(a, {
+      saleCount: s.saleCount,
+      salesTotalKurus: s.total,
+      salesNetKurus: s.net,
+      discountKurus: s.discount,
+      grossProfitKurus: s.profit - (r?.profit ?? 0),
+      cashKurus: s.cash,
+      cardKurus: s.card,
+      itemsSold: (items.get(k) ?? 0) - (r?.qty ?? 0),
+      voidCount: s.voidCount,
+      voidTotalKurus: s.voidTotal,
+      returnCount: r?.n ?? 0,
+      refundKurus: r?.refund ?? 0,
+      refundNetKurus: r?.net ?? 0,
+      activeDays: s.activeDays,
+      activeMinutes: minutes.get(k) ?? 0,
+    });
+    out.set(k, a);
+  }
+  // Aralık dışında satılmış ama aralıkta iadesi olan satışlar
+  for (const [k, r] of returns) {
+    if (out.has(k)) continue;
+    const a = base(r.userId, r.userName);
+    Object.assign(a, { grossProfitKurus: -r.profit, itemsSold: -r.qty, returnCount: r.n, refundKurus: r.refund, refundNetKurus: r.net });
+    out.set(k, a);
+  }
+  // Hiç satışı olmayan aktif kasiyerler
+  for (const u of users.values()) {
+    if (u.role === "cashier" && u.isActive === 1 && !out.has(keyOf(u.id, null))) out.set(keyOf(u.id, null), base(u.id, null));
+  }
+  return [...out.values()].sort((a, b) => b.salesTotalKurus - a.salesTotalKurus || a.name.localeCompare(b.name, "tr"));
+}

@@ -203,7 +203,7 @@ export function UsersScreen({ meId, codeRequired }: { meId: number; codeRequired
           ))}
         </ul>
       )}
-      <p className="text-sm text-slate-500">Kendi şifrenizi ve e-postanızı Yönetim Paneli → Hesabım&apos;dan değiştirirsiniz.</p>
+      <p className="text-sm text-slate-500">Kendi şifrenizi ve e-postanızı Yönetici Paneli → Hesabım&apos;dan değiştirirsiniz.</p>
 
       {dialog && (
         <SecretChangeDialog

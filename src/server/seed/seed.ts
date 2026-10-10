@@ -341,7 +341,8 @@ export function runSeed(db: DB, opts: { now?: Date; randomSeed?: number } = {}):
           paymentMethod: s.payment,
           cashReceivedKurus,
         },
-        { role: s.role },
+        // Örnek veride iki vardiyalı kasiyer: öğleden önce Zeynep, sonra Ali (kasiyer performansı raporu için)
+        { role: s.role, name: getIstanbulHour(s.at) < 15 ? "Zeynep Demir" : "Ali Çelik" },
       );
       saleIds.set(s.key, { id: r.sale.id, itemIds: r.items.map((i) => i.id) });
     } else if (ev.kind === "void") {

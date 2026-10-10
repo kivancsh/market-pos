@@ -26,7 +26,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
         <div className="bg-sky-100 px-4 py-2 text-center text-sm font-medium text-sky-900 print:hidden">
           Henüz kasiyer hesabı yok. Kasiyerlerin Kasiyer No + PIN ile girebilmesi için{" "}
           <a href="/yonetim/kullanicilar" className="underline">
-            Yönetim Paneli → Kullanıcılar
+            Yönetici Paneli → Kullanıcılar
           </a>{" "}
           bölümünden kasiyer ekleyin.
         </div>

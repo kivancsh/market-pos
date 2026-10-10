@@ -3,7 +3,7 @@
 Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 40 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
 Akış: açılış (logo) → "satış · stok · kâr takibi" → **Adım 1** giriş (PIN) → **Adım 2** barkod okutma →
-**Adım 3** nakit ödeme, para üstü → **Adım 4** panel ve telefon → **Adım 5** Yönetim Paneli'nden toplu fiyat →
+**Adım 3** nakit ödeme, para üstü → **Adım 4** panel ve telefon → **Adım 5** Yönetici Paneli'nden toplu fiyat →
 "Ve dahası" (etiket, raporlar, işlem geçmişi, kasiyer hesapları) → kapanış.
 
 Ekranlar uygulamanın gerçek ekranlarıdır (ayrı demo veritabanı, "Köşe Market"). Müzik ve ses efektleri

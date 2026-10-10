@@ -5,7 +5,7 @@ Aşağıdaki **Market-Kasa-Setup.exe** dosyasını indirin ve çift tıklayın. 
 1. **"Windows kişisel bilgisayarınızı korudu"** uyarısı çıkarsa: **Ek bilgi** → **Yine de çalıştır**. (Program imzalı bir şirket ürünü olmadığı için Windows ilk seferde bu uyarıyı gösterir.)
 2. Kurulum yardımcısında **Sonraki → Sonraki → Kur → Bitti**. Yönetici izni istemez.
 3. Masaüstündeki **Market Kasa** simgesine çift tıklayın. İlk açılış bir dakika kadar sürebilir; hazır olunca program **kendi penceresinde** açılır.
-4. İlk açılışta **yönetici hesabınızı** oluşturun: ad, kullanıcı adı ve şifre — hepsi bu. (E-posta isteğe bağlıdır; isterseniz sonra Ayarlar'dan bağlarsınız.) Kasiyerleri sonra **Yönetim Paneli → Kullanıcılar**'dan ekleyin; her kasiyere bir **Kasiyer No** verilir, kasiyer No + PIN ile girer.
+4. İlk açılışta **yönetici hesabınızı** oluşturun: ad, kullanıcı adı ve şifre — hepsi bu. (E-posta isteğe bağlıdır; isterseniz sonra Ayarlar'dan bağlarsınız.) Kasiyerleri sonra **Yönetici Paneli → Kullanıcılar**'dan ekleyin; her kasiyere bir **Kasiyer No** verilir, kasiyer No + PIN ile girer.
 5. Windows Güvenlik Duvarı izin isterse **Erişime izin ver** deyin (aynı Wi-Fi'deki telefondan takip için gerekir).
 
 - Pencereyi kapatmak programı kapatmaz (telefondan takip sürer). Tamamen kapatmak için pencerenin üstündeki menü: **Market Kasa → Programı tamamen kapat**.

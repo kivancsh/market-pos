@@ -3,7 +3,7 @@ import { cart, loginOwner, openKasa, rescanPause, scan, seedBarcodes } from "./h
 
 test.describe("barkod okuyucu ve kasa", () => {
   test.beforeEach(async ({ page }) => {
-    await loginOwner(page, /\/(panel|kasa)/);
+    await loginOwner(page);
     await openKasa(page);
   });
 
@@ -100,7 +100,7 @@ test.describe("barkod okuyucu ve kasa", () => {
 
 test.describe("okuyucu çift tetikleme", () => {
   test("aynı barkod 80 ms içinde iki kez gelirse tek sayılır (okuyucu hatası)", async ({ page }) => {
-    await loginOwner(page, /\/(panel|kasa)/);
+    await loginOwner(page);
     await openKasa(page);
     const su = seedBarcodes()[0]!.barcode;
     await scan(page, su);

@@ -121,7 +121,7 @@ await shot(p, "hesabim", { notes: ['[data-testid="account-change-password"]', '[
 await p.goto(`${BASE}/yonetim`);
 await shot(p, "yonetim", { notes: [p.getByText("Ürünler ve fiyatlar").first(), p.getByText("Stok", { exact: true }).first(), p.getByText("Raporlar ve kayıtlar").first(), p.getByText("Hesaplar ve ayarlar").first()] });
 const nav = p.getByRole("navigation", { name: "Ana menü" });
-await shot(p, "menu", { clip: { x: 0, y: 0, width: VP.width, height: 64 }, pad: 0, notes: [nav.getByRole("link", { name: "Panel", exact: true }), nav.getByRole("link", { name: "Kasa", exact: true }), nav.getByRole("link", { name: "İade", exact: true }), nav.getByRole("link", { name: "Yönetim Paneli" }), '[data-testid="nav-user"]', p.getByRole("button", { name: "Çıkış" })] });
+await shot(p, "menu", { clip: { x: 0, y: 0, width: VP.width, height: 64 }, pad: 0, notes: [nav.getByRole("link", { name: "Panel", exact: true }), nav.getByRole("link", { name: "Kasa", exact: true }), nav.getByRole("link", { name: "İade", exact: true }), nav.getByRole("link", { name: "Yönetici Paneli" }), '[data-testid="nav-user"]', p.getByRole("button", { name: "Çıkış" })] });
 
 // ================================================================= 4. Giriş ekranı
 await p.getByRole("button", { name: "Çıkış" }).click();

@@ -22,12 +22,13 @@ test("kurulum yapılmışsa /kurulum girişe yönlenir; hatalı şifre reddedili
 
 test("yönetim paneli: kasiyer ekle → Kasiyer No + PIN ile kasaya giriş", async ({ page }) => {
   await loginOwner(page);
-  await page.getByRole("navigation", { name: "Ana menü" }).getByRole("link", { name: "Yönetim Paneli" }).click();
+  await page.getByRole("navigation", { name: "Ana menü" }).getByRole("link", { name: "Yönetici Paneli" }).click();
   await expect(page).toHaveURL(/\/yonetim$/);
+  const side = page.getByRole("navigation", { name: "Yönetici menüsü" });
   for (const href of ["/urunler", "/yonetim/toplu-fiyat", "/yonetim/kategoriler", "/yonetim/islem-gecmisi", "/yonetim/kullanicilar", "/yonetim/hesabim"]) {
-    await expect(page.getByTestId(`tile-${href}`)).toBeVisible();
+    await expect(side.locator(`a[href="${href}"]`)).toBeVisible();
   }
-  await page.getByTestId("tile-/yonetim/kullanicilar").click();
+  await side.getByRole("link", { name: "Kullanıcılar" }).click();
   await page.getByTestId("user-name").fill("Elif Kasa");
   await page.getByTestId("user-pin").fill("5151");
   await page.getByTestId("user-add").click();
@@ -149,5 +150,5 @@ test("şifremi unuttum: e-postadaki kodla yönetici şifresi yenilenir", async (
   await expect(page.getByTestId("login-username")).toHaveValue("deniz");
   await page.getByTestId("login-password").fill("deniz-yeni-456");
   await page.getByTestId("login-owner-submit").click();
-  await page.waitForURL(/\/panel/);
+  await page.waitForURL(/\/yonetim/);
 });

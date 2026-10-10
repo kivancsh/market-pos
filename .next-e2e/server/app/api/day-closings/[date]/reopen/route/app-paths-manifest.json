@@ -1,0 +1,3 @@
+{
+  "/api/day-closings/[date]/reopen/route": "app/api/day-closings/[date]/reopen/route.js"
+}

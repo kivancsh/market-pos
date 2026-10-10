@@ -44,7 +44,7 @@ export async function latestMailCode(page: Page, sinceMs: number): Promise<strin
 }
 
 /** Yönetici girişi: "Yönetici" sekmesinde kullanıcı adı + şifre. */
-export async function loginOwner(page: Page, expectPath: RegExp = /\/panel/) {
+export async function loginOwner(page: Page, expectPath: RegExp = /\/yonetim/) {
   await page.goto("/login");
   await page.getByTestId("login-tab-owner").click();
   await page.getByTestId("login-username").fill(E2E.owner.username);

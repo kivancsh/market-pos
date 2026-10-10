@@ -1,0 +1,11 @@
+var R=require("../../../../chunks/[turbopack]_runtime.js")("server/app/api/barcodes/availability/route.js")
+R.c("server/chunks/src_17t3zh5kgshrz._.js")
+R.c("server/chunks/src_server_services_barcodes_ts_1jnktm8y494ws._.js")
+R.c("server/chunks/src_server_05csq3y1l3g2-._.js")
+R.c("server/chunks/[root-of-the-server]__15bjnu5yieigz._.js")
+R.c("server/chunks/_00x91-42blfn5._.js")
+R.c("server/chunks/src_server_09118-qozn2o9._.js")
+R.c("server/chunks/[root-of-the-server]__022df6zsywegh._.js")
+R.c("server/chunks/_next-internal_server_app_api_barcodes_availability_route_actions_04lborw3doiku.js")
+R.m(22008)
+module.exports=R.m(22008).exports

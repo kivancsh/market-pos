@@ -298,7 +298,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
         .separator(),
         item("Kasa", #selector(goKasa), "1"),
         item("Panel", #selector(goPanel), "2"),
-        item("Yönetim Paneli", #selector(goAdmin), "3"),
+        item("Yönetici Paneli", #selector(goAdmin), "3"),
       ])
     let windowMenu = NSMenu(title: "Pencere")
     windowMenu.addItem(item("Küçült", #selector(NSWindow.performMiniaturize(_:)), "m"))

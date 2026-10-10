@@ -12,16 +12,14 @@ interface NavItem {
   owner?: boolean;
 }
 
-/** Menü. Yeni ekranlar eklendikçe buraya eklenir. */
+/** Üst menü: yönetici için Yönetici Paneli + Kasa; kasiyer için sadece Kasa. Yönetici ekranları paneldeki yan menüdedir. */
 const ITEMS: NavItem[] = [
-  { href: "/panel", label: "Panel", owner: true },
+  { href: "/yonetim", label: "Yönetici Paneli", owner: true },
   { href: "/kasa", label: "Kasa" },
-  { href: "/iade", label: "İade", owner: true },
-  { href: "/yonetim", label: "Yönetim Paneli", owner: true },
 ];
 
-/** Yönetim Paneli altındaki sayfalar (menüde "Yönetim Paneli" seçili görünsün). */
-const ADMIN_PREFIXES = ["/yonetim", "/urunler", "/mal-girisi", "/stok-sayim", "/etiketler", "/raporlar", "/ayarlar"];
+/** Yönetici Paneli altındaki sayfalar (üst menüde "Yönetici Paneli" seçili görünsün). */
+const ADMIN_PREFIXES = ["/yonetim", "/panel", "/iade", "/urunler", "/mal-girisi", "/stok-sayim", "/etiketler", "/raporlar", "/ayarlar", "/simulator"];
 
 export function AppNav({ role, userName, businessName }: { role: Role; userName: string; businessName: string }) {
   const pathname = usePathname();

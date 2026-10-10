@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { loginOwner } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
-  await loginOwner(page, /\/panel/);
+  await loginOwner(page);
 });
 
 test("yeni ürün formu: barkod üret, kaydet → ürün sayfası açılır", async ({ page }) => {

@@ -188,7 +188,7 @@ function actorOwner(ctx: Ctx): User {
 function actorOwnerWithEmail(ctx: Ctx): User & { email: string } {
   const me = actorOwner(ctx);
   if (!me.email) {
-    throw badRequest("EMAIL_REQUIRED", "Onay kodu gönderebilmek için önce Yönetim Paneli → Hesabım'dan e-posta adresinizi ekleyin.");
+    throw badRequest("EMAIL_REQUIRED", "Onay kodu gönderebilmek için önce Yönetici Paneli → Hesabım'dan e-posta adresinizi ekleyin.");
   }
   return me as User & { email: string };
 }

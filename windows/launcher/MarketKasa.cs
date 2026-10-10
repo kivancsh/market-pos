@@ -195,7 +195,7 @@ static class MarketKasa
             var go = new ToolStripMenuItem("Git");
             go.DropDownItems.Add(Item("Kasa", delegate { Go("kasa"); }));
             go.DropDownItems.Add(Item("Panel", delegate { Go("panel"); }));
-            go.DropDownItems.Add(Item("Yönetim Paneli", delegate { Go("yonetim"); }));
+            go.DropDownItems.Add(Item("Yönetici Paneli", delegate { Go("yonetim"); }));
             go.DropDownItems.Add(new ToolStripSeparator());
             go.DropDownItems.Add(Item("Geri", delegate { if (web.CanGoBack) web.GoBack(); }));
             go.DropDownItems.Add(Item("İleri", delegate { if (web.CanGoForward) web.GoForward(); }));

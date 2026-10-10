@@ -1,12 +1,12 @@
 /**
- * Günlük rapor e-postası: o günün özeti (ciro, kâr, marj, ödeme türleri, iadeler, en çok satanlar, kritik stok,
- * kasa sayımı) + ekte o günün ürün kârlılığı Excel'i. Aktif ve e-postası olan bütün yöneticilere gider.
+ * Günlük rapor e-postası: o günün özeti (ciro, kâr, marj, ödeme türleri, iadeler, kasiyer performansı, en çok satanlar,
+ * kritik stok, kasa sayımı) + ekte o günün ürün kârlılığı ve kasiyer performansı Excel'leri. Aktif ve e-postası olan bütün yöneticilere gider.
  *
  * Ne zaman: "Günü Kapat"ta hemen (trigger "close"); gün kapatılmazsa Ayarlar'daki saatte otomatik ("auto");
  * bilgisayar o saatte kapalıysa sonraki açılışta önceki günün raporu gönderilir. Otomatik gönderim günde bir kez.
  */
 import { addDays, formatBusinessDate, getBusinessDate } from "@/lib/businessDate";
-import { formatPermille, formatTRY } from "@/lib/money";
+import { divRound, formatPermille, formatTRY } from "@/lib/money";
 import type { Ctx } from "../context";
 import { hasDailyReport, insertDailyReportLog, type ReportTrigger } from "../db/repositories/dailyReports";
 import { getSettings } from "../db/repositories/settings";
@@ -15,8 +15,9 @@ import { asciiSlug, reportToXlsx } from "../excel";
 import { AppError } from "../errors";
 import { isMailConfigured, sendMail } from "../mail";
 import { esc, layout } from "../mail/templates";
+import { getCashierAggregates } from "../db/repositories/reports";
 import { getDashboard } from "./dashboard";
-import { buildReport } from "./reports";
+import { buildReport, cashierLabel, formatMinutes } from "./reports";
 
 export type ReportSendResult =
   | { status: "sent"; recipients: string[] }
@@ -42,6 +43,19 @@ ${closing.note ? row("Not", closing.note) : ""}</table>`
     items.length
       ? `<h2 style="font-size:15px;margin:20px 0 6px">${esc(title)}</h2><ol style="margin:0;padding-left:20px;font-size:14px;line-height:1.6">${items.map((i) => `<li>${esc(i)}</li>`).join("")}</ol>`
       : "";
+  const cashiers = getCashierAggregates(ctx.db, date, date).filter((a) => a.saleCount + a.voidCount + a.returnCount > 0);
+  const th = (t: string, right = false) => `<th style="padding:6px 4px;border-bottom:1px solid #e2e8f0;text-align:${right ? "right" : "left"};font-size:12px;color:#475569">${esc(t)}</th>`;
+  const td = (t: string, right = false) => `<td style="padding:6px 4px;border-bottom:1px solid #f1f5f9;text-align:${right ? "right" : "left"}">${esc(t)}</td>`;
+  const cashierHtml = cashiers.length
+    ? `<h2 style="font-size:15px;margin:20px 0 6px">Kasiyer performansı</h2>
+<table width="100%" style="border-collapse:collapse;font-size:13px"><tr>${th("Kasiyer")}${th("Satış", true)}${th("Tutar", true)}${th("Ort. sepet", true)}${th("İptal", true)}${th("İade", true)}${th("Kasada", true)}</tr>
+${cashiers
+  .map(
+    (a) =>
+      `<tr>${td(cashierLabel(a))}${td(String(a.saleCount), true)}${td(formatTRY(a.salesTotalKurus), true)}${td(a.saleCount ? formatTRY(divRound(a.salesTotalKurus, a.saleCount)) : "—", true)}${td(String(a.voidCount), true)}${td(a.refundKurus ? formatTRY(a.refundKurus) : "—", true)}${td(formatMinutes(a.activeMinutes), true)}</tr>`,
+  )
+  .join("\n")}</table>`
+    : "";
   const top = d.topByQty.map((p) => `${p.name} — ${p.qty} adet, ${formatTRY(p.revenueGrossKurus)}`);
   const critical = [
     ...d.stock.outOfStock.map((p) => `${p.name}: stok bitti`),
@@ -64,9 +78,10 @@ ${row("İadeler", `${formatTRY(s.refundsKurus)} (${s.returnCount} iade)`)}
 ${s.voidedCount ? row("İptal edilen satış", String(s.voidedCount)) : ""}
 </table>
 ${closingHtml}
+${cashierHtml}
 ${list("En çok satan ürünler", top)}
 ${list("Azalan / biten stok", critical)}
-<p style="margin:18px 0 0;font-size:13px;color:#64748b">Ekte: o günün ürün kârlılığı (Excel).</p>`,
+<p style="margin:18px 0 0;font-size:13px;color:#64748b">Ekte: o günün ürün kârlılığı ve kasiyer performansı (Excel).</p>`,
     businessName,
   );
   const text = [
@@ -78,6 +93,7 @@ ${list("Azalan / biten stok", critical)}
   ].join("\n");
   const report = buildReport(ctx, "products", date, date);
   const xlsx = await reportToXlsx(report, businessName);
+  const cashierXlsx = await reportToXlsx(buildReport(ctx, "cashiers", date, date), businessName);
   return {
     subject: `${businessName} günlük rapor ${nice}: ciro ${formatTRY(s.revenueGrossKurus)}, kâr ${formatTRY(s.grossProfitKurus)}`,
     text,
@@ -86,6 +102,11 @@ ${list("Azalan / biten stok", critical)}
       {
         filename: `urun-karliligi-${asciiSlug(businessName)}-${date}.xlsx`,
         content: xlsx,
+        contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      },
+      {
+        filename: `kasiyer-performansi-${asciiSlug(businessName)}-${date}.xlsx`,
+        content: cashierXlsx,
         contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       },
     ],

@@ -3,10 +3,11 @@
  * aynı tanımdan üretilir (ikisi her zaman aynı veriyi gösterir).
  */
 import { addDays, isBusinessDate } from "@/lib/businessDate";
-import { marginPermille } from "@/lib/money";
+import { divRound, marginPermille } from "@/lib/money";
 import { unitEconomics } from "@/lib/pricing";
 import type { Ctx } from "../context";
 import {
+  getCashierAggregates,
   getDailyRows,
   getLastSaleDates,
   getPeriodSummary,
@@ -39,7 +40,7 @@ export interface ReportResult {
   totals: ReportRow | null;
 }
 
-export const REPORT_KEYS = ["daily", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
+export const REPORT_KEYS = ["daily", "cashiers", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
 export type ReportKey = (typeof REPORT_KEYS)[number];
 
 export const MAX_RANGE_DAYS = 366;
@@ -64,9 +65,87 @@ function daysBetween(from: string, to: string): string[] {
 
 const sum = (rows: ReportRow[], key: string) => rows.reduce((a, r) => a + (Number(r[key]) || 0), 0);
 
+/** "5 sa 20 dk" */
+export function formatMinutes(m: number): string {
+  if (m <= 0) return "—";
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return h > 0 ? `${h} sa ${mm} dk` : `${mm} dk`;
+}
+
+/** Kasiyer adı + rolü ("Mehmet Kaya (No 1001)", "Ayşe Yılmaz (yönetici)") */
+export function cashierLabel(a: { name: string; role: "owner" | "cashier" | null; cashierNo: number | null; isActive: boolean }): string {
+  const tag = a.role === "owner" ? "yönetici" : a.cashierNo !== null ? `No ${a.cashierNo}` : null;
+  return `${a.name}${tag ? ` (${tag})` : ""}${a.role !== null && !a.isActive ? " · pasif" : ""}`;
+}
+
 type Builder = (ctx: Ctx, from: string, to: string) => Omit<ReportResult, "key" | "from" | "to">;
 
 const BUILDERS: Record<ReportKey, Builder> = {
+  cashiers: (ctx, from, to) => {
+    const rows = getCashierAggregates(ctx.db, from, to).map((a) => ({
+      name: cashierLabel(a),
+      saleCount: a.saleCount,
+      salesTotalKurus: a.salesTotalKurus,
+      avgBasketKurus: a.saleCount > 0 ? divRound(a.salesTotalKurus, a.saleCount) : null,
+      itemsSold: a.itemsSold,
+      discountKurus: a.discountKurus,
+      grossProfitKurus: a.grossProfitKurus,
+      marginPermille: marginPermille(a.grossProfitKurus, a.salesNetKurus - a.refundNetKurus),
+      cashKurus: a.cashKurus,
+      cardKurus: a.cardKurus,
+      voidCount: a.voidCount,
+      refundKurus: a.refundKurus,
+      activeDays: a.activeDays,
+      activeTime: formatMinutes(a.activeMinutes),
+      perHourKurus: a.activeMinutes >= 30 ? divRound(a.salesTotalKurus * 60, a.activeMinutes) : null,
+    }));
+    const salesTotal = sum(rows, "salesTotalKurus");
+    const saleCount = sum(rows, "saleCount");
+    return {
+      title: "Kasiyer performansı",
+      description:
+        "Her kasiyerin (ve satış yapan yöneticinin) satışları: ciro, sepet, indirim, iptal, iade ve kasada geçen süre. " +
+        "Kasada geçen süre her gün ilk satıştan son satışa kadardır. İptaller ciroya girmez; satışlarından yapılan iadeler ayrıca yazılır, kârdan düşülür.",
+      usesRange: true,
+      columns: [
+        { key: "name", label: "Kasiyer", type: "text" },
+        { key: "saleCount", label: "Satış sayısı", type: "int" },
+        { key: "salesTotalKurus", label: "Satış tutarı (KDV dahil)", type: "money" },
+        { key: "avgBasketKurus", label: "Ortalama sepet", type: "money" },
+        { key: "itemsSold", label: "Satılan adet", type: "int" },
+        { key: "discountKurus", label: "Yapılan indirim", type: "money" },
+        { key: "grossProfitKurus", label: "Brüt kâr (KDV hariç)", type: "money" },
+        { key: "marginPermille", label: "Marj", type: "permille" },
+        { key: "cashKurus", label: "Nakit", type: "money" },
+        { key: "cardKurus", label: "Kart", type: "money" },
+        { key: "voidCount", label: "İptal edilen satış", type: "int" },
+        { key: "refundKurus", label: "Satışlarından iade", type: "money" },
+        { key: "activeDays", label: "Çalıştığı gün", type: "int" },
+        { key: "activeTime", label: "Kasada geçen süre", type: "text" },
+        { key: "perHourKurus", label: "Saat başı satış", type: "money" },
+      ],
+      rows,
+      totals: {
+        name: "Toplam",
+        saleCount,
+        salesTotalKurus: salesTotal,
+        avgBasketKurus: saleCount > 0 ? divRound(salesTotal, saleCount) : null,
+        itemsSold: sum(rows, "itemsSold"),
+        discountKurus: sum(rows, "discountKurus"),
+        grossProfitKurus: sum(rows, "grossProfitKurus"),
+        marginPermille: null,
+        cashKurus: sum(rows, "cashKurus"),
+        cardKurus: sum(rows, "cardKurus"),
+        voidCount: sum(rows, "voidCount"),
+        refundKurus: sum(rows, "refundKurus"),
+        activeDays: null,
+        activeTime: "",
+        perHourKurus: null,
+      },
+    };
+  },
+
   daily: (ctx, from, to) => {
     const rows = getDailyRows(ctx.db, daysBetween(from, to)).map((r) => ({ ...r }));
     const s = getPeriodSummary(ctx.db, from, to);

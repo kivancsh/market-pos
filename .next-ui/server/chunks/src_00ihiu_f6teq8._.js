@@ -1,0 +1,3 @@
+module.exports=[23322,e=>{"use strict";async function s(){if("phase-production-build"===process.env.NEXT_PHASE||"1"===process.env.MARKET_KASA_NO_SCHEDULER)return;let{startScheduler:s}=await e.A(86343);s()}e.s(["register",0,s])},86343,e=>{e.v(s=>Promise.all(["server/chunks/[externals]__1s8fx-fx7gumb._.js","server/chunks/_0yy4yndrh100o._.js"].map(s=>e.l(s))).then(()=>s(48861)))}];
+
+//# sourceMappingURL=src_00ihiu_f6teq8._.js.map

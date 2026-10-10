@@ -48,7 +48,7 @@ Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](do
 
 🎬 **[Market Kasa tanıtım videosu (40 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
 
-Lansman tarzı, "nasıl kullanılır" videosu: giriş → barkod okutma → nakit ödeme ve para üstü → panelde kâr (telefondan da) → Yönetim Paneli'nden toplu fiyat → etiket, raporlar, işlem geçmişi, kasiyer hesapları. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
+Lansman tarzı, "nasıl kullanılır" videosu: giriş → barkod okutma → nakit ödeme ve para üstü → panelde kâr (telefondan da) → Yönetici Paneli'nden toplu fiyat → etiket, raporlar, işlem geçmişi, kasiyer hesapları. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
 
 Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 
@@ -90,8 +90,8 @@ Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında oto
 
 1. Klasördeki **Kurulum** dosyasına çift tıklayın (ilk seferde macOS "doğrulanamadı" derse: dosyaya sağ tıklayın → **Aç** → **Aç**). Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
 2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **kendi penceresinde** açılır (tarayıcı gerekmez; adres çubuğu/sekme yok, Dock'ta kendi simgesi). Sunucu arka planda çalışır. Simgeyi Dock'a da sürükleyebilirsiniz.
-3. Pencerenin üst menüsü: **Market Kasa** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetim Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
-4. **İlk açılışta** tek adımlık kurulum ekranı gelir: adınızı, kullanıcı adınızı ve en az 8 karakterlik şifrenizi yazıp **Hesabı oluştur**'a basın; hesap hemen açılır. E-posta isteğe bağlıdır (bkz. [E-posta](#e-posta-isteğe-bağlı-şifre-sıfırlama-ve-günlük-rapor)). Sonra **Yönetim Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin; her kasiyere otomatik bir **Kasiyer No** verilir (1001, 1002…).
+3. Pencerenin üst menüsü: **Market Kasa** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetici Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
+4. **İlk açılışta** tek adımlık kurulum ekranı gelir: adınızı, kullanıcı adınızı ve en az 8 karakterlik şifrenizi yazıp **Hesabı oluştur**'a basın; hesap hemen açılır. E-posta isteğe bağlıdır (bkz. [E-posta](#e-posta-isteğe-bağlı-şifre-sıfırlama-ve-günlük-rapor)). Sonra **Yönetici Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin; her kasiyere otomatik bir **Kasiyer No** verilir (1001, 1002…).
 5. Pencereyi kapatmak programı kapatmaz (telefondan takip sürer). Program; menüden **Market Kasa → Programı tamamen kapat** denene ya da bilgisayar kapanana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
 
 Klasördeki diğer çift tıklanabilir dosyalar:
@@ -209,7 +209,7 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | **Kasa** | Okut → sepete ekle → NAKİT (F8) / KART (F9) → tamamla. Ürün adıyla arama da yapılabilir. | Herkes |
 | **Panel** | Günün cirosu, kârı, satışları (kimin yaptığıyla), kritik stok, saatlik grafik. Satışa tıklayınca iptal/iade. **Günü Kapat**. | Yönetici |
 | **İade** | Fiş numarasıyla eski bir satışı bulup kısmi/tam iade. | Yönetici |
-| **Yönetim Paneli** | Aşağıdaki tüm yönetim ekranlarının toplandığı sayfa. | Yönetici |
+| **Yönetici Paneli** | Aşağıdaki tüm yönetim ekranlarının toplandığı sayfa. | Yönetici |
 | **Ürünler** | Ürün ekle/düzenle, barkodlar, pasife alma, stok geçmişi. **Satış fiyatına tıklayıp** fiyatı listede hızlıca değiştirme. | Yönetici |
 | **Toplu fiyat güncelleme** | Bir kategoriye, seçili ürünlere veya hepsine % ya da ₺ zam/indirim; yuvarlama (0,50 / 1 ₺ / x,90); önce önizleme, maliyetin altına düşenler uyarılı. | Yönetici |
 | **Kategoriler** | Kategori ekle, adını değiştir, boş kategoriyi sil. | Yönetici |
@@ -274,10 +274,10 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 ## 8. Hesaplar: yönetici, kasiyerler, şifre sıfırlama
 
-- **Yönetici** kullanıcı adı + şifreyle girer (giriş ekranında **Yönetici** sekmesi). İlk yönetici, programın ilk açılışında oluşturulur. Başka yönetici eklemek için: Yönetim Paneli → Kullanıcılar.
-- **Kasiyerler** kendi **Kasiyer No**'ları + PIN'leriyle girer (giriş ekranı **Kasiyer** sekmesiyle açılır). Kasiyer No otomatik verilir (1001, 1002…), her kasiyerin kendi numarası ve hesabı vardır; numara bir daha başkasına verilmez. PIN 4–8 rakamdır ve her kasiyerinki farklıdır. Yönetim Paneli → **Kullanıcılar**'dan eklenir, PIN'i değiştirilir veya **pasife alınır** (işten ayrılan kasiyer artık giremez; eski satışlarında adı kalır). Program o bilgisayarda en son giren Kasiyer No'yu hatırlar.
+- **Yönetici** kullanıcı adı + şifreyle girer (giriş ekranında **Yönetici** sekmesi). İlk yönetici, programın ilk açılışında oluşturulur. Başka yönetici eklemek için: Yönetici Paneli → Kullanıcılar.
+- **Kasiyerler** kendi **Kasiyer No**'ları + PIN'leriyle girer (giriş ekranı **Kasiyer** sekmesiyle açılır). Kasiyer No otomatik verilir (1001, 1002…), her kasiyerin kendi numarası ve hesabı vardır; numara bir daha başkasına verilmez. PIN 4–8 rakamdır ve her kasiyerinki farklıdır. Yönetici Paneli → **Kullanıcılar**'dan eklenir, PIN'i değiştirilir veya **pasife alınır** (işten ayrılan kasiyer artık giremez; eski satışlarında adı kalır). Program o bilgisayarda en son giren Kasiyer No'yu hatırlar.
 - **Şifre ve PIN'leri sadece yönetici değiştirir/sıfırlar** (kasiyerlerinki dahil). E-posta bağlı değilse doğrudan değişir (yönetici kendi şifresinde mevcut şifresini de yazar). E-posta bağlıysa her seferinde yöneticinin e-postasına **6 haneli onay kodu** gider; kod doğru girilmeden değişiklik yapılmaz (10 dakika geçerli, 5 yanlışta iptal).
-- Kendi şifrenizi veya e-postanızı değiştirmek: Yönetim Paneli → **Hesabım** (e-posta eklerken adrese kod gider).
+- Kendi şifrenizi veya e-postanızı değiştirmek: Yönetici Paneli → **Hesabım** (e-posta eklerken adrese kod gider).
 - Bir hesabın şifresi/PIN'i değişince ya da hesap pasife alınınca o hesabın açık oturumları kapanır.
 - **Yönetici şifresini unuttuysanız:** kasa bilgisayarında **Yönetici Şifresi Sıfırla** (Windows: Başlat menüsü → Market Kasa; Mac: klasördeki dosya; ya da Terminal'de `npm run users -- reset-password`). E-posta bağladıysanız giriş ekranı → **Yönetici** → **Şifremi unuttum** ile e-postanıza gelen kodla da yenileyebilirsiniz.
 
@@ -285,7 +285,7 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 
 ### E-posta (isteğe bağlı): şifre sıfırlama ve günlük rapor
 
-Program e-postasız da tam çalışır. **Ayarlar → E-posta gönderimi → E-posta bağla** ile bağlarsanız: şifrenizi e-postayla yenileyebilir, her akşam günlük raporu alırsınız; şifre/PIN değişiklikleri de e-posta koduyla yapılır. Ardından Yönetim Paneli → **Hesabım**'dan kendi e-posta adresinizi ekleyin (adrese kod gelir). E-postalar **dükkânın kendi e-posta hesabından** gönderilir. Gmail önerilir (iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). **Outlook / Hotmail gönderen olarak kullanılamaz:** Microsoft 2026'dan beri programların şifreyle e-posta göndermesine izin vermiyor. Hotmail adresiniz yine **alıcı** olabilir (kodlar ve rapor oraya gelir); gönderen için bir Gmail hesabı açın. Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
+Program e-postasız da tam çalışır. **Ayarlar → E-posta gönderimi → E-posta bağla** ile bağlarsanız: şifrenizi e-postayla yenileyebilir, her akşam günlük raporu alırsınız; şifre/PIN değişiklikleri de e-posta koduyla yapılır. Ardından Yönetici Paneli → **Hesabım**'dan kendi e-posta adresinizi ekleyin (adrese kod gelir). E-postalar **dükkânın kendi e-posta hesabından** gönderilir. Gmail önerilir (iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). **Outlook / Hotmail gönderen olarak kullanılamaz:** Microsoft 2026'dan beri programların şifreyle e-posta göndermesine izin vermiyor. Hotmail adresiniz yine **alıcı** olabilir (kodlar ve rapor oraya gelir); gönderen için bir Gmail hesabı açın. Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
 
 1. **myaccount.google.com** → **Güvenlik** → **2 Adımlı Doğrulama**'yı açın (kapalıysa).
 2. Arama kutusuna **Uygulama şifreleri** yazın → ad olarak **Market Kasa** → **Oluştur**.

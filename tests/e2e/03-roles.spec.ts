@@ -23,10 +23,25 @@ test("oturumsuz kullanıcı girişe yönlenir", async ({ page }) => {
   await expect(page).toHaveURL(/\/login\?next=%2Fpanel/);
 });
 
-test("yönetici: tüm menüler görünür ve panel açılır", async ({ page }) => {
-  await loginOwner(page, /\/panel/);
+test("yönetici: Yönetici Paneli açılır; yan menüden kasiyer performansı ve gün sonu", async ({ page }) => {
+  await loginOwner(page);
   const nav = page.getByRole("navigation", { name: "Ana menü" });
-  for (const label of ["Panel", "Kasa", "İade", "Yönetim Paneli"]) {
+  for (const label of ["Yönetici Paneli", "Kasa"]) {
     await expect(nav.getByRole("link", { name: label, exact: true })).toBeVisible();
   }
+  await expect(page.getByRole("heading", { name: "Yönetici Paneli" })).toBeVisible();
+  await expect(page.getByTestId("kpi-revenue")).toBeVisible();
+  const side = page.getByRole("navigation", { name: "Yönetici menüsü" });
+  for (const label of ["Genel bakış", "Bugün ve gün sonu", "Kasiyer performansı", "Ürünler ve fiyatlar", "Mal girişi", "Raporlar ve Excel", "Kullanıcılar", "Ayarlar ve yedekler"]) {
+    await expect(side.getByRole("link", { name: label })).toBeVisible();
+  }
+  await side.getByRole("link", { name: "Kasiyer performansı" }).click();
+  await expect(page.getByRole("heading", { name: "Kasiyer performansı" })).toBeVisible();
+  await expect(side.getByRole("link", { name: "Kasiyer performansı" })).toHaveAttribute("aria-current", "page");
+  await side.getByRole("link", { name: "Bugün ve gün sonu" }).click();
+  await expect(page).toHaveURL(/\/panel/);
+  await expect(page.getByTestId("summary-cards")).toBeVisible();
+  // Dönem seçimi
+  await page.goto("/yonetim?donem=ay");
+  await expect(page.getByRole("link", { name: "Bu ay" })).toHaveAttribute("aria-current", "page");
 });
