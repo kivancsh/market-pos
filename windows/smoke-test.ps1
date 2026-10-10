@@ -33,7 +33,7 @@ Step 'Kurulum (sessiz)'
 $setup = Resolve-Path 'build\dist\Market-Kasa-Setup.exe'
 $code = RunExe $setup @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=desktopicon')
 if ($code -ne 0) { Fail "Kurulum çıkış kodu $code" }
-foreach ($f in @($exe, "$appDir\node\node.exe", "$appDir\app\server.js", "$appDir\app\kasa-server.js", "$appDir\app\tools\users-cli.js", "$appDir\unins000.exe")) {
+foreach ($f in @($exe, "$appDir\node\node.exe", "$appDir\app\server.js", "$appDir\app\kasa-server.js", "$appDir\app\tools\users-cli.js", "$appDir\unins000.exe", "$appDir\Microsoft.Web.WebView2.Core.dll", "$appDir\Microsoft.Web.WebView2.WinForms.dll", "$appDir\WebView2Loader.dll")) {
   if (-not (Test-Path $f)) { Fail "Kurulumdan sonra eksik: $f" }
 }
 $desktop = [Environment]::GetFolderPath('Desktop')
@@ -52,6 +52,13 @@ $me = Invoke-RestMethod "$base/api/auth/me"
 if (-not $me.needsSetup) { Fail 'İlk açılışta kurulum ekranı bekleniyordu' }
 $r = Invoke-WebRequest "$base/" -MaximumRedirection 5 -UseBasicParsing
 if ($r.Content -notmatch 'Yönetici hesabı') { Fail 'Kurulum sayfası gelmedi' }
+
+Step 'Uygulama penceresi (WebView2): pencereyi görünmeden açıp sayfayı yükle'
+$code = RunExe $exe @('--selftest') 150
+$ll = Join-Path $root 'logs\launcher.log'
+$tail = if (Test-Path $ll) { (Get-Content $ll -Tail 6) -join ' | ' } else { '' }
+if ($code -eq 0) { Write-Host "Pencere testi geçti: $tail" }
+else { Write-Host "::warning::Uygulama penceresi testi çıkış kodu $code — $tail" }
 
 Step 'İlk yönetici hesabı ve oturum'
 $s = New-Object Microsoft.PowerShell.Commands.WebRequestSession

@@ -47,13 +47,30 @@ jobs:
       - name: Paket dosyalarını topla
         run: node windows/build.mjs
 
-      - name: Başlatıcıyı derle (Market Kasa.exe)
+      - name: Uygulama penceresi bileşeni (Microsoft Edge WebView2, NuGet)
+        shell: pwsh
+        run: |
+          $versions = (Invoke-RestMethod https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/index.json).versions | Where-Object { $_ -notmatch '-' }
+          $v = $versions[-1]
+          Write-Host "WebView2 SDK $v"
+          Invoke-WebRequest "https://api.nuget.org/v3-flatcontainer/microsoft.web.webview2/$v/microsoft.web.webview2.$v.nupkg" -OutFile wv2.zip
+          Expand-Archive wv2.zip -DestinationPath wv2 -Force
+          foreach ($n in @('Microsoft.Web.WebView2.Core.dll', 'Microsoft.Web.WebView2.WinForms.dll')) {
+            $f = Get-ChildItem wv2\lib -Recurse -Filter $n | Where-Object { $_.FullName -match '\\net4' } | Select-Object -First 1
+            if (-not $f) { Write-Host "::error::$n bulunamadı"; exit 1 }
+            Copy-Item $f.FullName build\win\
+          }
+          Copy-Item wv2\runtimes\win-x64\native\WebView2Loader.dll build\win\
+
+      - name: Uygulamayı derle (Market Kasa.exe)
         shell: pwsh
         run: |
           $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
           & $csc /nologo /codepage:65001 /target:winexe /optimize+ /platform:anycpu `
             /win32icon:windows\MarketKasa.ico "/out:build\win\Market Kasa.exe" `
-            /r:System.Windows.Forms.dll /r:System.Drawing.dll windows\launcher\MarketKasa.cs
+            /r:System.Windows.Forms.dll /r:System.Drawing.dll `
+            /r:build\win\Microsoft.Web.WebView2.Core.dll /r:build\win\Microsoft.Web.WebView2.WinForms.dll `
+            windows\launcher\MarketKasa.cs
           if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Kurulum dosyasını oluştur (Inno Setup)

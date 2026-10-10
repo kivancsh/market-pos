@@ -1,5 +1,6 @@
 #!/bin/bash
-# Masaüstüne "Market Kasa" uygulama simgesini oluşturur (program arka planda, pencere açmadan çalışır).
+# Masaüstüne "Market Kasa" uygulamasını oluşturur: program kendi penceresinde açılır,
+# sunucu arka planda çalışır (pencereyi kapatmak programı kapatmaz).
 # Kullanım: scripts/create-app.sh [proje klasörü] [uygulama yolu]
 set -euo pipefail
 
@@ -18,66 +19,49 @@ if [ -e "$APP" ]; then
   fi
 fi
 
-cat > "$TMP/app.applescript" <<'APPLESCRIPT'
--- Market Kasa: programı arka planda (pencere açmadan) başlatır / durdurur.
-on run
-	set appIcon to path to resource "applet.icns"
-	set pathFile to POSIX path of (path to resource "project-path.txt")
-	set projectDir to do shell script "cat " & quoted form of pathFile
-	set svc to quoted form of (projectDir & "/scripts/service.sh")
-	try
-		do shell script "test -f " & svc
-	on error
-		display dialog "Market Kasa klasörü bulunamadı:" & return & projectDir & return & return & "Klasörü taşıdıysanız, klasördeki 'Kurulum' dosyasına tekrar çift tıklayın." buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
-		return
-	end try
+BIN="$PROJECT/mac/bin/MarketKasa"
+if [ ! -x "$BIN" ]; then
+  echo "❌ Uygulama dosyası bulunamadı: $BIN" >&2
+  exit 1
+fi
 
-	set svcState to do shell script "/bin/bash " & svc & " status"
-	if svcState is "running" then
-		set ipAddr to do shell script "/bin/bash " & svc & " ip"
-		set msg to "Market Kasa açık ve çalışıyor." & return & return & "Bu bilgisayarda:  http://localhost:3000"
-		if ipAddr is not "" then set msg to msg & return & "Telefondan panel:  http://" & ipAddr & ":3000/panel"
-		set r to display dialog msg buttons {"Programı kapat", "Tarayıcıda aç"} default button "Tarayıcıda aç" with title "Market Kasa" with icon appIcon
-		if button returned of r is "Tarayıcıda aç" then
-			open location "http://localhost:3000"
-		else
-			display dialog "Program kapatılsın mı?" & return & return & "Kapatınca kasa ve panel çalışmaz; tekrar açmak için simgeye çift tıklayın." buttons {"Vazgeç", "Kapat"} default button "Vazgeç" cancel button "Vazgeç" with title "Market Kasa" with icon caution
-			do shell script "/bin/bash " & svc & " stop"
-			display notification "Program kapatıldı." with title "Market Kasa"
-		end if
-	else
-		display notification "Başlatılıyor… (ilk seferde birkaç dakika sürebilir)" with title "Market Kasa"
-		try
-			do shell script "/bin/bash " & svc & " start"
-		on error errMsg number errNum
-			if errNum is 10 then
-				display dialog "Node.js bulunamadı." & return & return & "Açılacak sayfadan LTS sürümünü kurun, sonra klasördeki 'Kurulum' dosyasına çift tıklayın." buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
-				open location "https://nodejs.org"
-			else
-				set failReason to "bilinmeyen bir hata"
-				if errNum is 11 then set failReason to "paketler kurulamadı (internet bağlantısını kontrol edin)"
-				if errNum is 12 then set failReason to "program derlenemedi"
-				if errNum is 13 then set failReason to "program açılırken kapandı"
-				if errNum is 14 then set failReason to "program zamanında yanıt vermedi"
-				display dialog "Market Kasa başlatılamadı: " & failReason & "." & return & return & "Ayrıntılar: " & projectDir & "/data/logs" buttons {"Tamam"} default button 1 with title "Market Kasa" with icon stop
-			end if
-			return
-		end try
-		open location "http://localhost:3000"
-	end if
-end run
-APPLESCRIPT
-
-osacompile -o "$APP" "$TMP/app.applescript"
-printf '%s' "$PROJECT" > "$APP/Contents/Resources/project-path.txt"
-cp "$PROJECT/assets/MarketKasa.icns" "$APP/Contents/Resources/applet.icns"
-/usr/libexec/PlistBuddy -c "Set :CFBundleName Market Kasa" "$APP/Contents/Info.plist" 2>/dev/null || true
-/usr/libexec/PlistBuddy -c "Add :CFBundleDisplayName string Market Kasa" "$APP/Contents/Info.plist" 2>/dev/null \
-  || /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Market Kasa" "$APP/Contents/Info.plist"
-# Yeni macOS'ta simge Assets.car içindeki katalogdan okunur; kendi simgemiz (applet.icns) kullanılsın.
-rm -f "$APP/Contents/Resources/Assets.car"
-/usr/libexec/PlistBuddy -c "Delete :CFBundleIconName" "$APP/Contents/Info.plist" 2>/dev/null || true
-# İçeriği değiştirdiğimiz için imzayı yenile (yerel, "ad-hoc" imza)
+# Uygulama paketi: kendi penceresinde açılan Market Kasa (mac/MarketKasa.swift)
+mkdir -p "$TMP/app/Contents/MacOS" "$TMP/app/Contents/Resources"
+cp "$BIN" "$TMP/app/Contents/MacOS/Market Kasa"
+chmod +x "$TMP/app/Contents/MacOS/Market Kasa"
+cp "$PROJECT/assets/MarketKasa.icns" "$TMP/app/Contents/Resources/MarketKasa.icns"
+printf '%s' "$PROJECT" > "$TMP/app/Contents/Resources/project-path.txt"
+printf 'APPL????' > "$TMP/app/Contents/PkgInfo"
+cat > "$TMP/app/Contents/Info.plist" <<'PLIST'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key><string>tr</string>
+  <key>CFBundleExecutable</key><string>Market Kasa</string>
+  <key>CFBundleIdentifier</key><string>com.marketkasa.app</string>
+  <key>CFBundleName</key><string>Market Kasa</string>
+  <key>CFBundleDisplayName</key><string>Market Kasa</string>
+  <key>CFBundleIconFile</key><string>MarketKasa</string>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleShortVersionString</key><string>2.0</string>
+  <key>CFBundleVersion</key><string>2</string>
+  <key>LSMinimumSystemVersion</key><string>12.0</string>
+  <key>LSApplicationCategoryType</key><string>public.app-category.business</string>
+  <key>NSHighResolutionCapable</key><true/>
+  <key>NSPrincipalClass</key><string>NSApplication</string>
+  <key>NSHumanReadableCopyright</key><string>Market Kasa — barkodlu satış, stok ve kâr takibi</string>
+  <key>NSAppTransportSecurity</key>
+  <dict>
+    <key>NSAllowsLocalNetworking</key><true/>
+    <key>NSAllowsArbitraryLoadsInWebContent</key><true/>
+  </dict>
+</dict>
+</plist>
+PLIST
+mkdir -p "$(dirname "$APP")"
+mv "$TMP/app" "$APP"
+# Yerel, "ad-hoc" imza (Apple Silicon'da çalışması için gerekli)
 codesign --force --deep --sign - "$APP" >/dev/null 2>&1
 codesign --verify --deep "$APP"
 touch "$APP"

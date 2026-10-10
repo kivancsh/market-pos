@@ -1,10 +1,12 @@
-﻿// Market Kasa — Windows başlatıcısı (Market Kasa.exe).
-// Windows'ta hazır gelen .NET Framework 4 derleyicisiyle (csc.exe, C# 5) derlenir; ek kurulum gerektirmez.
+﻿// Market Kasa — Windows uygulaması (Market Kasa.exe).
+// Programı tarayıcı yerine KENDİ PENCERESİNDE açar (Microsoft Edge WebView2; Windows 10/11'de hazır gelir).
+// Windows'taki .NET Framework 4 derleyicisiyle (csc.exe, C# 5) derlenir; WebView2 DLL'leri exe'nin yanında durur.
 //
-// Çift tıklayınca:
-//   - Program kapalıysa: sunucuyu görünmez pencerede başlatır, hazır olunca tarayıcıyı açar.
-//   - Program açıksa: "Tarayıcıda aç / Programı kapat" penceresi gösterir.
-// Komut satırı (kurulum ve test için): --start (başlat ve bekle), --stop (durdur), --status (0 = çalışıyor).
+// Çift tıklayınca: sunucu kapalıysa görünmez pencerede başlatır, sonra uygulama penceresini açar.
+// Pencere zaten açıksa öne getirir. Pencereyi kapatmak programı KAPATMAZ (telefondan takip sürer);
+// tamamen kapatmak için menü: Market Kasa → Programı tamamen kapat.
+// WebView2 bulunamazsa program varsayılan tarayıcıda açılır.
+// Komut satırı: --start (başlat ve bekle), --stop (durdur), --status (0 = çalışıyor), --selftest (pencereyi dene).
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -16,15 +18,18 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.Core;
+using Microsoft.Web.WebView2.WinForms;
 
 [assembly: System.Reflection.AssemblyTitle("Market Kasa")]
 [assembly: System.Reflection.AssemblyProduct("Market Kasa")]
 [assembly: System.Reflection.AssemblyDescription("Barkodlu satış, stok ve kâr takibi")]
-[assembly: System.Reflection.AssemblyVersion("1.0.0.0")]
+[assembly: System.Reflection.AssemblyVersion("2.0.0.0")]
 
 static class MarketKasa
 {
     const int Port = 3000;
+    const string Home = "http://localhost:3000/";
     static readonly string AppDir = Path.GetDirectoryName(Application.ExecutablePath);
     static readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Market Kasa");
     static string DataDir { get { return Path.Combine(Root, "data"); } }
@@ -52,10 +57,18 @@ static class MarketKasa
 
         Application.EnableVisualStyles();
         Application.SetCompatibleTextRenderingDefault(false);
+
+        if (cmd == "--selftest") return SelfTest();
+
         bool created;
         using (var mutex = new Mutex(true, "MarketKasaLauncher", out created))
         {
-            if (!created) return 0; // zaten bir pencere açık
+            if (!created)
+            {
+                // Pencere zaten açık: öne getirmesini söyle
+                try { EventWaitHandle.OpenExisting("MarketKasaShowWindow").Set(); } catch { }
+                return 0;
+            }
             try { Interactive(); }
             catch (Exception e)
             {
@@ -70,18 +83,39 @@ static class MarketKasa
     // ------------------------------------------------------------------ etkileşimli kullanım
     static void Interactive()
     {
-        if (IsRunning())
+        if (!IsRunning())
         {
-            ShowRunningDialog();
-            return;
-        }
-        if (!File.Exists(NodeExe) || !File.Exists(Path.Combine(ServerDir, "kasa-server.js")))
-        {
-            MessageBox.Show("Program dosyaları eksik. Lütfen Market Kasa'yı yeniden kurun.", "Market Kasa",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            return;
+            if (!File.Exists(NodeExe) || !File.Exists(Path.Combine(ServerDir, "kasa-server.js")))
+            {
+                MessageBox.Show("Program dosyaları eksik. Lütfen Market Kasa'yı yeniden kurun.", "Market Kasa",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (!StartWithSplash())
+            {
+                MessageBox.Show("Market Kasa başlatılamadı.\n\nBilgisayarı yeniden başlatıp tekrar deneyin. Sorun sürerse şu klasördeki server.log dosyasını destek için saklayın:\n" + LogDir,
+                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
         }
 
+        var form = new MainForm(false);
+        var showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, "MarketKasaShowWindow");
+        var listener = new Thread(delegate ()
+        {
+            while (true)
+            {
+                showSignal.WaitOne();
+                try { form.BeginInvoke(new MethodInvoker(form.BringToFrontNow)); } catch { return; }
+            }
+        });
+        listener.IsBackground = true;
+        listener.Start();
+        Application.Run(form);
+    }
+
+    static bool StartWithSplash()
+    {
         var splash = new StartingForm();
         splash.Show();
         Application.DoEvents();
@@ -95,31 +129,191 @@ static class MarketKasa
             Thread.Sleep(40);
         }
         splash.Close();
-
-        if (ok) OpenBrowser("http://localhost:" + Port);
-        else
-            MessageBox.Show("Market Kasa başlatılamadı.\n\nBilgisayarı yeniden başlatıp tekrar deneyin. Sorun sürerse şu klasördeki server.log dosyasını destek için saklayın:\n" + LogDir,
-                "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        return ok;
     }
 
-    static void ShowRunningDialog()
+    // Pencereyi görünmeden açıp sayfanın yüklendiğini dener (GitHub'daki Windows testinde kullanılır)
+    static int SelfTest()
     {
-        using (var dlg = new RunningForm(LanAddress()))
+        if (!StartAndWait(180)) { Report("sunucu başlamadı"); return 2; }
+        var form = new MainForm(true);
+        Application.Run(form);
+        return form.SelfTestResult;
+    }
+
+    // ------------------------------------------------------------------ ana pencere
+    sealed class MainForm : Form
+    {
+        readonly WebView2 web;
+        readonly bool selfTest;
+        public int SelfTestResult = 4;
+
+        public MainForm(bool selfTest)
         {
-            DialogResult r = dlg.ShowDialog();
-            if (r == DialogResult.Yes) OpenBrowser("http://localhost:" + Port);
-            else if (r == DialogResult.No)
+            this.selfTest = selfTest;
+            Text = "Market Kasa";
+            Icon = AppIcon();
+            StartPosition = FormStartPosition.CenterScreen;
+            Size = new Size(1280, 840);
+            MinimumSize = new Size(900, 600);
+            Font = new Font("Segoe UI", 9.5f);
+            if (selfTest)
             {
-                DialogResult confirm = MessageBox.Show(
-                    "Program kapatılsın mı?\n\nKapatınca kasa ve panel çalışmaz; tekrar açmak için Market Kasa simgesine tıklayın.",
-                    "Market Kasa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
-                if (confirm == DialogResult.Yes)
-                {
-                    Stop();
-                    MessageBox.Show("Program kapatıldı.", "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
+                ShowInTaskbar = false;
+                Opacity = 0;
+            }
+            else
+            {
+                WindowState = FormWindowState.Maximized;
+            }
+
+            web = new WebView2();
+            web.Dock = DockStyle.Fill;
+            Controls.Add(web);
+
+            var menu = new MenuStrip();
+            var app = new ToolStripMenuItem("Market Kasa");
+            app.DropDownItems.Add(Item("Yenile  (F5)", delegate { if (web.CoreWebView2 != null) web.Reload(); }));
+            app.DropDownItems.Add(Item("Yazdır…  (Ctrl+P)", delegate { if (web.CoreWebView2 != null) web.CoreWebView2.ShowPrintUI(); }));
+            app.DropDownItems.Add(new ToolStripSeparator());
+            app.DropDownItems.Add(Item("Yakınlaştır  (Ctrl +)", delegate { web.ZoomFactor = Math.Min(2.0, web.ZoomFactor + 0.1); }));
+            app.DropDownItems.Add(Item("Uzaklaştır  (Ctrl -)", delegate { web.ZoomFactor = Math.Max(0.5, web.ZoomFactor - 0.1); }));
+            app.DropDownItems.Add(Item("Gerçek boyut  (Ctrl 0)", delegate { web.ZoomFactor = 1.0; }));
+            app.DropDownItems.Add(new ToolStripSeparator());
+            app.DropDownItems.Add(Item("Telefondan bağlanma…", delegate { ShowPhoneInfo(); }));
+            app.DropDownItems.Add(Item("Tarayıcıda aç", delegate { OpenBrowser(web.Source != null ? web.Source.ToString() : Home); }));
+            app.DropDownItems.Add(new ToolStripSeparator());
+            app.DropDownItems.Add(Item("Programı tamamen kapat…", delegate { StopAndExit(); }));
+            app.DropDownItems.Add(Item("Pencereyi kapat (program arka planda çalışır)", delegate { Close(); }));
+            menu.Items.Add(app);
+            var go = new ToolStripMenuItem("Git");
+            go.DropDownItems.Add(Item("Kasa", delegate { Go("kasa"); }));
+            go.DropDownItems.Add(Item("Panel", delegate { Go("panel"); }));
+            go.DropDownItems.Add(Item("Yönetim Paneli", delegate { Go("yonetim"); }));
+            go.DropDownItems.Add(new ToolStripSeparator());
+            go.DropDownItems.Add(Item("Geri", delegate { if (web.CanGoBack) web.GoBack(); }));
+            go.DropDownItems.Add(Item("İleri", delegate { if (web.CanGoForward) web.GoForward(); }));
+            menu.Items.Add(go);
+            MainMenuStrip = menu;
+            Controls.Add(menu);
+
+            Shown += delegate { InitWebView(); };
+            if (selfTest)
+            {
+                var timeout = new System.Windows.Forms.Timer();
+                timeout.Interval = 90000;
+                timeout.Tick += delegate { Report("zaman aşımı"); SelfTestResult = 5; Close(); };
+                timeout.Start();
             }
         }
+
+        static ToolStripMenuItem Item(string text, EventHandler onClick)
+        {
+            var i = new ToolStripMenuItem(text);
+            i.Click += onClick;
+            return i;
+        }
+
+        void Go(string path)
+        {
+            if (web.CoreWebView2 != null) web.CoreWebView2.Navigate(Home + path);
+        }
+
+        public void BringToFrontNow()
+        {
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Maximized;
+            Show();
+            Activate();
+            TopMost = true;
+            TopMost = false;
+        }
+
+        async void InitWebView()
+        {
+            try
+            {
+                Directory.CreateDirectory(Root);
+                var env = await CoreWebView2Environment.CreateAsync(null, Path.Combine(Root, "webview"), null);
+                await web.EnsureCoreWebView2Async(env);
+            }
+            catch (Exception e)
+            {
+                LauncherLog("WebView2 açılamadı: " + e);
+                if (selfTest)
+                {
+                    Report("WebView2 açılamadı: " + e.Message);
+                    SelfTestResult = 6;
+                    Close();
+                    return;
+                }
+                MessageBox.Show("Bu bilgisayarda Microsoft Edge WebView2 bileşeni bulunamadı; Market Kasa tarayıcıda açılacak.\n\nUygulama penceresi için Windows Update ile Microsoft Edge'i güncelleyin.",
+                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                OpenBrowser(Home);
+                Close();
+                return;
+            }
+
+            CoreWebView2 core = web.CoreWebView2;
+            core.Settings.AreDevToolsEnabled = false;
+            core.Settings.IsStatusBarEnabled = false;
+            core.DocumentTitleChanged += delegate
+            {
+                Text = string.IsNullOrEmpty(core.DocumentTitle) ? "Market Kasa" : core.DocumentTitle;
+            };
+            // Dış bağlantılar normal tarayıcıda açılsın; uygulama sayfaları pencerede kalsın
+            core.NavigationStarting += delegate (object s, CoreWebView2NavigationStartingEventArgs a)
+            {
+                if (!IsLocal(a.Uri)) { a.Cancel = true; OpenBrowser(a.Uri); }
+            };
+            core.NewWindowRequested += delegate (object s, CoreWebView2NewWindowRequestedEventArgs a)
+            {
+                if (!IsLocal(a.Uri)) { a.Handled = true; OpenBrowser(a.Uri); }
+            };
+            if (selfTest)
+            {
+                core.NavigationCompleted += async delegate (object s, CoreWebView2NavigationCompletedEventArgs a)
+                {
+                    if (!a.IsSuccess) { Report("sayfa yüklenemedi: " + a.WebErrorStatus); SelfTestResult = 7; Close(); return; }
+                    string r = await core.ExecuteScriptAsync(
+                        "!!(document.querySelector('[data-testid=login-tab-owner]') || document.querySelector('[data-testid=setup-name]'))");
+                    Report("sayfa: " + core.Source + " → arayüz " + (r == "true" ? "çizildi" : "çizilemedi"));
+                    SelfTestResult = r == "true" ? 0 : 8;
+                    Close();
+                };
+            }
+            core.Navigate(Home);
+        }
+
+        void ShowPhoneInfo()
+        {
+            string ip = LanAddress();
+            MessageBox.Show(ip == null
+                ? "Bu bilgisayar bir ağa bağlı görünmüyor."
+                : "Telefon bu bilgisayarla aynı Wi-Fi'ye bağlıyken tarayıcısına şu adresi yazın:\n\nhttp://" + ip + ":" + Port + "/panel\n\nYönetici sekmesinden kullanıcı adı ve şifrenizle girin.",
+                "Telefondan bağlanma", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        void StopAndExit()
+        {
+            DialogResult r = MessageBox.Show(
+                "Program tamamen kapatılsın mı?\n\nKapatınca kasa ve panel çalışmaz, telefondan da bağlanılamaz. Tekrar açmak için Market Kasa simgesine tıklayın.",
+                "Market Kasa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+            if (r != DialogResult.Yes) return;
+            Cursor = Cursors.WaitCursor;
+            Stop();
+            Close();
+        }
+    }
+
+    static bool IsLocal(string uri)
+    {
+        try
+        {
+            var u = new Uri(uri);
+            if (u.Scheme == "about" || u.Scheme == "data" || u.Scheme == "blob") return true;
+            return u.Host == "localhost" || u.Host == "127.0.0.1";
+        }
+        catch { return true; }
     }
 
     // ------------------------------------------------------------------ sunucu yönetimi
@@ -257,6 +451,12 @@ static class MarketKasa
 
     static string Quote(string s) { return "\"" + s + "\""; }
 
+    static void Report(string text)
+    {
+        Console.WriteLine(text);
+        LauncherLog("selftest: " + text);
+    }
+
     static void LauncherLog(string text)
     {
         try
@@ -273,7 +473,7 @@ static class MarketKasa
         catch { return SystemIcons.Application; }
     }
 
-    // ------------------------------------------------------------------ pencereler
+    // ------------------------------------------------------------------ başlatılıyor penceresi
     sealed class StartingForm : Form
     {
         public StartingForm()
@@ -297,7 +497,7 @@ static class MarketKasa
             Controls.Add(title);
 
             var hint = new Label();
-            hint.Text = "İlk açılışta bir dakika kadar sürebilir. Hazır olunca tarayıcı açılacak.";
+            hint.Text = "İlk açılışta bir dakika kadar sürebilir. Hazır olunca program penceresi açılacak.";
             hint.AutoSize = false;
             hint.Size = new Size(380, 40);
             hint.Location = new Point(20, 46);
@@ -309,61 +509,6 @@ static class MarketKasa
             bar.Location = new Point(20, 92);
             bar.Size = new Size(380, 18);
             Controls.Add(bar);
-        }
-    }
-
-    sealed class RunningForm : Form
-    {
-        public RunningForm(string lanIp)
-        {
-            Text = "Market Kasa";
-            Icon = AppIcon();
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            StartPosition = FormStartPosition.CenterScreen;
-            ClientSize = new Size(460, 190);
-            Font = new Font("Segoe UI", 10f);
-            TopMost = true;
-
-            var pic = new PictureBox();
-            pic.Image = AppIcon().ToBitmap();
-            pic.SizeMode = PictureBoxSizeMode.Zoom;
-            pic.Location = new Point(20, 20);
-            pic.Size = new Size(48, 48);
-            Controls.Add(pic);
-
-            var title = new Label();
-            title.Text = "Market Kasa açık ve çalışıyor.";
-            title.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
-            title.AutoSize = true;
-            title.Location = new Point(84, 20);
-            Controls.Add(title);
-
-            var info = new Label();
-            info.Text = "Bu bilgisayarda:  http://localhost:" + Port +
-                (lanIp != null ? "\nTelefondan panel:  http://" + lanIp + ":" + Port + "/panel" : "");
-            info.AutoSize = false;
-            info.Size = new Size(360, 60);
-            info.Location = new Point(84, 54);
-            Controls.Add(info);
-
-            var close = new Button();
-            close.Text = "Programı kapat";
-            close.DialogResult = DialogResult.No;
-            close.Size = new Size(140, 34);
-            close.Location = new Point(146, 138);
-            Controls.Add(close);
-
-            var open = new Button();
-            open.Text = "Tarayıcıda aç";
-            open.DialogResult = DialogResult.Yes;
-            open.Size = new Size(150, 34);
-            open.Location = new Point(294, 138);
-            Controls.Add(open);
-
-            AcceptButton = open;
-            CancelButton = null;
         }
     }
 }
