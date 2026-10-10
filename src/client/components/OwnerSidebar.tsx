@@ -46,8 +46,11 @@ export const OWNER_MENU: { title: string; items: Item[] }[] = [
     ],
   },
   {
-    title: "Raporlar",
-    items: [{ href: "/raporlar", label: "Raporlar ve Excel", icon: "📊" }],
+    title: "Raporlar ve analiz",
+    items: [
+      { href: "/yonetim/analiz", label: "Analizler", icon: "📈" },
+      { href: "/raporlar", label: "Raporlar ve Excel", icon: "📊" },
+    ],
   },
   {
     title: "Hesaplar ve ayarlar",

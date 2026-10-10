@@ -560,3 +560,32 @@ export function getCashierAggregates(db: DB, from: string, to: string): CashierA
   }
   return [...out.values()].sort((a, b) => b.salesTotalKurus - a.salesTotalKurus || a.name.localeCompare(b.name, "tr"));
 }
+
+// ------------------------------------------------------------------ analizler
+
+/** Tamamlanan satışların zamanı ve tutarı (yoğunluk haritası için). */
+export function getSaleTimes(db: DB, from: string, to: string): { createdAt: string; totalKurus: number }[] {
+  return db
+    .prepare(`SELECT created_at AS createdAt, total_kurus AS totalKurus FROM sales WHERE status = 'completed' AND business_date BETWEEN ? AND ?`)
+    .all(from, to) as { createdAt: string; totalKurus: number }[];
+}
+
+export interface StockPlanRow {
+  id: number;
+  name: string;
+  categoryName: string | null;
+  stockQty: number;
+  minStock: number;
+  avgCostKurus: number;
+}
+
+/** Aktif ürünlerin stok ve asgari stok bilgisi (sipariş önerisi için). */
+export function listStockPlanRows(db: DB): StockPlanRow[] {
+  return db
+    .prepare(
+      `SELECT p.id, p.name, c.name AS categoryName, p.stock_qty AS stockQty, p.min_stock AS minStock, p.avg_cost_kurus AS avgCostKurus
+         FROM products p LEFT JOIN categories c ON c.id = p.category_id
+        WHERE p.is_active = 1 ORDER BY p.name COLLATE NOCASE`,
+    )
+    .all() as StockPlanRow[];
+}

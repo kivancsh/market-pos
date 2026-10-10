@@ -19,6 +19,7 @@ import { expenseCategoryLabel } from "@/lib/expenses";
 import { listExpenses } from "../db/repositories/expenses";
 import { todayOf } from "./dayClosing";
 import { getProfitLoss } from "./expenses";
+import { COVER_TARGET_DAYS, STOCK_STATUS_LABEL, formatDailyAvg, getStockPlan } from "./analytics";
 
 export type ColumnType = "text" | "int" | "money" | "permille" | "date";
 
@@ -43,7 +44,7 @@ export interface ReportResult {
   totals: ReportRow | null;
 }
 
-export const REPORT_KEYS = ["daily", "cashiers", "profit-loss", "expenses", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
+export const REPORT_KEYS = ["daily", "cashiers", "profit-loss", "expenses", "reorder", "products", "categories", "low-margin", "dead-stock", "stock-value"] as const;
 export type ReportKey = (typeof REPORT_KEYS)[number];
 
 export const MAX_RANGE_DAYS = 366;
@@ -85,6 +86,42 @@ export function cashierLabel(a: { name: string; role: "owner" | "cashier" | null
 type Builder = (ctx: Ctx, from: string, to: string) => Omit<ReportResult, "key" | "from" | "to">;
 
 const BUILDERS: Record<ReportKey, Builder> = {
+  reorder: (ctx) => {
+    const rows = getStockPlan(ctx)
+      .filter((p) => p.suggestQty > 0 || p.status === "bitti" || p.status === "acil")
+      .map((p) => ({
+        name: p.name,
+        categoryName: p.categoryName ?? "",
+        status: STOCK_STATUS_LABEL[p.status],
+        stockQty: p.stockQty,
+        minStock: p.minStock,
+        soldLast30: p.soldLast30,
+        dailyAvg: formatDailyAvg(p.dailyAvgTenths),
+        daysCover: p.daysCover,
+        suggestQty: p.suggestQty,
+        suggestCostKurus: p.suggestCostKurus,
+      }));
+    return {
+      title: "Sipariş önerisi",
+      description: `Son 30 günün satış hızına göre stok kaç gün yeter; ${COVER_TARGET_DAYS} gün yetecek kadar (ve asgari stoğun altına düşmeyecek kadar) önerilen alım. Tahmini maliyet ortalama alış fiyatıyladır.`,
+      usesRange: false,
+      columns: [
+        { key: "name", label: "Ürün", type: "text" },
+        { key: "categoryName", label: "Kategori", type: "text" },
+        { key: "status", label: "Durum", type: "text" },
+        { key: "stockQty", label: "Stok", type: "int" },
+        { key: "minStock", label: "Asgari stok", type: "int" },
+        { key: "soldLast30", label: "30 günde satılan", type: "int" },
+        { key: "dailyAvg", label: "Günlük ortalama", type: "text" },
+        { key: "daysCover", label: "Kaç gün yeter", type: "int" },
+        { key: "suggestQty", label: "Önerilen alım", type: "int" },
+        { key: "suggestCostKurus", label: "Tahmini maliyet", type: "money" },
+      ],
+      rows,
+      totals: { name: "Toplam", categoryName: "", status: "", stockQty: null, minStock: null, soldLast30: null, dailyAvg: "", daysCover: null, suggestQty: sum(rows, "suggestQty"), suggestCostKurus: sum(rows, "suggestCostKurus") },
+    };
+  },
+
   "profit-loss": (ctx, from, to) => {
     const p = getProfitLoss(ctx, from, to);
     const line = (item: string, amountKurus: number | null, ratioPermille: number | null = null) => ({ item, amountKurus, ratioPermille });

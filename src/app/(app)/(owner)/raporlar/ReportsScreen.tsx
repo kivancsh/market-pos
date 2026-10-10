@@ -13,6 +13,7 @@ const TABS: { key: ReportKey; label: string }[] = [
   { key: "cashiers", label: "Kasiyer performansı" },
   { key: "profit-loss", label: "Kâr-zarar" },
   { key: "expenses", label: "Giderler" },
+  { key: "reorder", label: "Sipariş önerisi" },
   { key: "products", label: "Ürün kârlılığı" },
   { key: "categories", label: "Kategori kârlılığı" },
   { key: "low-margin", label: "Düşük marjlı" },
