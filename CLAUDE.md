@@ -87,11 +87,15 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).
 - Migration 004: `users.email`, `users.cashier_no`, `verification_codes`, `daily_report_log`.
 - Testlerde e-posta: `captureMail()` (tests/apiHelpers.ts); e2e'de `latestMailCode()` `data/e2e/mail`'den kodu okur.
-- Güncelleme (`src/server/update/`, kullanıcı kararı): sürüm `1.1.<GitHub derleme no>` → `app/version.json` (kanal "windows"); proje klasöründe
+- Güncelleme (`src/server/update/`, kullanıcı kararı): sürüm `1.1.<GitHub derleme no>` → `app/version.json`, `windows/kasa-server.js` okuyup
+  `MARKET_KASA_VERSION_INFO` ile verir (kanal "windows"); proje klasöründe
   (Mac) kanal "dev", denetim yok. Yayında `latest.json` (sürüm, boyut, SHA-256). Denetim açılışta + 6 saatte bir; yönetici
   Ayarlar → Güncelle: yedek → indir (`MARKET_UPDATE_DIR`, başlatıcı verir) → SHA-256 doğrula → sayfa `market-kasa:install-update`
   mesajı → `Market Kasa.exe` sessiz kurulumu `/relaunch=1` ile başlatıp kapanır → kurulum programı yeniden açar. Asla kendiliğinden kurulmaz.
   İndirme adresi sabit (GitHub); `MARKET_KASA_UPDATE_BASE` yalnızca testler içindir.
+- Sunucu kodunda değişken yolla dosya işlemi (`path.join(dir, x)`) Next'e bütün proje klasörünü Windows paketine ekletir
+  (derleme uyarısı "Dynamic filesystem access…"; paket 37 → 82 MB olmuştu). `path.join(/*turbopackIgnore: true*/ …)` kullan;
+  `windows/build.mjs` böyle bir sızıntıda derlemeyi durdurur.
 - `docs/kilavuz/` (kullanma kılavuzu PDF'i) ve `promo/` (tanıtım videosu) üreticileri ayrı demo veritabanıyla çalışır
   (`data/guide`, `data/promo`; port 3300/3200). Ekranlar değişirse yeniden üretilir; adımlar klasörlerdeki README'lerde.
 - Uygulama penceresi: Mac'te `mac/MarketKasa.swift` (WKWebView; ikili `mac/bin/MarketKasa` depoda, `mac/build.sh` ile derlenir,

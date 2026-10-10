@@ -17,6 +17,15 @@ if (!fs.existsSync(path.join(standalone, "server.js"))) {
   process.exit(1);
 }
 
+// Proje klasörü pakete girmemeli: sunucu kodunda değişken bir yolla dosya işlemi yapılırsa Next.js bütün klasörü izler
+// (derlemede "Dynamic filesystem access causes tracing of the whole project" uyarısı; paket iki katına çıkar).
+// Böyle bir durumda derlemeyi durdur ki fark edilsin.
+const leaked = ["promo", "docs", "tests", "scripts", "mac", "windows"].filter((d) => fs.existsSync(path.join(standalone, d)));
+if (leaked.length) {
+  console.error(`Pakete proje klasörleri girmiş: ${leaked.join(", ")}. Derleme uyarısındaki satıra path.join(/*turbopackIgnore: true*/ …) ekleyin.`);
+  process.exit(1);
+}
+
 fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 

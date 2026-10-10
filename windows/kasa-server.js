@@ -48,4 +48,11 @@ process.on("uncaughtException", (e) => {
   process.exit(1);
 });
 
+// Sürüm bilgisi (güncelleme denetimi için): version.json paket derlenirken yazılır
+try {
+  process.env.MARKET_KASA_VERSION_INFO = fs.readFileSync(path.join(__dirname, "version.json"), "utf8");
+} catch {
+  // yerelde denenen paket: sürüm package.json'dan
+}
+
 require("./server.js");

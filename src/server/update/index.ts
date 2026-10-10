@@ -18,6 +18,7 @@ import { AppError } from "../errors";
 import { audit } from "../services/audit";
 import { createBackup } from "../services/backup";
 import { z } from "../validation/zod";
+import pkg from "../../../package.json";
 
 const DEFAULT_BASE = "https://github.com/kivancsh/market-pos/releases/latest/download";
 export const SETUP_FILE = "Market-Kasa-Setup.exe";
@@ -46,26 +47,26 @@ const g = globalThis as unknown as {
   __mkDownload?: Promise<DownloadResult> | null;
 };
 
-function readJson(file: string): unknown {
+function parseJson(text: string | undefined): unknown {
   try {
-    return JSON.parse(fs.readFileSync(file, "utf8"));
+    return text ? JSON.parse(text) : null;
   } catch {
     return null;
   }
 }
 
-/** Çalışan programın sürümü. Kurulum paketinde version.json'dan, proje klasöründe package.json'dan. */
+/**
+ * Çalışan programın sürümü. Windows paketinde sunucu başlatıcısı (windows/kasa-server.js) version.json'u okuyup
+ * MARKET_KASA_VERSION_INFO ortam değişkeniyle verir; proje klasöründe (Mac) package.json'daki sürüm kullanılır.
+ * (Burada process.cwd() ile dosya okunmaz: Next.js o zaman bütün proje klasörünü Windows paketine ekliyor.)
+ */
 export function getAppVersion(): AppVersion {
   if (g.__mkTestVersion) return g.__mkTestVersion;
   if (g.__mkVersion) return g.__mkVersion;
-  const cwd = process.cwd();
-  const packaged = versionFileSchema.safeParse(readJson(path.join(/*turbopackIgnore: true*/ cwd, "version.json")));
-  if (packaged.success) {
-    g.__mkVersion = { version: packaged.data.version, channel: "windows", commit: packaged.data.commit ?? null, builtAt: packaged.data.builtAt ?? null };
-  } else {
-    const pkg = readJson(path.join(/*turbopackIgnore: true*/ cwd, "package.json")) as { version?: string } | null;
-    g.__mkVersion = { version: pkg?.version ?? "0.0.0", channel: "dev", commit: null, builtAt: null };
-  }
+  const packaged = versionFileSchema.safeParse(parseJson(process.env.MARKET_KASA_VERSION_INFO));
+  g.__mkVersion = packaged.success
+    ? { version: packaged.data.version, channel: "windows", commit: packaged.data.commit ?? null, builtAt: packaged.data.builtAt ?? null }
+    : { version: pkg.version, channel: "dev", commit: null, builtAt: null };
   return g.__mkVersion;
 }
 
@@ -119,7 +120,8 @@ export function updatesEnabled(): boolean {
 
 /** İndirilen kurulum dosyasının klasörü (Windows başlatıcısı verir: %LOCALAPPDATA%\Market Kasa\updates). */
 function updatesDir(): string | null {
-  return process.env.MARKET_UPDATE_DIR || null;
+  const dir = process.env.MARKET_UPDATE_DIR;
+  return dir ? path.resolve(/*turbopackIgnore: true*/ process.cwd(), dir) : null;
 }
 
 export interface UpdateInfo {
@@ -263,7 +265,8 @@ export function cleanupUpdates(): void {
   if (!dir) return;
   for (const f of [SETUP_FILE, `${SETUP_FILE}.part`]) {
     try {
-      fs.rmSync(path.join(dir, f), { force: true });
+      // İşaretsiz değişken yol Next.js'e bütün proje klasörünü pakete ekletiyor (paket iki katına çıkıyordu)
+      fs.rmSync(path.join(/*turbopackIgnore: true*/ dir, f), { force: true });
     } catch {
       // kilitliyse bir sonraki açılışta
     }
