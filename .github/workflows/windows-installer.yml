@@ -32,6 +32,13 @@ jobs:
           node-version: "24"
           cache: npm
 
+      - name: Sürüm numarası (package.json'daki ilk iki sayı + derleme no)
+        shell: bash
+        run: |
+          v=$(node -p "require('./package.json').version.split('.').slice(0, 2).join('.')").${{ github.run_number }}
+          echo "MARKET_KASA_VERSION=$v" >> "$GITHUB_ENV"
+          echo "Sürüm: $v"
+
       - name: Paketleri kur
         run: npm ci
 
@@ -81,10 +88,13 @@ jobs:
             choco install innosetup -y --no-progress
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
-          $version = (node -p "require('./package.json').version")
-          & $iscc /Qp "/DAppVersion=$version.${{ github.run_number }}" windows\installer.iss
+          & $iscc /Qp "/DAppVersion=$env:MARKET_KASA_VERSION" windows\installer.iss
           if ($LASTEXITCODE -ne 0) { exit 1 }
           Get-Item build\dist\Market-Kasa-Setup.exe | Format-List Name, Length
+
+      - name: En son sürüm bilgisi (latest.json — programlar güncellemeyi buradan öğrenir)
+        shell: bash
+        run: node windows/write-latest.mjs build/dist/Market-Kasa-Setup.exe build/dist/latest.json "$(git log -1 --format=%s)"
 
       - name: Gerçek kurulum testi (kur, aç, kullan, kaldır)
         timeout-minutes: 15
@@ -105,8 +115,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete windows -y --cleanup-tag || true
-          gh release create windows build/dist/Market-Kasa-Setup.exe \
+          gh release create windows build/dist/Market-Kasa-Setup.exe build/dist/latest.json \
             --target "$GITHUB_SHA" \
-            --title "Market Kasa — Windows kurulum (#${{ github.run_number }})" \
+            --title "Market Kasa $MARKET_KASA_VERSION — Windows kurulum" \
             --notes-file windows/RELEASE_NOTES.md \
             --latest

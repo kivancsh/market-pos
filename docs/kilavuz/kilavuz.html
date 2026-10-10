@@ -200,7 +200,7 @@
     <div><b>2</b>Başlamadan önce gerekenler</div>
     <div><b>3</b>Mac'e kurulum</div>
     <div><b>4</b>Açmak ve kapatmak (Mac)</div>
-    <div><b>5</b>Windows'a kurulum ve kullanım</div>
+    <div><b>5</b>Windows'a kurulum, kullanım ve güncelleme</div>
     <div><b>6</b>İlk açılış: e-posta ve yönetici hesabı</div>
     <div><b>7</b>Giriş yapmak</div>
     <div><b>8</b>Ekranları tanıyalım</div>
@@ -492,7 +492,7 @@
   </table>
   <p><b>Klasörü açmak için:</b> klavyede <span class="key">⊞ Win</span> + <span class="key">R</span>'ye basın, <span class="mono">%LOCALAPPDATA%\Market Kasa</span> yazıp <span class="key">Enter</span>.</p>
   <ul class="dots">
-    <li><b>Yeni sürüm:</b> Yeni Market-Kasa-Setup.exe'yi çalıştırın. Açık program kendiliğinden kapatılır ve güncellenir; bilgiler aynen kalır.</li>
+    <li><b>Yeni sürüm:</b> Program yeni sürümü kendisi haber verir; <b>Ayarlar → Güncelle</b> (Bölüm 5.9). Elle de olur: yeni Market-Kasa-Setup.exe'yi çalıştırın; açık program kapatılır ve güncellenir, bilgiler aynen kalır.</li>
     <li><b>Kaldırma:</b> Başlat → Market Kasa → <b>Market Kasa'yı kaldır</b> (ya da Ayarlar → Uygulamalar). Bilgileriniz <b>silinmez</b>; yeniden kurarsanız kaldığınız yerden devam edersiniz.</li>
   </ul>
   <p><b>Bir yedeğe geri dönmek (Windows):</b></p>
@@ -523,6 +523,17 @@ Yeni şifre (tekrar):
 ✅ Ayşe Yılmaz (ayse) için yeni şifre kaydedildi.
 Devam etmek için bir tuşa basın . . .</pre></div>
   </div>
+
+  <h3>5.9 Programı güncellemek</h3>
+  <p>Yeni bir sürüm çıktığında program bunu kendisi fark eder ve yöneticiye ekranın üstünde yeşil bir şeritle haber verir: <b>"Yeni sürüm var: 1.1.60 (sizdeki 1.1.57)"</b>.</p>
+  <ol class="steps">
+    <li>Kasada satış yapılmıyorken <b>Yönetim Paneli → Ayarlar</b>'ı açın, en alttaki <b>Program sürümü ve güncelleme</b> bölümüne gelin.</li>
+    <li>Yeni sürümün notunu okuyun, <span class="ui">Güncelle</span>'ye basıp soruyu onaylayın.</li>
+    <li>Program önce <b>yedek alır</b>, yeni sürümü indirir ve dosyanın sağlam indiğini doğrular.</li>
+    <li>Pencere kapanır; 1–2 dakika sonra Market Kasa <b>yeni sürümle kendiliğinden açılır</b>. Bu arada bir şeye dokunmanıza gerek yok.</li>
+  </ol>
+  <div class="box tip"><span class="t">Bilmekte fayda var</span><p>Güncelleme <b>kendiliğinden kurulmaz</b>; siz düğmeye basınca yapılır (satış sırasında program kapanmasın diye). Bilgileriniz silinmez. Program 6 saatte bir yeni sürüm var mı diye bakar; hemen bakmak için <span class="ui">Güncellemeleri denetle</span>. Çalışan sürüm aynı bölümde yazar.</p></div>
+  <div class="box warn"><span class="t">Güncelle düğmesi sadece kasa bilgisayarındaki Market Kasa penceresinde çalışır</span><p>Telefondan ya da tarayıcıdan bakıyorsanız yeni sürüm görünür ama güncellemeyi kasa bilgisayarından yapın. Bu özellikten önceki bir sürümü kullanıyorsanız yeni Market-Kasa-Setup.exe'yi bir kez elle kurun; sonraki güncellemeler programın içinden yapılır.</p></div>
 </section>
 
 <!-- ============================================================ 5 İLK AÇILIŞ -->
@@ -1285,6 +1296,8 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <tr><td>Onay kodu e-postası gelmiyor</td><td>1–2 dakika bekleyin, <b>Gereksiz / Spam</b> klasörüne bakın. Ayarlar → E-posta gönderimi → <span class="ui">Deneme e-postası gönder</span> ile gönderimin çalıştığını kontrol edin. Hesabım'daki e-posta adresiniz doğru mu?</td></tr>
     <tr><td>"Gmail girişi reddedildi"</td><td>Normal Gmail şifresi değil, <b>uygulama şifresi</b> gerekir (Bölüm 6). Google hesabınızın şifresini değiştirdiyseniz uygulama şifresi iptal olur; yenisini alıp Ayarlar → <span class="ui">Hesabı değiştir</span>'e yazın.</td></tr>
     <tr><td>"Kod hatalı / süresi doldu"</td><td>Kod 10 dakika geçerlidir, 5 yanlışta iptal olur. <span class="ui">Kodu tekrar gönder</span> ile yeni kod isteyin; <b>en son gelen</b> e-postadaki kodu yazın.</td></tr>
+    <tr><td>"Güncelleme indirilemedi" / "doğrulanamadı"</td><td>İnternet bağlantısını kontrol edip <span class="ui">Güncelle</span>'ye tekrar basın. Dosya eksik ya da bozuk inerse program onu kurmaz; bilgileriniz etkilenmez.</td></tr>
+    <tr><td>Güncellemeden sonra program açılmadı</td><td>2–3 dakika bekleyin, sonra masaüstündeki <b>Market Kasa</b> simgesine tıklayın. Olmazsa en son Market-Kasa-Setup.exe'yi indirip kurun (bilgiler silinmez).</td></tr>
     <tr><td>Günlük rapor gelmedi</td><td>O gün satış yoksa gönderilmez. Ayarlar → Günlük rapor açık mı? <span class="ui">Bugünün raporunu şimdi gönder</span> ile deneyin.</td></tr>
     <tr><td>Okuyucu okuyor ama ürün sepete düşmüyor</td><td>Barkod alanına tıklayın, tekrar okutun. Olmazsa <b>Ayarlar → Okuyucu testi</b> (Bölüm 23.1).</td></tr>
     <tr><td>"Barkod hatalı okundu"</td><td>Barkod buruşuk ya da yarım okundu. Düz tutup tekrar okutun ya da rakamları elle yazın.</td></tr>

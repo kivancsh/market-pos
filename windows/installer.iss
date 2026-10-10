@@ -65,18 +65,37 @@ Name: "{autodesktop}\Market Kasa"; Filename: "{app}\{#AppExe}"; Tasks: desktopic
 
 [Run]
 Filename: "{app}\{#AppExe}"; Description: "Market Kasa'yı şimdi aç"; Flags: nowait postinstall skipifsilent
+; Programın içinden güncellemede (sessiz kurulum, /relaunch=1): bitince programı yeniden aç
+Filename: "{app}\{#AppExe}"; Flags: nowait; Check: RelaunchAfterUpdate
 
 [UninstallRun]
 Filename: "{app}\{#AppExe}"; Parameters: "--stop"; Flags: runhidden waituntilterminated; RunOnceId: "StopServer"
 
 [Code]
+// Ayarlar → Güncelle ile başlatıldı mı (Market Kasa.exe kurulumu /relaunch=1 ile çalıştırır)
+function RelaunchAfterUpdate: Boolean;
+begin
+  Result := ExpandConstant('{param:relaunch|0}') = '1';
+end;
+
 // Güncelleme sırasında çalışan programı önce durdur (dosyalar kilitli kalmasın)
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var
   Exe: String;
   Code: Integer;
+  I: Integer;
 begin
   Result := '';
+  // Programın içinden güncellemede pencere kendini kapatıyor; kapanmasını bekle (en fazla 30 sn)
+  if RelaunchAfterUpdate then
+  begin
+    I := 0;
+    while CheckForMutexes('MarketKasaLauncher') and (I < 60) do
+    begin
+      Sleep(500);
+      I := I + 1;
+    end;
+  end;
   Exe := ExpandConstant('{app}\{#AppExe}');
   if FileExists(Exe) then
     Exec(Exe, '--stop', '', SW_HIDE, ewWaitUntilTerminated, Code);

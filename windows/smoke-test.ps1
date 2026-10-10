@@ -48,6 +48,16 @@ Step 'Başlatma'
 # Test: e-postalar gönderilmez, bu klasöre yazılır (başlatıcı ortam değişkenini sunucuya geçirir)
 $env:MAIL_DEV_DIR = Join-Path ([IO.Path]::GetTempPath()) 'market-kasa-mail'
 Remove-Item -Recurse -Force $env:MAIL_DEV_DIR -ErrorAction SilentlyContinue
+# Test: GitHub yerine yerel deneme sunucusu "99.0.0" sürümünü sunar (aynı kurulum dosyası; parmak izi gerçek)
+$updSite = Join-Path ([IO.Path]::GetTempPath()) 'market-kasa-update-site'
+Remove-Item -Recurse -Force $updSite -ErrorAction SilentlyContinue
+New-Item -ItemType Directory $updSite | Out-Null
+Copy-Item $setup (Join-Path $updSite 'Market-Kasa-Setup.exe')
+$updSha = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLower()
+@{ version = '99.0.0'; sha256 = $updSha; size = (Get-Item $setup).Length; notes = 'Deneme güncellemesi' } | ConvertTo-Json |
+  Set-Content (Join-Path $updSite 'latest.json') -Encoding utf8
+$updServer = Start-Process node -ArgumentList @((Resolve-Path 'windows\smoke-update-server.js').Path, $updSite, '8790') -PassThru -WindowStyle Hidden
+$env:MARKET_KASA_UPDATE_BASE = 'http://127.0.0.1:8790'
 $code = RunExe $exe @('--start')
 if ($code -ne 0) { Fail "Başlatıcı --start çıkış kodu $code" }
 if ((RunExe $exe @('--status')) -ne 0) { Fail '--status çalışmıyor diyor' }
@@ -117,6 +127,43 @@ $r = Invoke-WebRequest "$base/api/reports/daily/export" -WebSession $s -UseBasic
 if ($r.RawContentLength -lt 1000) { Fail 'Excel raporu üretilemedi' }
 $b = Invoke-RestMethod "$base/api/backups" -Method Post -WebSession $s
 if (-not (Test-Path (Join-Path $root "backups\$($b.file)"))) { Fail 'Yedek dosyası oluşmadı' }
+
+Step 'Güncelleme: yeni sürüm → yedek + indirme (parmak izi) → sessiz kurulum → program yeniden açılır, bilgiler yerinde'
+$ver = (Get-Content "$appDir\app\version.json" -Raw | ConvertFrom-Json).version
+if ($ver -ne $env:MARKET_KASA_VERSION) { Fail "version.json sürümü $ver, beklenen $env:MARKET_KASA_VERSION" }
+$u = (PostJson '/api/update/check' @{} $s).update
+if ($u.current -ne $ver) { Fail "Çalışan sürüm $($u.current), beklenen $ver" }
+if (-not $u.available -or $u.latest.version -ne '99.0.0') { Fail "Yeni sürüm görünmedi: $($u | ConvertTo-Json -Compress -Depth 4)" }
+if (-not $u.canDownload) { Fail 'Güncelleme indirilemez görünüyor (MARKET_UPDATE_DIR?)' }
+$backupDir = Join-Path $root 'backups'
+$backupsBefore = @(Get-ChildItem $backupDir -Filter *.db).Count
+$d = PostJson '/api/update/download' @{} $s
+if ($d.version -ne '99.0.0') { Fail "İndirme sonucu beklenmedik: $($d | ConvertTo-Json -Compress)" }
+$dl = Join-Path $root 'updates\Market-Kasa-Setup.exe'
+if (-not (Test-Path $dl)) { Fail 'İndirilen kurulum dosyası yok' }
+if ((Get-FileHash $dl -Algorithm SHA256).Hash.ToLower() -ne $updSha) { Fail 'İndirilen dosyanın parmak izi tutmuyor' }
+if (@(Get-ChildItem $backupDir -Filter *.db).Count -le $backupsBefore) { Fail 'Güncellemeden önce yedek alınmadı' }
+$pidBefore = (Get-Content (Join-Path $root 'server.pid') | Select-Object -First 1).Trim()
+if ((RunExe $exe @('--install-update') 60) -ne 0) { Fail 'Başlatıcı --install-update başarısız' }
+$deadline = (Get-Date).AddSeconds(240)
+$back = $false
+while ((Get-Date) -lt $deadline) {
+  Start-Sleep -Seconds 3
+  $pf = Join-Path $root 'server.pid'
+  $pidNow = if (Test-Path $pf) { (Get-Content $pf -ErrorAction SilentlyContinue | Select-Object -First 1) } else { $null }
+  if ($pidNow -and $pidNow.Trim() -ne $pidBefore) {
+    try { if (-not (Invoke-RestMethod "$base/api/auth/me" -TimeoutSec 5).needsSetup) { $back = $true; break } } catch { }
+  }
+}
+if (-not $back) { Fail 'Güncellemeden sonra program yeniden açılmadı' }
+if ((Invoke-RestMethod "$base/api/auth/me" -WebSession $s).user.role -ne 'owner') { Fail 'Güncellemeden sonra oturum kayboldu' }
+if (-not ((Invoke-RestMethod "$base/api/products" -WebSession $s).items | Where-Object { $_.name -eq 'Deneme Çay 1 kg' })) { Fail 'Güncellemeden sonra ürün kayboldu' }
+if ((Get-Content (Join-Path $root 'logs\launcher.log') -Raw) -notmatch 'Güncelleme kurulumu başlatıldı') { Fail 'Başlatıcı güncellemeyi kaydetmedi' }
+Write-Host "Güncelleme çalıştı: $ver → (deneme) 99.0.0, program yeniden açıldı"
+# Kurulumun yeniden açtığı pencereyi kapat (sonraki adımlarda dosyalar kilitli kalmasın)
+Get-Process -Name 'Market Kasa' -ErrorAction SilentlyContinue | Stop-Process -Force
+Stop-Process -Id $updServer.Id -Force -ErrorAction SilentlyContinue
+$env:MARKET_KASA_UPDATE_BASE = $null
 
 Step 'Komut satırı araçları (şifre sıfırlama aracı, yedek)'
 Push-Location "$appDir\app"

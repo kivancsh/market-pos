@@ -56,6 +56,22 @@ for (const [name, entry] of [["users-cli", "scripts/users-cli.ts"], ["backup", "
   });
 }
 
+// 5b) Sürüm bilgisi: program güncelleme denetimini bununla yapar (GitHub'da MARKET_KASA_VERSION = 1.1.<derleme no>)
+const version = process.env.MARKET_KASA_VERSION;
+if (version && !/^\d+\.\d+\.\d+$/.test(version)) {
+  console.error(`Geçersiz MARKET_KASA_VERSION: ${version}`);
+  process.exit(1);
+}
+if (!version && process.env.CI) {
+  console.error("MARKET_KASA_VERSION ayarlı değil (GitHub'da derlerken gerekli).");
+  process.exit(1);
+}
+if (version) {
+  const info = { version, commit: process.env.GITHUB_SHA ?? null, builtAt: new Date().toISOString() };
+  fs.writeFileSync(path.join(app, "version.json"), JSON.stringify(info, null, 1));
+  console.log(`Sürüm: ${version}`);
+}
+
 // 6) Kısayol dosyaları ve simge
 for (const f of ["Yonetici Sifresi Sifirla.cmd", "Yedek Al.cmd", "MarketKasa.ico"]) {
   fs.copyFileSync(path.join(root, "windows", f), path.join(out, f));

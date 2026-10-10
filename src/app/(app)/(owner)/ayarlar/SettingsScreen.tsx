@@ -9,6 +9,8 @@ import { Notice, type NoticeKind } from "@/client/components/Notice";
 import { beepError, beepSuccess } from "@/client/sound";
 import type { Settings } from "@/server/db/repositories/settings";
 import type { MailStatus } from "@/server/mail";
+import type { UpdateInfo } from "@/server/update";
+import { UpdateSection } from "./UpdateSection";
 import { errText } from "@/client/errors";
 import type { BackupInfo } from "@/server/services/backup";
 import type { ImportPreview, ImportResult } from "@/server/services/productImport";
@@ -27,7 +29,7 @@ function Toggle({ label, hint, checked, onChange }: { label: string; hint?: stri
   );
 }
 
-export function SettingsScreen({ initial, initialMail }: { initial: Settings; initialMail: MailStatus }) {
+export function SettingsScreen({ initial, initialMail, initialUpdate }: { initial: Settings; initialMail: MailStatus; initialUpdate: UpdateInfo }) {
   const [s, setS] = useState(initial);
   const [opening, setOpening] = useState(formatKurusPlain(initial.openingCashKurus));
   const [notice, setNotice] = useState<{ kind: NoticeKind; text: string } | null>(null);
@@ -167,6 +169,7 @@ export function SettingsScreen({ initial, initialMail }: { initial: Settings; in
       <MailSection initial={initialMail} />
       <ImportSection />
       <BackupSection />
+      <UpdateSection initial={initialUpdate} />
     </main>
   );
 }

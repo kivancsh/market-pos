@@ -14,7 +14,12 @@ Arkadaşınızın / dükkânın **Windows** bilgisayarına klasik bir kurulum do
 4. Başlatıcıyı (`Market Kasa.exe`, `launcher/MarketKasa.cs`) Windows'un kendi C# derleyicisiyle derler.
 5. Inno Setup ile `Market-Kasa-Setup.exe`'yi oluşturur (`installer.iss`).
 6. **Gerçek kurulum testi** (`smoke-test.ps1`): sessiz kurar, açar, e-posta onay koduyla yönetici hesabı (test modunda posta dosyaya yazılır), Kasiyer No'lu kasiyer ve ürün oluşturur, satış yapar, sayfaları, barkodu, Excel'i ve yedeği dener, kapatıp yeniden açar, kaldırır ve bilgilerin silinmediğini doğrular.
-7. Hepsi geçerse dosyayı **Releases** sayfasında "en son sürüm" olarak yayınlar.
+   Güncellemeyi de dener: yerel deneme sunucusu (`smoke-update-server.js`) "99.0.0" sürümünü sunar; program yeni sürümü görür, yedek alıp
+   indirir, parmak izini doğrular, `Market Kasa.exe --install-update` sessiz kurulumu başlatır ve program yeniden açılınca bilgilerin yerinde olduğu kontrol edilir.
+7. Hepsi geçerse kurulum dosyasını ve **`latest.json`**'u (sürüm, boyut, SHA-256 — `write-latest.mjs`) **Releases** sayfasında "en son sürüm" olarak yayınlar.
+   Kurulu programlar yeni sürümü bu dosyadan öğrenir.
+
+Sürüm numarası: `package.json`'daki ilk iki sayı + GitHub derleme numarası (ör. `1.1.57`); `build/win/app/version.json`'a ve kurulum dosyasına yazılır.
 
 Elle çalıştırmak için: GitHub → **Actions** → **Windows kurulum dosyası** → **Run workflow**.
 
@@ -26,6 +31,7 @@ Elle çalıştırmak için: GitHub → **Actions** → **Windows kurulum dosyas�
 | `%LOCALAPPDATA%\Market Kasa\data` | Veritabanı (`store.db`) — kaldırırken **silinmez** |
 | `%LOCALAPPDATA%\Market Kasa\backups` | Yedekler (gün sonu, Yedek Al) |
 | `%LOCALAPPDATA%\Market Kasa\logs` | `server.log`, `launcher.log` (sorun ararken) |
+| `%LOCALAPPDATA%\Market Kasa\updates` | İndirilen güncelleme (kurulunca bir sonraki açılışta silinir) |
 | Masaüstü + Başlat menüsü | Market Kasa, Yedek Al, Yedekler klasörü, Yönetici Şifresi Sıfırla, Kaldır |
 
 `Market Kasa.exe` programı **kendi penceresinde** açar (Microsoft Edge WebView2; DLL'ler exe'nin yanında, NuGet'ten CI'da indirilir). WebView2 yoksa varsayılan tarayıcıya düşer.

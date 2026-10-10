@@ -31,7 +31,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 55 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 56 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -67,6 +67,16 @@ Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → 
 - Bilgiler `%LOCALAPPDATA%\Market Kasa` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
 
 Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında otomatik üretilir ve **gerçekten kurulup açılarak test edilir**. Ayrıntılar: [`windows/README.md`](windows/README.md).
+
+### Güncelleme (Windows)
+
+- Her yayında **sürüm numarası** kendiliğinden artar: `1.1.<derleme no>` (ilk iki sayı `package.json`'dan). Çalışan sürüm **Ayarlar → Program sürümü ve güncelleme**'de yazar.
+- Program açılıştan kısa süre sonra ve **6 saatte bir** GitHub'daki en son sürüme bakar. Yeni sürüm varsa yöneticiye yeşil bir şerit çıkar: "Yeni sürüm var".
+- **Ayarlar → Güncelle**: önce **otomatik yedek** alınır, yeni kurulum dosyası indirilir ve boyutu + parmak izi (SHA-256) doğrulanır. Sonra pencere kapanır, kurulum sessizce yapılır ve program 1–2 dakika içinde **kendiliğinden yeniden açılır**. Bilgiler yerinde kalır; veritabanı değişikliği gerekiyorsa ilk açılışta otomatik yapılır.
+- Güncelleme **kendiliğinden kurulmaz**; satış sırasında program kapanmasın diye yönetici düğmeye basınca yapılır. Kasiyerler bildirimi görmez.
+- Güncelle düğmesi yalnızca kasa bilgisayarındaki **Market Kasa penceresinde** çalışır (telefonda/tarayıcıda ne yapılacağı yazar).
+- Sürüm notu olarak kod gönderiminin başlığı gösterilir.
+- Bu özellikten **önceki** sürümleri kullananlar bir kereliğine yeni Setup.exe'yi indirip kurmalıdır; sonrakiler programın içinden güncellenir.
 
 ---
 

@@ -13,6 +13,7 @@ Aşağıdaki **Market-Kasa-Setup.exe** dosyasını indirin ve çift tıklayın. 
 - **Başlat menüsü → Market Kasa** klasöründe: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
 - Bilgileriniz `%LOCALAPPDATA%\Market Kasa` klasöründedir. Programı kaldırmak ya da yeni sürümü kurmak bu bilgileri **silmez**.
 - Günü Kapat'ta (ya da Ayarlar'daki saatte) günün raporu yöneticinin e-postasına gider.
+- **Güncellemeler:** Yeni sürüm çıkınca program yöneticiye "Yeni sürüm var" der. **Ayarlar → Güncelle**'ye basmanız yeterli: önce yedek alınır, program 1–2 dakika kapanıp yeni sürümle kendiliğinden açılır. (Daha eski bir sürüm kullanıyorsanız bu dosyayı bir kez kurun; sonraki güncellemeler programın içinden yapılır.)
 - Haftada bir **Yedekler klasörü**nü USB belleğe kopyalayın.
 
 Resimli anlatım: [Kullanma kılavuzu, 5. bölüm](https://github.com/kivancsh/market-pos/raw/main/docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)

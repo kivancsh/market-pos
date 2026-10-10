@@ -6,7 +6,10 @@
 // Pencere zaten açıksa öne getirir. Pencereyi kapatmak programı KAPATMAZ (telefondan takip sürer);
 // tamamen kapatmak için menü: Market Kasa → Programı tamamen kapat.
 // WebView2 bulunamazsa program varsayılan tarayıcıda açılır.
-// Komut satırı: --start (başlat ve bekle), --stop (durdur), --status (0 = çalışıyor), --selftest (pencereyi dene).
+// Komut satırı: --start (başlat ve bekle), --stop (durdur), --status (0 = çalışıyor), --selftest (pencereyi dene),
+//   --install-update (indirilmiş güncellemeyi kur; normalde Ayarlar → Güncelle düğmesi pencereden yapar).
+// Güncelleme: sayfa, sunucunun indirip doğruladığı updates\Market-Kasa-Setup.exe için "market-kasa:install-update"
+// mesajı gönderir; pencere sessiz kurulumu başlatıp kapanır, kurulum bitince program yeniden açılır.
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,7 +27,7 @@ using Microsoft.Web.WebView2.WinForms;
 [assembly: System.Reflection.AssemblyTitle("Market Kasa")]
 [assembly: System.Reflection.AssemblyProduct("Market Kasa")]
 [assembly: System.Reflection.AssemblyDescription("Barkodlu satış, stok ve kâr takibi")]
-[assembly: System.Reflection.AssemblyVersion("2.0.0.0")]
+[assembly: System.Reflection.AssemblyVersion("2.1.0.0")]
 
 static class MarketKasa
 {
@@ -38,6 +41,8 @@ static class MarketKasa
     static string PidFile { get { return Path.Combine(Root, "server.pid"); } }
     static string NodeExe { get { return Path.Combine(AppDir, "node", "node.exe"); } }
     static string ServerDir { get { return Path.Combine(AppDir, "app"); } }
+    static string UpdateDir { get { return Path.Combine(Root, "updates"); } }
+    const string UpdateMessage = "market-kasa:install-update";
 
     [STAThread]
     static int Main(string[] args)
@@ -48,6 +53,7 @@ static class MarketKasa
             if (cmd == "--status") return IsRunning() ? 0 : 1;
             if (cmd == "--stop") { Stop(); return 0; }
             if (cmd == "--start") return StartAndWait(180) ? 0 : 2;
+            if (cmd == "--install-update") return StartUpdateInstaller() ? 0 : 9;
         }
         catch (Exception e)
         {
@@ -254,6 +260,9 @@ static class MarketKasa
             }
 
             CoreWebView2 core = web.CoreWebView2;
+            // Sayfaya "bu pencere güncellemeyi kurabilir" bilgisini ver (Ayarlar → Güncelle düğmesi bunu arar)
+            await core.AddScriptToExecuteOnDocumentCreatedAsync("window.marketKasaHost = Object.freeze({ installUpdate: true });");
+            core.WebMessageReceived += OnWebMessage;
             core.Settings.AreDevToolsEnabled = false;
             core.Settings.IsStatusBarEnabled = false;
             core.DocumentTitleChanged += delegate
@@ -276,12 +285,33 @@ static class MarketKasa
                     if (!a.IsSuccess) { Report("sayfa yüklenemedi: " + a.WebErrorStatus); SelfTestResult = 7; Close(); return; }
                     string r = await core.ExecuteScriptAsync(
                         "!!(document.querySelector('[data-testid=login-tab-owner]') || document.querySelector('[data-testid=setup-name]'))");
-                    Report("sayfa: " + core.Source + " → arayüz " + (r == "true" ? "çizildi" : "çizilemedi"));
-                    SelfTestResult = r == "true" ? 0 : 8;
+                    string h = await core.ExecuteScriptAsync("!!(window.marketKasaHost && window.marketKasaHost.installUpdate && window.chrome && window.chrome.webview)");
+                    Report("sayfa: " + core.Source + " → arayüz " + (r == "true" ? "çizildi" : "çizilemedi") +
+                        ", güncelleme köprüsü " + (h == "true" ? "hazır" : "YOK"));
+                    SelfTestResult = r == "true" && h == "true" ? 0 : 8;
                     Close();
                 };
             }
             core.Navigate(Home);
+        }
+
+        // Sayfadan gelen mesaj: sadece programın kendi sayfasından (localhost) ve sadece güncelleme komutu
+        void OnWebMessage(object sender, CoreWebView2WebMessageReceivedEventArgs a)
+        {
+            string msg;
+            try { msg = a.TryGetWebMessageAsString(); } catch { return; }
+            if (msg != UpdateMessage || !IsLocal(a.Source)) return;
+            if (StartUpdateInstaller())
+            {
+                // Kurulum bu pencerenin dosyalarını değiştirecek: pencereyi kapat (kurulum bitince program yeniden açılır)
+                Close();
+                Application.Exit();
+            }
+            else
+            {
+                MessageBox.Show("Güncelleme başlatılamadı. Ayarlar → Güncelle ile tekrar deneyin.\n\nAyrıntılar: " + LogDir,
+                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         void ShowPhoneInfo()
@@ -302,6 +332,33 @@ static class MarketKasa
             Cursor = Cursors.WaitCursor;
             Stop();
             Close();
+        }
+    }
+
+    // ------------------------------------------------------------------ güncelleme
+    // Sunucu, kurulum dosyasını indirip boyut ve SHA-256 ile doğruladıktan sonra updates klasörüne koyar.
+    // Kurulum sessiz çalışır, çalışan sunucuyu kendisi durdurur, bilgilere dokunmaz ve bitince programı yeniden açar.
+    static bool StartUpdateInstaller()
+    {
+        string setup = Path.Combine(UpdateDir, "Market-Kasa-Setup.exe");
+        if (!File.Exists(setup))
+        {
+            LauncherLog("Güncelleme dosyası yok: " + setup);
+            return false;
+        }
+        try
+        {
+            var psi = new ProcessStartInfo(setup, "/VERYSILENT /SUPPRESSMSGBOXES /NORESTART /relaunch=1");
+            psi.UseShellExecute = false;
+            psi.WorkingDirectory = UpdateDir;
+            Process.Start(psi);
+            LauncherLog("Güncelleme kurulumu başlatıldı: " + setup);
+            return true;
+        }
+        catch (Exception e)
+        {
+            LauncherLog("Güncelleme kurulumu başlatılamadı: " + e);
+            return false;
         }
     }
 
@@ -358,6 +415,7 @@ static class MarketKasa
         psi.EnvironmentVariables["SESSION_SECRET"] = SessionSecret();
         psi.EnvironmentVariables["MARKET_LOG_DIR"] = LogDir;
         psi.EnvironmentVariables["MARKET_PID_FILE"] = PidFile;
+        psi.EnvironmentVariables["MARKET_UPDATE_DIR"] = UpdateDir;
         Process proc = Process.Start(psi);
 
         DateTime until = DateTime.Now.AddSeconds(seconds);

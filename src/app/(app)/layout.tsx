@@ -4,6 +4,7 @@ import { getSettings } from "@/server/db/repositories/settings";
 import { listActiveCashiersWithPins } from "@/server/db/repositories/users";
 import { AppNav } from "@/client/components/AppNav";
 import { isMailConfigured } from "@/server/mail";
+import { getUpdateInfo } from "@/server/update";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
   const user = await requirePageUser();
@@ -12,6 +13,7 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
   const noCashier = user.role === "owner" && listActiveCashiersWithPins(db).length === 0;
   const noEmail = user.role === "owner" && !user.email;
   const noMail = user.role === "owner" && !isMailConfigured(db);
+  const update = user.role === "owner" ? getUpdateInfo() : null;
   return (
     <div className="flex min-h-dvh flex-col">
       <AppNav role={user.role} userName={user.name} businessName={businessName} />
@@ -32,6 +34,14 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
               </a>
             </>
           )}
+        </div>
+      )}
+      {update?.available && update.latest && (
+        <div className="bg-emerald-100 px-4 py-2 text-center text-sm font-medium text-emerald-900 print:hidden" data-testid="update-banner">
+          Yeni sürüm var: {update.latest.version} (sizdeki {update.current}).{" "}
+          <a href="/ayarlar#guncelleme" className="underline">
+            Ayarlar → Program güncellemesi
+          </a>
         </div>
       )}
       {noCashier && (
