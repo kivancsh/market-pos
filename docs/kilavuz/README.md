@@ -1,6 +1,6 @@
 # Kullanma kılavuzu (kaynak dosyalar)
 
-Hazır kılavuz: [`docs/Market Kasa Kullanma Kılavuzu.pdf`](../Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 43 sayfa, resimli).
+Hazır kılavuz: [`docs/Market Kasa Kullanma Kılavuzu.pdf`](../Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 49 sayfa, resimli; Mac ve Windows kurulumu dahil).
 
 Bu klasör, PDF'i yeniden üretmek içindir (ör. ekranlar değişince):
 

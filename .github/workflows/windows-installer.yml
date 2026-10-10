@@ -7,7 +7,8 @@ name: Windows kurulum dosyası
 on:
   push:
     branches: [main]
-    paths-ignore: ["docs/**", "promo/**", "**/*.md"]
+    # Kılavuz/video/belge değişiklikleri kurulum dosyasını etkilemez; windows/ altındaki her şey (sürüm notu dahil) yeniden üretir.
+    paths: ["**", "!docs/**", "!promo/**", "!**/*.md", "windows/**"]
   workflow_dispatch:
 
 permissions:

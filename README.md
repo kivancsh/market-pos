@@ -30,11 +30,11 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 43 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 49 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
-- Kurulum, programı açıp kapatma, ilk yönetici hesabı, giriş
+- Mac'e ve **Windows'a kurulum** (uyarı penceresi, kurulum yardımcısı, Başlat menüsü, bilgilerin yeri), programı açıp kapatma, ilk yönetici hesabı, giriş
 - **Satış:** okutma, adet, adla arama, nakit/kart, para üstü, bilgi fişi, indirim, bilinmeyen barkod, kısayollar, kasa mesajları
 - Ürün ekleme, Excel'den aktarma, fiyat değiştirme (tek ürün ve toplu), kategoriler, barkod etiketi
 - Mal girişi, stok sayımı, iade ve iptal, panel, gün sonu, raporlar, telefondan takip
@@ -57,9 +57,10 @@ Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 
 🪟 **[Market-Kasa-Setup.exe'yi indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Market-Kasa-Setup.exe)**
 
-Klasik Windows kurulumu: dosyaya çift tıklayın → **İleri → Kur → Son**. Bilgisayarda başka hiçbir şeyin kurulu olması gerekmez ve yönetici izni istemez. Masaüstüne ve Başlat menüsüne **Market Kasa** simgesi gelir.
+Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → Kur → Bitti**. Bilgisayarda başka hiçbir şeyin kurulu olması gerekmez ve yönetici izni istemez. Masaüstüne ve Başlat menüsüne **Market Kasa** simgesi gelir.
 
-- İlk çalıştırmada "Windows bilgisayarınızı korudu" uyarısı çıkarsa: **Ek bilgi → Yine de çalıştır**.
+- İlk çalıştırmada "Windows kişisel bilgisayarınızı korudu" uyarısı çıkarsa: **Ek bilgi → Yine de çalıştır**.
+- Resimli anlatım: kılavuzun **5. bölümü**.
 - Simgeye tıklayınca program arka planda başlar ve tarayıcı açılır. Program açıkken tekrar tıklarsanız **Tarayıcıda aç / Programı kapat** penceresi çıkar (Mac'tekiyle aynı).
 - Başlat menüsü → Market Kasa: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
 - Bilgiler `%LOCALAPPDATA%\Market Kasa` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
