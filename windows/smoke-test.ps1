@@ -9,14 +9,23 @@ $exe = Join-Path $appDir 'Market Kasa.exe'
 function Step($m) { Write-Host "`n=== $m" -ForegroundColor Cyan }
 function Fail($m) {
   Write-Host "HATA: $m" -ForegroundColor Red
+  $detail = ''
   foreach ($f in @('server.log', 'launcher.log')) {
     $p = Join-Path $root "logs\$f"
-    if (Test-Path $p) { Write-Host "--- $f"; Get-Content $p -Tail 80 }
+    if (Test-Path $p) { $t = (Get-Content $p -Tail 40) -join ' | '; Write-Host "--- $f"; Write-Host $t; $detail += " [$f] $t" }
   }
+  # GitHub'da "annotation" olarak görünür (kayıtları okumak için giriş gerekmez)
+  Write-Host "::error::KURULUM TESTI: $m$detail"
   exit 1
 }
-function RunExe($file, $argList) {
-  $p = Start-Process -FilePath $file -ArgumentList $argList -Wait -PassThru
+# Start-Process -Wait, başlatılan programın ALT süreçlerini de bekler (arka plandaki sunucu hiç kapanmaz);
+# bu yüzden sadece programın kendisini bekleyen .NET Process kullanılır.
+function RunExe($file, $argList, $timeoutSec = 300) {
+  $psi = New-Object System.Diagnostics.ProcessStartInfo ([string]$file)
+  $psi.Arguments = ($argList -join ' ')
+  $psi.UseShellExecute = $false
+  $p = [System.Diagnostics.Process]::Start($psi)
+  if (-not $p.WaitForExit($timeoutSec * 1000)) { Fail "$file $($psi.Arguments) $timeoutSec sn içinde bitmedi" }
   return $p.ExitCode
 }
 
@@ -98,7 +107,8 @@ RunExe $exe @('--stop') | Out-Null
 
 Step 'Kaldırma (bilgiler kalmalı)'
 $code = RunExe "$appDir\unins000.exe" @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART')
-Start-Sleep -Seconds 5
+# Kaldırıcı kendini geçici klasöre kopyalayıp orada çalışır; bitmesini bekle
+for ($i = 0; $i -lt 60 -and (Test-Path $exe); $i++) { Start-Sleep -Seconds 1 }
 if (Test-Path $exe) { Fail 'Program kaldırılamadı' }
 if (-not (Test-Path (Join-Path $root 'data\store.db'))) { Fail 'Kaldırırken bilgiler silinmiş (silinmemeliydi)' }
 if (Test-Path (Join-Path $desktop 'Market Kasa.lnk')) { Fail 'Masaüstü kısayolu kaldırılmadı' }

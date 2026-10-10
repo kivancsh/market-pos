@@ -35,6 +35,7 @@ jobs:
         run: npm ci
 
       - name: Testler (Windows'ta)
+        timeout-minutes: 15
         run: npm test
 
       - name: Uygulamayı derle (kendi kendine yeten sunucu)
@@ -68,6 +69,7 @@ jobs:
           Get-Item build\dist\Market-Kasa-Setup.exe | Format-List Name, Length
 
       - name: Gerçek kurulum testi (kur, aç, kullan, kaldır)
+        timeout-minutes: 15
         shell: pwsh
         run: ./windows/smoke-test.ps1
 
