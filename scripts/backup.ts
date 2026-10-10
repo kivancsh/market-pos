@@ -7,7 +7,8 @@ async function main() {
   const db = openDatabase(resolveDbPath());
   const file = await createBackup(db, new Date());
   db.close();
-  console.log(`✅ Yedek alındı: ${path.relative(process.cwd(), file)}`);
+  const rel = path.relative(process.cwd(), file);
+  console.log(`✅ Yedek alındı: ${rel.startsWith("..") ? file : rel}`);
 }
 
 main().catch((e) => {

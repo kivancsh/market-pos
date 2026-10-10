@@ -51,3 +51,6 @@ next-env.d.ts
 
 # Yerel geliştirme ayarları (bilgisayara özel yollar içerir)
 /.claude/
+
+# Windows paketi için ayrı derleme klasörü
+/.next-win/

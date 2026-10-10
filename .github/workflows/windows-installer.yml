@@ -1,0 +1,92 @@
+# Windows kurulum dosyası (Market-Kasa-Setup.exe)
+# GitHub'ın Windows bilgisayarında: testler → derleme → paket → kurulum dosyası → gerçek kurulum testi → yayın.
+# Sonuç her zaman şu adresten indirilebilir:
+#   https://github.com/<kullanıcı>/<repo>/releases/latest/download/Market-Kasa-Setup.exe
+name: Windows kurulum dosyası
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["docs/**", "promo/**", "**/*.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-installer
+  cancel-in-progress: true
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Paketleri kur
+        run: npm ci
+
+      - name: Testler (Windows'ta)
+        run: npm test
+
+      - name: Uygulamayı derle (kendi kendine yeten sunucu)
+        run: npm run build
+        env:
+          NEXT_OUTPUT: standalone
+
+      - name: Paket dosyalarını topla
+        run: node windows/build.mjs
+
+      - name: Başlatıcıyı derle (Market Kasa.exe)
+        shell: pwsh
+        run: |
+          $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
+          & $csc /nologo /codepage:65001 /target:winexe /optimize+ /platform:anycpu `
+            /win32icon:windows\MarketKasa.ico "/out:build\win\Market Kasa.exe" `
+            /r:System.Windows.Forms.dll /r:System.Drawing.dll windows\launcher\MarketKasa.cs
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Kurulum dosyasını oluştur (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+          $version = (node -p "require('./package.json').version")
+          & $iscc /Qp "/DAppVersion=$version.${{ github.run_number }}" windows\installer.iss
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Get-Item build\dist\Market-Kasa-Setup.exe | Format-List Name, Length
+
+      - name: Gerçek kurulum testi (kur, aç, kullan, kaldır)
+        shell: pwsh
+        run: ./windows/smoke-test.ps1
+
+      - name: Kurulum dosyasını sakla
+        uses: actions/upload-artifact@v4
+        with:
+          name: Market-Kasa-Setup
+          path: build/dist/Market-Kasa-Setup.exe
+          retention-days: 30
+
+      - name: Yayınla (Releases → en son sürüm)
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete windows -y --cleanup-tag || true
+          gh release create windows build/dist/Market-Kasa-Setup.exe \
+            --target "$GITHUB_SHA" \
+            --title "Market Kasa — Windows kurulum (#${{ github.run_number }})" \
+            --notes-file windows/RELEASE_NOTES.md \
+            --latest

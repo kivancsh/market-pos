@@ -11,6 +11,8 @@ const eslintConfig = defineConfig([
     ".next/**",
     "out/**",
     "build/**",
+    // Windows paketi için ayrı derleme klasörü (windows/build.mjs)
+    ".next-win/**",
     "next-env.d.ts",
   ]),
 ]);

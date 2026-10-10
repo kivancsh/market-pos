@@ -12,6 +12,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 - [Kullanma kılavuzu (PDF)](#kullanma-kılavuzu-pdf)
 - [Tanıtım videosu](#tanıtım-videosu)
+- [Windows'a kurulum (Setup.exe)](#windowsa-kurulum-setupexe)
 - [Kolay kurulum: masaüstü simgesi (Mac)](#kolay-kurulum-masaüstü-simgesi-mac)
 1. [İlk kurulum](#1-ilk-kurulum)
 2. [Dükkânda çalıştırma ve telefondan erişim](#2-dükkânda-çalıştırma-ve-telefondan-erişim)
@@ -49,6 +50,21 @@ Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](do
 Lansman tarzı, "nasıl kullanılır" videosu: giriş → barkod okutma → nakit ödeme ve para üstü → panelde kâr (telefondan da) → Yönetim Paneli'nden toplu fiyat → etiket, raporlar, işlem geçmişi, kasiyer hesapları. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
 
 Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
+
+---
+
+## Windows'a kurulum (Setup.exe)
+
+🪟 **[Market-Kasa-Setup.exe'yi indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Market-Kasa-Setup.exe)**
+
+Klasik Windows kurulumu: dosyaya çift tıklayın → **İleri → Kur → Son**. Bilgisayarda başka hiçbir şeyin kurulu olması gerekmez ve yönetici izni istemez. Masaüstüne ve Başlat menüsüne **Market Kasa** simgesi gelir.
+
+- İlk çalıştırmada "Windows bilgisayarınızı korudu" uyarısı çıkarsa: **Ek bilgi → Yine de çalıştır**.
+- Simgeye tıklayınca program arka planda başlar ve tarayıcı açılır. Program açıkken tekrar tıklarsanız **Tarayıcıda aç / Programı kapat** penceresi çıkar (Mac'tekiyle aynı).
+- Başlat menüsü → Market Kasa: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
+- Bilgiler `%LOCALAPPDATA%\Market Kasa` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
+
+Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında otomatik üretilir ve **gerçekten kurulup açılarak test edilir**. Ayrıntılar: [`windows/README.md`](windows/README.md).
 
 ---
 
