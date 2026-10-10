@@ -1,3 +1,0 @@
-module.exports=[60075,a=>{"use strict";var b=a.i(87924),c=a.i(72131);a.s(["PrintOnLoad",0,function({enabled:a}){return(0,c.useEffect)(()=>{a&&window.print()},[a]),(0,b.jsx)("button",{type:"button",onClick:()=>window.print(),className:"no-print mt-4 w-full rounded border border-black py-2 font-sans",children:"Yazdır"})}])}];
-
-//# sourceMappingURL=src_app_fis_%5Bid%5D_PrintOnLoad_tsx_0px7t_5ly701c._.js.map

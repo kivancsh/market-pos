@@ -1,3 +1,0 @@
-{
-  "/api/barcodes/[code]/route": "app/api/barcodes/[code]/route.js"
-}
