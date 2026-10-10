@@ -78,3 +78,7 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).
 - `docs/kilavuz/` (kullanma kılavuzu PDF'i) ve `promo/` (tanıtım videosu) üreticileri ayrı demo veritabanıyla çalışır
   (`data/guide`, `data/promo`; port 3300/3200). Ekranlar değişirse yeniden üretilir; adımlar klasörlerdeki README'lerde.
+- Uygulama penceresi: Mac'te `mac/MarketKasa.swift` (WKWebView; ikili `mac/bin/MarketKasa` depoda, `mac/build.sh` ile derlenir,
+  `scripts/create-app.sh` paketler), Windows'ta `windows/launcher/MarketKasa.cs` (WebView2). İkisi de `--selftest` ile sınanır.
+  WKWebView `window.print`/indirme/`confirm`/`prompt`/dosya seçmeyi kendisi yapmaz; Swift tarafında karşılanır — yeni böyle bir
+  tarayıcı özelliği kullanılırsa orada da desteklenmeli.

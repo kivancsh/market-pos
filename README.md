@@ -30,7 +30,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 49 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 50 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -61,7 +61,7 @@ Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → 
 
 - İlk çalıştırmada "Windows kişisel bilgisayarınızı korudu" uyarısı çıkarsa: **Ek bilgi → Yine de çalıştır**.
 - Resimli anlatım: kılavuzun **5. bölümü**.
-- Simgeye tıklayınca program arka planda başlar ve tarayıcı açılır. Program açıkken tekrar tıklarsanız **Tarayıcıda aç / Programı kapat** penceresi çıkar (Mac'tekiyle aynı).
+- Simgeye tıklayınca program **kendi penceresinde** açılır (Microsoft Edge WebView2 ile; Windows 10/11'de hazır gelir). Pencere açıkken tekrar tıklarsanız pencere öne gelir. Pencereyi kapatmak programı kapatmaz; menü **Market Kasa → Programı tamamen kapat** ile kapanır.
 - Başlat menüsü → Market Kasa: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
 - Bilgiler `%LOCALAPPDATA%\Market Kasa` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
 
@@ -72,13 +72,10 @@ Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında oto
 ## Kolay kurulum: masaüstü simgesi (Mac)
 
 1. Klasördeki **Kurulum** dosyasına çift tıklayın. Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
-2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **arka planda, pencere açmadan** çalışır ve tarayıcı açılır. Simgeyi Dock'a da sürükleyebilirsiniz.
-3. Program açıkken simgeye tekrar tıklarsanız küçük bir pencere çıkar:
-   - **Tarayıcıda aç** — kasa/panel sayfasını açar,
-   - **Programı kapat** — onay sorduktan sonra programı durdurur.
-   Bu pencerede telefondan panel adresi de yazar.
+2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **kendi penceresinde** açılır (tarayıcı gerekmez; adres çubuğu/sekme yok, Dock'ta kendi simgesi). Sunucu arka planda çalışır. Simgeyi Dock'a da sürükleyebilirsiniz.
+3. Pencerenin üst menüsü: **Market Kasa** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetim Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
 4. **İlk açılışta** "Yönetici hesabı oluştur" ekranı gelir: adınızı, bir kullanıcı adı ve en az 8 karakterlik bir şifre belirleyin. Sonra **Yönetim Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin.
-5. Tarayıcı sekmesini kapatmak programı kapatmaz. Program; simgeden "Programı kapat" denene ya da bilgisayar kapanana/yeniden başlayana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
+5. Pencereyi kapatmak programı kapatmaz (telefondan takip sürer). Program; menüden **Market Kasa → Programı tamamen kapat** denene ya da bilgisayar kapanana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
 
 Klasördeki diğer çift tıklanabilir dosyalar:
 

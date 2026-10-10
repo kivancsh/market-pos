@@ -28,4 +28,6 @@ Elle çalıştırmak için: GitHub → **Actions** → **Windows kurulum dosyas�
 | `%LOCALAPPDATA%\Market Kasa\logs` | `server.log`, `launcher.log` (sorun ararken) |
 | Masaüstü + Başlat menüsü | Market Kasa, Yedek Al, Yedekler klasörü, Yönetici Şifresi Sıfırla, Kaldır |
 
-`Market Kasa.exe` komutları: `--start` (başlat ve hazır olmasını bekle), `--stop` (durdur), `--status` (çalışıyorsa 0).
+`Market Kasa.exe` programı **kendi penceresinde** açar (Microsoft Edge WebView2; DLL'ler exe'nin yanında, NuGet'ten CI'da indirilir). WebView2 yoksa varsayılan tarayıcıya düşer.
+
+Komutlar: `--start` (başlat ve hazır olmasını bekle), `--stop` (durdur), `--status` (çalışıyorsa 0), `--selftest` (pencereyi görünmeden açıp sayfanın yüklendiğini dener).

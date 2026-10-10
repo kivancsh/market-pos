@@ -315,36 +315,38 @@
 </section>
 
 <!-- ============================================================ 4 AÇMA KAPAMA -->
-<section class="flow-sec">
+<section class="page">
   <h2 class="sec"><span class="num">4</span>Programı açmak ve kapatmak (Mac)</h2>
   <div class="who"><span class="tag all">HERKES</span></div>
   <h3>4.1 Açmak</h3>
   <ol class="steps">
-    <li>Masaüstündeki <b>Market Kasa</b> simgesine <b>çift tıklayın</b>.</li>
-    <li>Ekranın sağ üstünde "Başlatılıyor…" bildirimi çıkar. İlk seferde ya da güncellemeden sonra 1–2 dakika sürebilir; normalde birkaç saniyedir.</li>
-    <li>İnternet tarayıcınız kendiliğinden açılır ve giriş ekranı gelir.</li>
+    <li>Masaüstündeki (ya da Dock'taki) <b>Market Kasa</b> simgesine <b>çift tıklayın</b>.</li>
+    <li>Market Kasa <b>kendi penceresinde</b> açılır. İlk seferde ya da güncellemeden sonra "Market Kasa başlatılıyor…" yazısıyla 1–2 dakika bekleyebilir; normalde birkaç saniyedir.</li>
+    <li>Giriş ekranı pencerenin içinde gelir. Tarayıcı açmanıza gerek yoktur.</li>
   </ol>
-  <div class="box tip"><span class="t">Program arka planda çalışır</span><p>Ayrı bir pencere açılmaz. Tarayıcı sekmesini kapatsanız bile program çalışmaya devam eder. Sayfayı tekrar açmak için simgeye yine tıklayın.</p></div>
-
-  <h3>4.2 Program açıkken simgeye tıklarsanız</h3>
-  <p>Şöyle küçük bir pencere çıkar:</p>
-  <div class="dlg">
-    <img data-src="icon.png" alt="" />
-    <div><div class="tt">Market Kasa açık ve çalışıyor.</div>
-    <div class="msg">Bu bilgisayarda: <code>http://localhost:3000</code><br>Telefondan panel: <code>http://192.168.1.34:3000/panel</code></div></div>
-    <div class="btns"><span>Programı kapat</span><span class="def">Tarayıcıda aç</span></div>
+  <div class="mock" style="width:150mm;margin:3mm auto 2mm">
+    <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i><b style="margin:0 auto">Kasa · Market Kasa</b></div>
+    <img data-src="kasa-bos.jpg" alt="" style="display:block;width:100%" />
   </div>
-  <ul class="dots">
-    <li><span class="ui">Tarayıcıda aç</span>: Kasa ve panel sayfasını açar. Gün içinde genelde bunu kullanırsınız.</li>
-    <li><span class="ui">Programı kapat</span>: Onay sorar, sonra programı tamamen durdurur.</li>
-    <li>"Telefondan panel" satırındaki adres, telefondan takip için gereklidir (Bölüm 20). Sizin bilgisayarınızda rakamlar farklı olabilir.</li>
-  </ul>
+  <p class="note-draw" style="text-align:center">Market Kasa penceresi: adres çubuğu ve sekme yoktur; Dock'ta kendi simgesiyle durur.</p>
+
+  <h3>4.2 Üst menü</h3>
+  <p>Market Kasa penceresi öndeyken ekranın en üstündeki menü çubuğunda şunlar vardır:</p>
+  <table class="t">
+    <tr><th style="width:24%">Menü</th><th>İçinde</th></tr>
+    <tr><td>Market Kasa</td><td><b>Telefondan bağlanma…</b> (telefonda yazılacak adresi gösterir, Bölüm 20) · <b>Tarayıcıda aç</b> · <b>Programı tamamen kapat…</b> · Pencereyi kapat <span class="key">⌘</span>+<span class="key">Q</span></td></tr>
+    <tr><td>Dosya</td><td><b>Yazdır…</b> <span class="key">⌘</span>+<span class="key">P</span></td></tr>
+    <tr><td>Düzen</td><td>Geri al, Kes, Kopyala, Yapıştır, Tümünü seç</td></tr>
+    <tr><td>Görünüm</td><td><b>Yenile</b> <span class="key">⌘</span>+<span class="key">R</span> · <b>Yakınlaştır</b> <span class="key">⌘</span>+<span class="key">+</span> · <b>Uzaklaştır</b> <span class="key">⌘</span>+<span class="key">−</span> · Gerçek boyut <span class="key">⌘</span>+<span class="key">0</span> · Tam ekran</td></tr>
+    <tr><td>Git</td><td><b>Kasa</b> <span class="key">⌘</span>+<span class="key">1</span> · <b>Panel</b> <span class="key">⌘</span>+<span class="key">2</span> · <b>Yönetim Paneli</b> <span class="key">⌘</span>+<span class="key">3</span> · Geri / İleri</td></tr>
+  </table>
+  <div class="box tip"><span class="t">Yazdırma ve indirme pencerenin içinden olur</span><p>Bilgi fişi küçük ayrı bir pencerede açılır ve yazdırma penceresi kendiliğinden gelir. Excel raporları <b>İndirilenler</b> klasörüne kaydedilir; ekranda "Aç / Finder'da göster" sorusu çıkar.</p></div>
 
   <h3>4.3 Kapatmak</h3>
-  <ol class="steps">
-    <li>Simgeye tıklayın, <span class="ui">Programı kapat</span>'a basın.</li>
-    <li>"Program kapatılsın mı?" sorusuna <span class="ui">Kapat</span> deyin.</li>
-  </ol>
+  <ul class="dots">
+    <li><b>Pencereyi kapatmak</b> (sol üstteki kırmızı düğme ya da <span class="key">⌘</span>+<span class="key">Q</span>) programı <b>kapatmaz</b>: arka planda çalışmaya devam eder, telefondan takip sürer. Simgeye tıklayınca pencere hemen geri gelir.</li>
+    <li><b>Tamamen kapatmak</b> için: menü <b>Market Kasa → Programı tamamen kapat…</b> → <span class="ui">Kapat</span>.</li>
+  </ul>
   <div class="box warn"><span class="t">Bilgisayar kapanınca program da kapanır</span><p>Ertesi sabah bilgisayarı açtıktan sonra <b>simgeye bir kez tıklamanız</b> yeterlidir. Akşam programı kapatmak zorunda değilsiniz; ama önce <b>günü kapatın</b> (Bölüm 18).</p></div>
 </section>
 
@@ -407,7 +409,7 @@
     <div>
       <ol class="steps">
         <li>"Market Kasa başlatılıyor…" penceresi çıkar. İlk açılışta bir dakika kadar sürebilir; bekleyin.</li>
-        <li>Hazır olunca internet tarayıcısı (genelde Microsoft Edge) kendiliğinden açılır.</li>
+        <li>Hazır olunca Market Kasa <b>kendi penceresinde</b> açılır (tarayıcı gerekmez).</li>
         <li><b>Yönetici hesabı oluşturma</b> ekranı gelir (Bölüm 6). Bundan sonrası Mac ile aynıdır.</li>
       </ol>
     </div>
@@ -436,17 +438,28 @@
 <section class="flow-sec">
   <h3>5.5 Her gün açmak ve kapatmak</h3>
   <ul class="dots">
-    <li><b>Açmak:</b> Masaüstündeki <b>Market Kasa</b> simgesine çift tıklayın (ya da Başlat menüsü → Market Kasa). Program arka planda başlar ve tarayıcı açılır.</li>
-    <li><b>Program açıkken</b> simgeye tekrar tıklarsanız şu pencere çıkar (Mac'tekiyle aynı):</li>
+    <li><b>Açmak:</b> Masaüstündeki <b>Market Kasa</b> simgesine çift tıklayın (ya da Başlat menüsü → Market Kasa). Program kendi penceresinde açılır. Pencere zaten açıksa öne gelir.</li>
+    <li><b>Pencerenin üstündeki menü</b> (Mac'tekiyle aynı işler):</li>
   </ul>
-  <div class="wmock wdlg" style="width:120mm;margin:2mm auto 4mm">
-    <div class="wt">Market Kasa</div>
-    <div class="wdb" style="display:grid;grid-template-columns:14mm 1fr;gap:3mm"><img data-src="icon.png" alt="" style="width:13mm;height:13mm" /><div><b style="font-size:11.5pt">Market Kasa açık ve çalışıyor.</b><p>Bu bilgisayarda:  http://localhost:3000<br>Telefondan panel:  http://192.168.1.34:3000/panel</p></div>
-    <div class="ss-b" style="grid-column:1/-1;justify-content:flex-end"><span class="wbtn">Programı kapat</span><span class="wbtn pri">Tarayıcıda aç</span></div></div>
+  <div class="side">
+    <div class="wmock wstart">
+      <div class="wt">Market Kasa &nbsp;·&nbsp; Git</div>
+      <div class="wli">Yenile (F5) &nbsp;·&nbsp; Yazdır… (Ctrl+P)</div>
+      <div class="wli">Yakınlaştır · Uzaklaştır · Gerçek boyut</div>
+      <div class="wli">Telefondan bağlanma…<span class="wpin wpin-r">1</span></div>
+      <div class="wli">Tarayıcıda aç</div>
+      <div class="wli">Programı tamamen kapat…<span class="wpin wpin-r">2</span></div>
+      <div class="wli">Pencereyi kapat (program arka planda çalışır)</div>
+    </div>
+    <ul class="legend one">
+      <li><i>1</i><span>Telefonda yazılacak adresi gösterir (Bölüm 20).</span></li>
+      <li><i>2</i><span>Programı tamamen durdurur (onay sorar). Kasa ve telefon bağlantısı kapanır.</span></li>
+    </ul>
   </div>
   <ul class="dots">
-    <li><span class="ui">Tarayıcıda aç</span>: kasa ve panel sayfasını açar. <span class="ui">Programı kapat</span>: onay sorup programı durdurur.</li>
-    <li>Tarayıcı sekmesini kapatmak programı kapatmaz. Bilgisayar kapanınca program da kapanır; sabah simgeye bir kez tıklamanız yeterlidir.</li>
+    <li><b>Pencereyi kapatmak</b> (sağ üstteki ✕) programı kapatmaz; arka planda çalışmaya devam eder. Bilgisayar kapanınca program da kapanır; sabah simgeye bir kez tıklamanız yeterlidir.</li>
+    <li>Yazdırma (bilgi fişi, etiket) Windows'un yazdırma penceresiyle olur; Excel raporları <b>İndirilenler</b> klasörüne iner.</li>
+    <li>Nadiren, bilgisayarda gerekli Microsoft Edge bileşeni yoksa program tarayıcıda açılır; Windows Update ile Edge'i güncellemek bunu düzeltir.</li>
   </ul>
 
   <h3>5.6 Başlat menüsündeki kısayollar</h3>
@@ -484,7 +497,7 @@
   </ul>
   <p><b>Bir yedeğe geri dönmek (Windows):</b></p>
   <ol class="steps">
-    <li>Programı kapatın: Market Kasa simgesi → <span class="ui">Programı kapat</span>.</li>
+    <li>Programı kapatın: pencerenin menüsünden <b>Market Kasa → Programı tamamen kapat…</b> → <span class="ui">Evet</span>.</li>
     <li><span class="mono">%LOCALAPPDATA%\Market Kasa\data</span> klasöründe <b>store.db</b>'nin adını <b>store-eski.db</b> yapın; varsa <b>store.db-wal</b> ve <b>store.db-shm</b> dosyalarını silin.</li>
     <li><b>backups</b> klasöründen dönmek istediğiniz yedeği <b>data</b> klasörüne kopyalayın, adını <b>store.db</b> yapın.</li>
     <li>Market Kasa simgesiyle programı açın.</li>
@@ -1017,7 +1030,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <div>
       <ol class="steps">
         <li>Telefon, kasa bilgisayarıyla <b>aynı Wi-Fi</b>'ye bağlı olsun.</li>
-        <li>Bilgisayarda Market Kasa simgesine tıklayın. Pencerede <b>"Telefondan panel: http://…"</b> adresini görün (Mac: Bölüm 4.2, Windows: Bölüm 5.5).</li>
+        <li>Bilgisayardaki Market Kasa penceresinde menü: <b>Market Kasa → Telefondan bağlanma…</b> Telefonda yazılacak adres (ör. http://192.168.1.34:3000/panel) gösterilir (Mac: Bölüm 4.2, Windows: Bölüm 5.5).</li>
         <li>Telefonun tarayıcısına bu adresi aynen yazın.</li>
         <li><span class="ui">Yönetici</span> sekmesinden kullanıcı adı ve şifrenizle girin.</li>
         <li>Kolaylık için telefonda "Ana ekrana ekle" yapabilirsiniz.</li>
@@ -1118,7 +1131,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
   <h3>24.2 Bir yedeğe geri dönmek</h3>
   <p style="font-size:10.2pt;color:#475569">Aşağıdaki adımlar Mac içindir. Windows'ta aynı işlem: Bölüm 5.7.</p>
   <ol class="steps">
-    <li>Programı kapatın: simge → <span class="ui">Programı kapat</span> → <span class="ui">Kapat</span>.</li>
+    <li>Programı kapatın: menü <b>Market Kasa → Programı tamamen kapat…</b> → <span class="ui">Kapat</span>.</li>
     <li><b>market-pos/data</b> klasöründe <b>store.db</b> dosyasının adını <b>store-eski.db</b> yapın. Varsa <b>store.db-wal</b> ve <b>store.db-shm</b> dosyalarını silin.</li>
     <li>Dönmek istediğiniz yedeği (backups klasöründen) <b>data</b> klasörüne kopyalayın ve adını <b>store.db</b> yapın.</li>
     <li>Simgeye tıklayıp programı açın. Bilgiler yedeğin alındığı ana döner.</li>
@@ -1144,7 +1157,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <tr><td>"Yetersiz stok" yüzünden satış yapılamıyor</td><td>Sistemdeki stok yanlış. <b>Stok sayımı</b> ile düzeltin ya da gelen malı <b>Mal girişi</b>'ne girin.</td></tr>
     <tr><td>"Gün kapatıldı", satış yapılamıyor</td><td>Panel → <span class="ui">Günü yeniden aç</span> → gerekçe yazın.</td></tr>
     <tr><td>Etiketler kâğıda kaymış basılıyor</td><td>Yazdırırken ölçek %100, kenar boşluğu "Yok" olsun. Gerekirse "Kenar boşluğu (mm)" ayarını değiştirin.</td></tr>
-    <tr><td>Telefondan açılmıyor</td><td>Telefon aynı Wi-Fi'de mi? Adres değişmiş olabilir; simgeye tıklayıp güncel adrese bakın.</td></tr>
+    <tr><td>Telefondan açılmıyor</td><td>Telefon aynı Wi-Fi'de mi? Adres değişmiş olabilir; menü <b>Market Kasa → Telefondan bağlanma…</b> ile güncel adrese bakın.</td></tr>
     <tr><td>Fiyatı değiştirdim, kasada eski fiyat</td><td>Kasa sayfasını yenileyin (<span class="key">⌘</span> + <span class="key">R</span>). Satışta zaten güncel fiyat kullanılır.</td></tr>
     <tr><td>Yanlış satış yaptım</td><td>Bugünse: Panel → satışa tıkla → <span class="ui">Satışı iptal et</span>. Eskiyse iade alın (Bölüm 16).</td></tr>
   </table>
