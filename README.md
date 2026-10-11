@@ -47,9 +47,9 @@ Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](do
 
 ## Tanıtım videosu
 
-🎬 **[Market Kasa tanıtım videosu (40 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
+🎬 **[Market Kasa tanıtım videosu (45 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
 
-Lansman tarzı, "nasıl kullanılır" videosu: giriş → barkod okutma → nakit ödeme ve para üstü → panelde kâr (telefondan da) → Yönetici Paneli'nden toplu fiyat → etiket, raporlar, işlem geçmişi, kasiyer hesapları. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
+Tempolu reklam filmi: "Defter, hesap makinesi, akşam kasa hesabı… artık değil." → hızlı satış (barkod, para üstü) → **finans yönetimi** (ciro, brüt kâr, giderler, net kâr, kâr-zarar ve KDV) → **iş takibi** (kasiyer performansı, yoğun saatler) → **stok** (bitmeden haber, sipariş önerisi) → etiket, toplu zam, Excel, telefondan takip, gün sonu e-postası, işlem geçmişi. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
 
 Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 
