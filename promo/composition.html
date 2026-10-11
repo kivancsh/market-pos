@@ -387,37 +387,42 @@ ALERTS.forEach((a) => S(a.e, { background: a.bgc, border: `2px solid ${a.dot}`, 
 const more = el("div", "abs ca", s5); S(more, { width: "1920px", textAlign: "center", top: "390px", fontSize: "230px", fontWeight: "900", letterSpacing: "-0.03em" });
 const moreL = "VE DAHASI".split("").map((ch, i) => { const s = el("span", "wi", more, ch === " " ? "&nbsp;" : ch); if (i >= 3) s.classList.add("grad"); return s; });
 
-// ================================================================== SAHNE 6 · Hızlı özellikler (31,875–37,5)
+// ================================================================== SAHNE 6 · Ve dahası: 3B karusel (31,875–36,56) → toplanma (–37,5)
 const s6 = el("div", "layer");
 const s6p = el("div", "persp", s6);
+S(s6p, { perspective: "1700px", perspectiveOrigin: "50% 42%" });
+const MD = 2 * BT; // her özellik 2 vuruş
+const MAIL_HEAD = `<div class="mh"><b>${(BOXES._mailSubject || "Köşe Market günlük rapor").replace(/</g, "&lt;")}</b><span>Market Kasa · her akşam · ekte: ürün kârlılığı.xlsx, kasiyer performansı.xlsx</span></div>`;
 const MT = [
-  { shot: "etiketler", title: "Barkod etiketi", sub: "Fiyatlı etiketleri A4'e basın", focus: [560, 120, 760, 520] },
-  { shot: "toplu-fiyat", title: "Toplu zam", sub: "Tek tıkla %10, önizlemeli", focus: [250, 300, 1000, 560] },
-  { shot: "raporlar", title: "Excel raporları", sub: "Ürün ve kategori kârlılığı", focus: [260, 80, 1180, 700] },
-  { phone: true, title: "Telefondan takip", sub: "Dükkânınız cebinizde" },
-  { mail: true, title: "Gün sonu raporu", sub: "Her akşam e-postanızda" },
-  { shot: "islem-gecmisi", title: "İşlem geçmişi", sub: "Kim, ne zaman, ne yaptı", focus: [250, 60, 1180, 740] },
+  { shot: "etiketler", title: "Barkod {etiketi}", sub: "Fiyatlı etiketleri A4'e basın", focus: [560, 120, 760, 520] },
+  { shot: "raporlar", title: "Excel {raporları}", sub: "Ürün ve kategori kârlılığı, tek tıkla", focus: [260, 80, 1180, 700] },
+  { phone: true, title: "Telefondan {takip}", sub: "Dükkânınız cebinizde" },
+  { mail: true, title: "Gün sonu {raporu}", sub: "Her akşam e-postanızda" },
+  { shot: "islem-gecmisi", title: "İşlem {geçmişi}", sub: "Kim, ne zaman, ne yaptı", focus: [250, 60, 1180, 740] },
 ].map((m, i) => {
-  const t0 = 31.875 + i * (2 * BT);
-  let obj;
+  let obj, w, h;
   if (m.phone) {
-    obj = el("div", "phone", s6, '<div class="island"></div><div class="scr"><img></div>');
+    obj = el("div", "phone", s6p, '<div class="island"></div><div class="scr"><img></div>');
     obj.querySelector("img").src = `${ASSETS}/shots/telefon.png`;
+    w = 360; h = 750;
   } else if (m.mail) {
-    obj = el("div", "mail", s6, `<div class="mh"><b>${(BOXES._mailSubject || "Köşe Market günlük rapor").replace(/</g, "&lt;")}</b><span>Market Kasa · bugün 23:30 · ekte: ürün kârlılığı.xlsx, kasiyer performansı.xlsx</span></div><img class="mb" src="${ASSETS}/shots/eposta.png">`);
+    obj = el("div", "mail", s6p, `${MAIL_HEAD}<img class="mb" src="${ASSETS}/shots/eposta.png">`);
+    w = 780; h = 720;
   } else {
-    obj = makeBrowser(s6p, 960, `Market Kasa — ${m.title}`, [m.shot]);
+    obj = makeBrowser(s6p, 960, `Market Kasa — ${m.title.replace(/[{}]/g, "")}`, [m.shot]);
+    w = 960; h = 642;
   }
-  const num = el("div", "abs", s6, String(i + 1).padStart(2, "0"));
-  S(num, { fontSize: "30px", fontWeight: "900", color: "#34d399", letterSpacing: ".2em" });
-  const tl = el("div", "abs ca", s6, m.title);
-  S(tl, { fontSize: "92px", fontWeight: "900", letterSpacing: "-0.035em", whiteSpace: "nowrap" });
-  const sb = el("div", "abs", s6, m.sub);
-  S(sb, { fontSize: "38px", color: "#cbd5e1", whiteSpace: "nowrap", fontWeight: "500" });
-  return { ...m, i, t0, obj, num, tl, sb, left: i % 2 === 0 };
+  const root = obj.root || obj;
+  S(root, { left: "0px", top: "0px", transformOrigin: "50% 50%" });
+  const tl = kinetic(s6, m.title, "abs ktitle ca", { width: "1920px", textAlign: "center", top: "818px", fontSize: "84px" });
+  const sb = el("div", "abs sub", s6, m.sub);
+  S(sb, { width: "1920px", textAlign: "center", top: "930px", fontSize: "34px" });
+  return { ...m, i, t0: 31.875 + i * MD, obj, root, w, h, tl, sb };
 });
-const s6bar = el("div", "abs", s6); S(s6bar, { left: "660px", top: "1020px", width: "600px", height: "6px", borderRadius: "6px", background: "rgba(255,255,255,.12)", overflow: "hidden" });
+const s6num = el("div", "abs", s6); S(s6num, { width: "1920px", textAlign: "center", top: "780px", fontSize: "22px", fontWeight: "900", color: "#34d399", letterSpacing: ".35em" });
+const s6bar = el("div", "abs", s6); S(s6bar, { left: "760px", top: "1028px", width: "400px", height: "6px", borderRadius: "6px", background: "rgba(255,255,255,.12)", overflow: "hidden" });
 const s6fill = el("div", null, s6bar); S(s6fill, { height: "100%", width: "0", background: "linear-gradient(90deg,#10b981,#34d399)" });
+const s6core = el("div", "abs", s6); S(s6core, { width: "420px", height: "420px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(110,231,183,.75) 22%, rgba(16,185,129,.25) 50%, transparent 70%)" });
 
 // ================================================================== SAHNE 7 · Final (37,5–45)
 const s7 = el("div", "layer");
@@ -456,8 +461,8 @@ function kickPulse(t) {
 }
 const IMPACTS = [
   [0.46875, 10, 0.15], [1.40625, 12, 0.15], [2.34375, 14, 0.15], [3.28125, 22, 0.2],
-  [3.75, 40, 0.35], [7.5, 8, 0.2], [13.125, 10, 0.2], [15, 14, 0.25], [18.75, 8, 0.2], [20.625, 8, 0.2], [22.5, 10, 0.2], [25.3125, 8, 0.2], [28.125, 8, 0.2],
-  [31.875, 44, 0.4], [32.8125, 14, 0.2], [33.75, 14, 0.2], [34.6875, 14, 0.2], [35.625, 14, 0.2], [36.5625, 14, 0.2],
+  [3.75, 40, 0.35], [8.4375, 3, 0.12], [9.375, 3, 0.12], [10.3125, 3, 0.12], [11.25, 3, 0.12], [13.125, 10, 0.2], [20.625, 8, 0.2], [24.375, 4, 0.15], [26.71875, 6, 0.2],
+  [31.875, 44, 0.4], [32.8125, 5, 0.15], [33.75, 5, 0.15], [34.6875, 5, 0.15], [35.625, 5, 0.15],
   [37.5, 36, 0.35], [41.25, 26, 0.4],
 ];
 function shake(t) {
@@ -468,11 +473,19 @@ function shake(t) {
     x += k * Math.sin((t - t0) * 87 + t0 * 3); y += k * Math.cos((t - t0) * 71 + t0 * 5); amp = Math.max(amp, k);
   }
   if (win(t, 30.0, 31.875)) { const k = 9 * P(t, 30.0, 31.85, E.inCubic); x += k * Math.sin(t * 97); y += k * Math.cos(t * 83); amp = Math.max(amp, k); }
+  if (win(t, 36.5625, 37.5)) { const k = 12 * P(t, 36.5625, 37.45, E.inCubic); x += k * Math.sin(t * 91); y += k * Math.cos(t * 77); amp = Math.max(amp, k); }
   return { x, y, amp };
 }
-const FLASH = [[3.75, 0.95, 0.55], [7.5, 0.25, 0.25], [13.125, 0.22, 0.3], [15, 0.35, 0.3], [18.75, 0.2, 0.2], [22.5, 0.28, 0.25], [25.3125, 0.2, 0.2], [28.125, 0.22, 0.25],
-  [31.875, 0.95, 0.5], [32.8125, 0.3, 0.2], [33.75, 0.3, 0.2], [34.6875, 0.3, 0.2], [35.625, 0.3, 0.2], [36.5625, 0.3, 0.2], [37.5, 0.85, 0.5], [41.25, 0.6, 0.6]];
-const WHIPS = [[7.3, 7.65], [14.75, 15.1], [18.55, 18.9], [22.3, 22.65], [25.1, 25.45], [27.95, 28.3], [31.7, 32.05], [32.65, 32.95], [33.6, 33.9], [34.55, 34.85], [35.45, 35.75], [36.4, 36.7]];
+// Flaş yalnızca büyük anlarda; geçişler kesintisiz kamera hareketiyle (aşağıdaki RAILS)
+const FLASH = [[3.75, 0.95, 0.55], [13.125, 0.16, 0.3], [31.875, 0.95, 0.5], [37.5, 0.9, 0.5], [41.25, 0.55, 0.6]];
+// Kesintisiz kamera: çıkan sahne bir yöne kayarken yenisi aynı hareketle gelir (ön plan biraz daha hızlı: derinlik)
+const RAILS = [
+  { t0: 7.05, d: 0.85, out: "s1", inn: "s2", dx: 0, dy: -1 },
+  { t0: 14.6, d: 0.8, out: "s2", inn: "s3", dx: 0, dy: -1 },
+  { t0: 22.1, d: 0.75, out: "s3", inn: "s4", dx: -1, dy: 0 },
+  { t0: 27.75, d: 0.75, out: "s4", inn: "s5", dx: -1, dy: 0 },
+];
+const WHIPS = [[18.45, 19.15, 1], [22.1, 22.85, 1], [27.75, 28.5, 1], [32.8125, 33.17, 1], [33.75, 34.11, 1], [34.6875, 35.05, 1], [35.625, 35.99, 1]];
 
 function renderBg(t) {
   const kp = kickPulse(t);
@@ -492,7 +505,7 @@ function renderBg(t) {
     d.d.style.opacity = 0.2 + 0.4 * Math.sin(t * 2 + d.ph) ** 2;
   });
   let ws = 0, wdir = 1;
-  WHIPS.forEach(([a, b], i) => { if (win(t, a, b)) { ws = Math.sin(((t - a) / (b - a)) * Math.PI); wdir = i % 2 ? -1 : 1; } });
+  WHIPS.forEach(([a, b, d]) => { if (win(t, a, b)) { ws = Math.sin(((t - a) / (b - a)) * Math.PI); wdir = -d; } });
   if (win(t, 30.5, 31.875)) ws = Math.max(ws, P(t, 30.5, 31.85) * 0.8);
   streaks.forEach((s, i) => {
     const x = ((t * 2600 * s.sp + i * 377) % (W + s.w)) - s.w;
@@ -539,9 +552,7 @@ function shockAt(list, t, t0, cx, cy, gap = 0.1, size = 1600) {
 }
 
 function renderS1(t) {
-  if (!show(s1, win(t, 3.7, 7.75))) return;
-  const out = P(t, 7.2, 7.55, E.inExpo);
-  S(s1, { transform: `scale(${1 + out * 3})`, opacity: 1 - out, filter: out > 0.01 ? `blur(${out * 20}px)` : "none" });
+  if (!show(s1, win(t, 3.7, 7.95))) return;
   const cx = W / 2, cy = 330;
   shockAt(shocks, t, 3.75, cx, cy, 0.09);
   burst(sparks, t, 3.75, cx, cy, 1.3);
@@ -559,12 +570,11 @@ function renderS1(t) {
 }
 
 function renderS2(t) {
-  if (!show(s2, win(t, 7.3, 15.2))) return;
-  const enter = P(t, 7.35, 7.9, E.outExpo), exit = P(t, 14.7, 15.05, E.inExpo);
+  if (!show(s2, win(t, 7.0, 15.45))) return;
+  const set = P(t, 7.2, 8.2, E.outExpo);
   const fl = Math.sin(t * 0.9) * 8;
-  place3d(KASA, 760 + (1 - enter) * 1400 - exit * 2600, 150 + fl, { ry: -12 + (1 - enter) * -30 + exit * 30, rx: 4, z: (1 - enter) * -600, blur: (1 - enter) * 18 + exit * 24 });
-  glareAt(KASA, t, 7.7);
-  // ekran ve kamera
+  place3d(KASA, 760, 150 + fl, { ry: -12 - (1 - set) * 16, rx: 4 + (1 - set) * 14 });
+  glareAt(KASA, t, 7.9);
   let shot = SCANS.reduce((s, sc, i) => (t >= sc.t ? `kasa-${i + 1}` : s), "kasa-0");
   if (t >= 12.1875) shot = t < 12.75 ? "pay-0" : t < 13.125 ? "pay-1" : "pay-done";
   setShot(KASA, shot);
@@ -578,11 +588,9 @@ function renderS2(t) {
   if (win(t, 11.45, 12.15)) setRing(KASA, kRingB, R("kasa-4", "total", [1085, 221, 327, 48]), P(t, 11.45, 11.6) * (1 - P(t, 11.95, 12.15)), 10);
   else if (t >= 13.4) setRing(KASA, kRingB, R("pay-done", "changeAmount", [504, 496, 432, 60]), P(t, 13.4, 13.55) * (1 - P(t, 14.4, 14.7)), 6);
   else kRingB.style.opacity = 0;
-  // başlıklar
-  animCaption(s2capA, t, 7.65, 12.95, 110 - exit * 600, 160);
-  animCaption(s2capB, t, 13.125, 14.7, 110, 160);
-  // sayaç
-  const cOn = win(t, 7.9, 15.1);
+  animCaption(s2capA, t, 7.65, 12.95, 110, 160);
+  animCaption(s2capB, t, 13.125, 99, 110, 160);
+  const cOn = win(t, 7.9, 15.45);
   show(ctr, cOn);
   if (cOn) {
     let val = 0, punch = 0;
@@ -595,9 +603,8 @@ function renderS2(t) {
     ctrL.textContent = change ? "PARA ÜSTÜ" : "TOPLAM";
     ctrV.textContent = fmt(val);
     S(ctrV, { color: change ? "#fbbf24" : "#fff", textShadow: change ? "0 0 50px rgba(251,191,36,.5)" : "none", transform: `scale(${1 + punch * 0.1})` });
-    S(ctr, { left: 110 - exit * 600 + "px", top: "560px", opacity: P(t, 7.9, 8.2) * (1 - exit) });
+    S(ctr, { left: "110px", top: "560px", opacity: P(t, 7.9, 8.2) });
   }
-  // barkod etiketleri
   SCANS.forEach((s) => {
     const on = win(t, s.t - 0.45, s.t + 0.6);
     show(s.c, on);
@@ -608,11 +615,9 @@ function renderS2(t) {
     S(s.laser, { top: 110 + P(t, s.t - 0.17, s.t + 0.02, E.inOutCubic) * 100 + "px", opacity: win(t, s.t - 0.19, s.t + 0.05) ? 1 : 0 });
     S(s.ok, { transform: `scale(${P(t, s.t, s.t + 0.22, E.outBack)})`, opacity: t >= s.t ? 1 : 0 });
   });
-  // F8
   const fa = P(t, 11.85, 12.1, E.outBack), fp = win(t, 12.1875, 12.31) ? 10 : 0, fo = P(t, 12.6, 12.85, E.inCubic);
   show(f8, win(t, 11.8, 12.9));
   S(f8, { transform: `translate(560px,${800 + fp + (1 - fa) * 80}px) scale(${fa * (1 - fo * 0.4)}) rotate(${(1 - fa) * -12}deg)`, opacity: fa * (1 - fo), boxShadow: `0 ${10 - fp}px 0 #94a3b8, 0 24px 48px rgba(0,0,0,.45), 0 0 ${fp ? 50 : 0}px rgba(52,211,153,.8)` });
-  // konfeti
   confetti.forEach((c) => {
     const u = (t - 13.125 - c.d) / 1.5;
     if (u < 0 || u > 1) { c.c.style.opacity = 0; return; }
@@ -623,109 +628,113 @@ function renderS2(t) {
 }
 
 function renderS3(t) {
-  if (!show(s3, win(t, 14.8, 22.75))) return;
-  // A: Genel bakış
-  const aOn = t < 19.0;
+  if (!show(s3, win(t, 14.55, 22.9))) return;
+  const ab = P(t, 18.45, 19.15, E.inOutExpo); // Genel bakış → Kâr-zarar (yatay kamera)
+  // A: Genel bakış (aşağıdan gelir, eğimi yerine oturur)
+  const aOn = t < 19.2;
   show(DASH.root, aOn);
   if (aOn) {
-    const e = P(t, 15.0, 15.6, E.outExpo), ex = P(t, 18.5, 18.85, E.inExpo);
-    place3d(DASH, 340 - ex * 1800, 210 + Math.sin(t * 0.8) * 6 - P(t, 15.4, 16.9, E.inOutCubic) * 30, { rx: lerp(38, 14, e) + Math.sin(t * 0.6), ry: ex * -40, z: lerp(-1800, 0, e), blur: (1 - e) * 14 + ex * 24, op: Math.min(1, e * 2) });
+    const set = P(t, 14.7, 15.9, E.outExpo);
+    place3d(DASH, 340 - ab * 2100, 210 + Math.sin(t * 0.8) * 6 - P(t, 15.4, 16.9, E.inOutCubic) * 30, { rx: lerp(34, 14, set) + Math.sin(t * 0.6), ry: -ab * 25 });
     setShot(DASH, "genel-bakis");
     setCam(DASH, [250, 100, 1180, 740], 0.2 + 0.6 * P(t, 15.2, 18.5, E.inOutCubic));
     glareAt(DASH, t, 15.3);
   }
-  animCaption(s3capA, t, 15.15, 18.45, 110, 48);
+  animCaption(s3capA, t, 15.15, 18.4, 110, 48);
   KPI.forEach((k, i) => {
-    const on = win(t, k.t - 0.05, 19.0);
+    const on = win(t, k.t - 0.05, k.hot ? 20.8 : 19.2);
     show(k.c, on);
     if (!on) return;
     const a = P(t, k.t, k.t + 0.45, E.outBack);
-    const ex = P(t, 18.4 + i * 0.04, 18.75 + i * 0.04, E.inExpo);
     const fx = 150 + i * 412, fy = 800;
     const sx = 520 + i * 290, sy = 360;
-    const x = lerp(sx, fx, E.outExpo(clamp((t - k.t) / 0.45))) - ex * 2000;
-    const y = lerp(sy, fy, E.outExpo(clamp((t - k.t) / 0.45))) + Math.sin(t * 2 + i) * 6 - ex * 200;
-    S(k.c, { transform: `translate(${x}px,${y}px) perspective(900px) rotateX(${(1 - a) * 50}deg) rotateY(${ex * -50}deg) scale(${0.4 + a * 0.6})`, opacity: Math.min(1, a * 3) * (1 - ex) });
+    const ent = E.outExpo(clamp((t - k.t) / 0.45));
+    let x = lerp(sx, fx, ent), y = lerp(sy, fy, ent) + Math.sin(t * 2 + i) * 6, sc = 0.4 + a * 0.6, op = Math.min(1, a * 3);
+    if (k.hot) {
+      // Net kâr kartı kâr-zarar denkleminin altına uçar ve sayaca dönüşür (eşleşen hareket)
+      x = lerp(x, 104, ab); y = lerp(y, 770, ab); sc *= 1 + ab * 0.12;
+      op *= 1 - P(t, 20.55, 20.7);
+    } else {
+      x -= ab * 2100; y -= ab * 120;
+    }
+    S(k.c, { transform: `translate(${x}px,${y}px) perspective(900px) rotateX(${(1 - a) * 50}deg) rotateY(${k.hot ? 0 : ab * -40}deg) scale(${sc})`, opacity: op });
     const cnt = P(t, k.t + 0.05, k.t + 0.9, E.outExpo);
     k.v.textContent = fmt(k.target * cnt);
     k.v.style.color = k.hot ? "#34d399" : "#fff";
     k.bar.style.width = cnt * 100 + "%";
   });
-  // B: Kâr-zarar
-  const bOn = t >= 18.6;
+  // B: Kâr-zarar (sağdan aynı kamera hareketiyle)
+  const bOn = t >= 18.4;
   show(PL.root, bOn);
   if (bOn) {
-    const e = P(t, 18.7, 19.15, E.outExpo), ex = P(t, 22.25, 22.6, E.inExpo);
-    place3d(PL, 760 + (1 - e) * 1400 - ex * 2600, 170 + Math.sin(t * 0.9) * 6, { ry: -12 + (1 - e) * -35 + ex * 30, rx: 4, blur: (1 - e) * 18 + ex * 24 });
+    place3d(PL, 760 + (1 - ab) * 2100, 170 + Math.sin(t * 0.9) * 6, { ry: -12 - (1 - ab) * 18, rx: 4 });
     setShot(PL, "kar-zarar");
     const tab = [330, 170, 1030, 560], net = [560, 560, 460, 170];
     setCam(PL, camLerp(tab, net, P(t, 20.55, 21.0, E.inOutCubic) * (1 - P(t, 21.5, 21.95, E.inOutCubic))), P(t, 18.9, 19.4, E.inOutCubic), 1 + (win(t, 20.625, 20.85) ? 0.05 * (1 - (t - 20.625) / 0.225) : 0));
-    glareAt(PL, t, 19.0);
+    glareAt(PL, t, 19.1);
     setRing(PL, plRingA, R("kar-zarar", "plNet", [753, 607, 231, 57]), P(t, 20.7, 20.85) * (1 - P(t, 21.6, 21.8)), 8);
     setRing(PL, plRingB, R("kar-zarar", "vat", [1016, 197, 320, 241]), P(t, 21.65, 21.8) * (1 - P(t, 22.2, 22.4)), 6);
   }
-  animCaption(s3capB, t, 18.9, 22.25, 110, 150);
-  const ex = P(t, 22.25, 22.55, E.inExpo);
+  animCaption(s3capB, t, 19.0, 99, 110, 150);
   EQ.forEach((q, i) => {
     const a = P(t, q.t, q.t + 0.35, E.outBack);
-    S(q.e, { left: "110px", top: 430 + i * 82 + "px", opacity: P(t, q.t, q.t + 0.1) * (1 - ex), transform: `translateX(${(1 - a) * -120 - ex * 400}px) scale(${0.8 + a * 0.2})` });
+    S(q.e, { left: "110px", top: 430 + i * 82 + "px", opacity: P(t, q.t, q.t + 0.1), transform: `translateX(${(1 - a) * -120}px) scale(${0.8 + a * 0.2})` });
   });
   const nv = P(t, 20.625, 21.4, E.outExpo);
-  netV.textContent = fmt(NET * nv);
-  S(netV, { left: "104px", top: "760px", opacity: P(t, 20.625, 20.7) * (1 - ex), transform: `translateX(${-ex * 400}px) scale(${1 + (1 - P(t, 20.625, 20.9, E.outCubic)) * 0.25})`, transformOrigin: "0 50%" });
+  netV.textContent = fmt(NET * (0.55 + 0.45 * nv));
+  S(netV, { left: "104px", top: "760px", opacity: P(t, 20.6, 20.68), transform: `scale(${1 + (1 - P(t, 20.625, 20.9, E.outCubic)) * 0.25})`, transformOrigin: "0 50%" });
   s3chips.forEach((c, i) => {
     const a = P(t, c.t, c.t + 0.35, E.outBack);
-    S(c.e, { left: 110 + i * 300 + "px", top: "940px", opacity: P(t, c.t, c.t + 0.1) * (1 - ex), transform: `translateY(${(1 - a) * 60}px) scale(${(0.6 + a * 0.4) * 0.72})`, transformOrigin: "0 50%" });
+    S(c.e, { left: 110 + i * 300 + "px", top: "940px", opacity: P(t, c.t, c.t + 0.1), transform: `translateY(${(1 - a) * 60}px) scale(${(0.6 + a * 0.4) * 0.72})`, transformOrigin: "0 50%" });
   });
 }
 
 function renderS4(t) {
-  if (!show(s4, win(t, 22.3, 28.35))) return;
-  // A: kasiyer tablosu
-  const aOn = t < 25.5;
+  if (!show(s4, win(t, 22.05, 28.55))) return;
+  const v = P(t, 24.95, 25.6, E.inOutExpo); // tablo → ısı haritası (dikey kamera)
+  const aOn = t < 25.65;
   show(KAS.root, aOn);
   if (aOn) {
-    const e = P(t, 22.5, 23.0, E.outExpo), ex = P(t, 25.1, 25.4, E.inExpo);
-    place3d(KAS, 720 + (1 - e) * 1400 + ex * 1600, 200 + Math.sin(t * 0.9) * 6, { ry: -11 + (1 - e) * -35 - ex * 30, rx: 4, blur: (1 - e) * 18 + ex * 22 });
+    const set = P(t, 22.2, 23.2, E.outExpo);
+    place3d(KAS, 720, 200 + Math.sin(t * 0.9) * 6 - v * 1250, { ry: -11 - (1 - set) * 16, rx: 4 + v * 10 });
     setCam(KAS, camLerp([250, 280, 1190, 560], [250, 470, 1190, 330], P(t, 23.2, 23.6, E.inOutCubic)), P(t, 22.6, 23.1, E.inOutCubic));
-    glareAt(KAS, t, 22.8);
+    glareAt(KAS, t, 22.9);
     const r0 = win(t, 23.4375, 23.906) ? ["row0", 23.4375] : t >= 23.906 && t < 24.9 ? ["row1", 23.906] : null;
     if (r0) setRing(KAS, ksRing, R("kasiyer", r0[0], [256, 550, 1325, 57]), P(t, r0[1], r0[1] + 0.12) * (1 - P(t, r0[1] + 0.5, r0[1] + 0.9)), 2);
     else ksRing.style.opacity = 0;
   }
-  animCaption(s4capA, t, 22.65, 25.1, 110, 170);
+  animCaption(s4capA, t, 22.65, 99, 110, 170 - v * 1250);
   s4chips.forEach((c, i) => {
-    const a = P(t, c.t, c.t + 0.35, E.outBack), ex = P(t, 25.05 + i * 0.03, 25.35 + i * 0.03, E.inExpo);
-    show(c.e, win(t, c.t - 0.05, 25.5));
-    S(c.e, { left: "110px", top: 545 + i * 100 + "px", opacity: P(t, c.t, c.t + 0.1) * (1 - ex), transform: `translateX(${(1 - a) * -160 - ex * 700}px) scale(${0.6 + a * 0.4})`, transformOrigin: "0 50%" });
+    const a = P(t, c.t, c.t + 0.35, E.outBack);
+    show(c.e, win(t, c.t - 0.05, 25.65));
+    S(c.e, { left: "110px", top: 545 + i * 100 - v * 1250 + "px", opacity: P(t, c.t, c.t + 0.1), transform: `translateX(${(1 - a) * -160}px) scale(${0.6 + a * 0.4})`, transformOrigin: "0 50%" });
   });
-  // B: yoğun saatler (ısı haritası)
-  const bOn = t >= 25.25;
-  const out = P(t, 27.9, 28.2, E.inExpo);
-  animCaption(s4capB, t, 25.3125, 27.9, 110, 230);
+  const bOn = t >= 24.95;
+  const dy = (1 - v) * 1250;
+  animCaption(s4capB, t, 25.3125, 99, 110, 230 + dy);
   cells.forEach((c) => {
     show(c.e, bOn);
     if (!bOn) return;
     const d = 25.3125 + (c.row + c.col) * 0.028;
     const a = P(t, d, d + 0.35, E.outBack);
     const wave = Math.exp(-Math.pow((t - 26.3 - (c.row + c.col) * 0.03) / 0.08, 2));
-    S(c.e, { left: GX + c.col * CS + "px", top: GY + c.row * CS + "px", opacity: P(t, d, d + 0.1) * (1 - out), transform: `scale(${a * (1 + wave * 0.18 * (c.lv > 0 ? 1 : 0)) * (1 - out * 0.5)}) translateY(${out * 300}px)`, filter: wave > 0.3 && c.lv > 0 ? `brightness(${1 + wave * 0.6})` : "none" });
+    S(c.e, { left: GX + c.col * CS + "px", top: GY + c.row * CS + dy + "px", opacity: P(t, d - 0.3, d) , transform: `scale(${(0.3 + 0.7 * a) * (1 + wave * 0.18 * (c.lv > 0 ? 1 : 0))})`, filter: wave > 0.3 && c.lv > 0 ? `brightness(${1 + wave * 0.6})` : "none" });
   });
-  dayLabs.forEach((d, i) => { show(d, bOn); if (bOn) S(d, { left: GX - 70 + "px", top: GY + i * CS + 18 + "px", width: "56px", opacity: P(t, 25.4 + i * 0.03, 25.7 + i * 0.03) * (1 - out) }); });
-  hourLabs.forEach((d, i) => { show(d, bOn); if (bOn) S(d, { left: GX + i * CS + "px", top: GY - 38 + "px", width: "64px", opacity: P(t, 25.4 + i * 0.02, 25.7 + i * 0.02) * (1 - out) }); });
+  dayLabs.forEach((d, i) => { show(d, bOn); if (bOn) S(d, { left: GX - 70 + "px", top: GY + i * CS + 18 + dy + "px", width: "56px", opacity: P(t, 25.4 + i * 0.03, 25.7 + i * 0.03) }); });
+  hourLabs.forEach((d, i) => { show(d, bOn); if (bOn) S(d, { left: GX + i * CS + "px", top: GY - 38 + dy + "px", width: "64px", opacity: P(t, 25.4 + i * 0.02, 25.7 + i * 0.02) }); });
   const hr = P(t, 26.71875, 26.95, E.outBack);
   show(hotRing, bOn && t >= 26.7);
-  S(hotRing, { left: GX + hot.col * CS - 14 + "px", top: GY + hot.row * CS - 14 + "px", transform: `scale(${(2 - hr) * (1 + 0.06 * Math.sin(t * 14))})`, opacity: hr * (1 - out) });
+  S(hotRing, { left: GX + hot.col * CS - 14 + "px", top: GY + hot.row * CS - 14 + "px", transform: `scale(${(2 - hr) * (1 + 0.06 * Math.sin(t * 14))})`, opacity: hr });
   show(hotCall, bOn && t >= 26.7);
-  S(hotCall, { left: GX + "px", top: GY + 7 * CS + 30 + "px", transform: `translateY(${(1 - hr) * 40 + out * 200}px) scale(${0.7 + hr * 0.3})`, opacity: hr * (1 - out), transformOrigin: "0 50%" });
+  S(hotCall, { left: GX + "px", top: GY + 7 * CS + 30 + "px", transform: `translateY(${(1 - hr) * 40}px) scale(${0.7 + hr * 0.3})`, opacity: hr, transformOrigin: "0 50%" });
 }
 
 function renderS5(t) {
-  if (!show(s5, win(t, 27.95, 31.9))) return;
-  const e = P(t, 28.125, 28.6, E.outExpo), ex = P(t, 30.35, 30.8, E.inExpo);
-  place3d(STK, 720 + (1 - e) * 1400, 200 + Math.sin(t * 0.9) * 6, { ry: -11 + (1 - e) * -35, rx: 4, s: 1 - ex * 0.4, z: -ex * 900, blur: (1 - e) * 18 + ex * 26, op: 1 - ex });
+  if (!show(s5, win(t, 27.7, 31.9))) return;
+  const set = P(t, 27.9, 28.9, E.outExpo), ex = P(t, 30.35, 30.8, E.inExpo);
+  place3d(STK, 720, 200 + Math.sin(t * 0.9) * 6, { ry: -11 - (1 - set) * 16, rx: 4, s: 1 - ex * 0.4, z: -ex * 900, blur: ex * 26, op: 1 - ex });
   setCam(STK, camLerp([280, 180, 1120, 330], [280, 230, 860, 260], P(t, 29.0, 30.2, E.inOutCubic)), P(t, 28.3, 28.8, E.inOutCubic));
-  glareAt(STK, t, 28.4);
+  glareAt(STK, t, 28.5);
   setRing(STK, stRing, R("yogun-saatler", "stockPlan", [296, 285, 1088, 143]), P(t, 28.9, 29.05) * (1 - P(t, 29.9, 30.2)), 6);
   animCaption(s5cap, t, 28.3, 30.3, 110, 200);
   ALERTS.forEach((a, i) => {
@@ -733,7 +742,6 @@ function renderS5(t) {
     show(a.e, t >= a.t - 0.05);
     S(a.e, { left: "110px", top: 540 + i * 120 + "px", opacity: P(t, a.t, a.t + 0.1) * (1 - o), transform: `translateX(${(1 - p) * -200 - o * 700}px) scale(${0.6 + p * 0.4})`, transformOrigin: "0 50%" });
   });
-  // VE DAHASI — trampet yükselişiyle harf harf
   const mOn = t >= 30.8;
   show(more, mOn);
   if (mOn) {
@@ -748,46 +756,65 @@ function renderS5(t) {
   }
 }
 
+function carouselPos(t) {
+  if (t < 31.875 + MD) return -1.4 * (1 - E.outExpo(clamp((t - 31.875) / 0.6)));
+  const k = clamp(Math.floor((t - 31.875) / MD), 0, MT.length - 1);
+  return k - 1 + E.inOutExpo(clamp((t - (31.875 + k * MD)) / 0.36));
+}
 function renderS6(t) {
-  if (!show(s6, win(t, 31.8, 37.75))) return;
-  const D = 2 * BT;
+  if (!show(s6, win(t, 31.8, 37.6))) return;
+  const pos = carouselPos(Math.min(t, 36.55));
+  const col = P(t, 36.5625, 37.4, E.inCubic); // kartlar merkezde toplanır → logoya patlar
   MT.forEach((m) => {
-    const on = win(t, m.t0 - 0.05, m.t0 + D + 0.12);
-    const objEl = m.obj.root || m.obj;
-    show(objEl, on); show(m.num, on); show(m.tl, on); show(m.sb, on);
-    if (!on) return;
-    const a = P(t, m.t0, m.t0 + 0.26, E.outExpo);
-    const isLast = m.i === MT.length - 1;
-    const b = isLast ? P(t, 37.3, 37.6, E.inExpo) : P(t, m.t0 + D - 0.1, m.t0 + D + 0.08, E.inExpo);
-    const dir = m.left ? 1 : -1;
-    const drift = (t - m.t0) * 30 * dir;
-    // görsel
-    const ox = m.left ? 110 : 1920 - 110 - (m.phone ? 360 : m.mail ? 780 : 960);
-    const oy = m.phone ? 165 : m.mail ? 190 : 230;
-    const x = ox - (1 - a) * 1500 * dir + b * 1900 * dir + drift;
-    const blur = (1 - a) * 20 + b * 24;
-    const ry = (m.left ? 12 : -12) + (1 - a) * 30 * dir - b * 30 * dir;
-    if (m.obj.root) {
-      place3d(m.obj, x, oy, { ry, rx: 3, blur });
-      setCam(m.obj, m.focus, 0.25 + 0.5 * P(t, m.t0, m.t0 + D, E.inOutCubic));
-      glareAt(m.obj, t, m.t0 + 0.1);
-    } else {
-      S(objEl, { left: x + "px", top: oy + "px", transform: `perspective(2000px) rotateY(${ry}deg) rotateZ(${m.phone ? (m.left ? -4 : 4) : 0}deg)`, filter: blur > 0.3 ? `blur(${blur}px)` : "none" });
-      if (m.phone) m.obj.querySelector("img").style.transform = `translateY(${-P(t, m.t0 + 0.1, m.t0 + D, E.inOutCubic) * 520}px)`;
-      if (m.mail) m.obj.querySelector(".mb").style.transform = `translateY(${-P(t, m.t0 + 0.1, m.t0 + D, E.inOutCubic) * 140}px)`;
+    const r = m.i - pos, ar = Math.abs(r);
+    const vis = ar < 2.4;
+    show(m.root, vis);
+    if (vis) {
+      const sc0 = m.phone ? 0.86 : m.mail ? 0.84 : 1;
+      let x = 960 + r * 1080 - m.w / 2, y = 430 - m.h / 2, z = -ar * 480, ry = -r * 34, rz = 0;
+      let s = sc0 * (1 - Math.min(ar, 1.5) * 0.06), op = clamp(1.6 - ar * 0.75), blur = Math.min(ar, 2) * 2.2;
+      if (col > 0) {
+        x = lerp(x, 960 - m.w / 2, col); y = lerp(y, 430 - m.h / 2, col); z = lerp(z, -300, col);
+        ry = lerp(ry, 0, col); rz = col * (m.i - 2) * 50; s *= 1 - col * 0.88; blur += col * 12; op *= 1 - P(t, 37.2, 37.45);
+      }
+      S(m.root, { transform: `translate3d(${x}px,${y}px,${z}px) rotateY(${ry}deg) rotateZ(${rz}deg) scale(${s})`, opacity: op, filter: blur > 0.4 ? `blur(${blur}px)` : "none", zIndex: String(100 - Math.round(ar * 10)) });
+      if (m.obj.root) { setCam(m.obj, m.focus, 0.25 + 0.5 * P(t, m.t0 - 0.3, m.t0 + MD, E.inOutCubic)); glareAt(m.obj, t, m.t0 + 0.05); }
+      if (m.phone) m.obj.querySelector("img").style.transform = `translateY(${-P(t, m.t0, m.t0 + MD + 0.3, E.inOutCubic) * 520}px)`;
+      if (m.mail) m.obj.querySelector(".mb").style.transform = `translateY(${-P(t, m.t0, m.t0 + MD + 0.3, E.inOutCubic) * 140}px)`;
     }
-    // yazı (görselin karşı tarafında)
-    const tx = m.left ? (m.phone ? 620 : m.mail ? 1010 : 1150) : 120;
-    const la = P(t, m.t0 + 0.04, m.t0 + 0.32, E.outExpo);
-    const lb = b;
-    const tw = m.tl.offsetWidth || 600;
-    const txx = m.left ? Math.min(tx, 1920 - 110 - tw) : tx;
-    S(m.num, { left: txx + "px", top: "380px", opacity: la * (1 - lb), transform: `translateX(${(1 - la) * 80 * -dir}px)` });
-    S(m.tl, { left: txx + "px", top: "425px", opacity: la * (1 - lb), transform: `translateX(${(1 - la) * 160 * -dir + lb * 300 * dir}px) scale(${0.85 + la * 0.15})`, transformOrigin: m.left ? "0 50%" : "0 50%" });
-    S(m.sb, { left: txx + 4 + "px", top: "560px", opacity: P(t, m.t0 + 0.12, m.t0 + 0.4) * (1 - lb), transform: `translateX(${(1 - la) * 100 * -dir + lb * 260 * dir}px)` });
+    const tin = m.i === 0 ? 31.95 : m.t0 + 0.14, tout = m.i === MT.length - 1 ? 36.5 : m.t0 + MD - 0.05;
+    animWords(m.tl, t, tin, tout, 0.05, 0.4);
+    const so = win(t, tin, tout + 0.3);
+    show(m.sb, so);
+    if (so) S(m.sb, { opacity: P(t, tin + 0.1, tin + 0.3) * (1 - P(t, tout, tout + 0.15)), transform: `translateY(${(1 - P(t, tin + 0.1, tin + 0.4, E.outExpo)) * 30}px)` });
   });
-  s6fill.style.width = clamp((t - 31.875) / (6 * D)) * 100 + "%";
-  s6bar.style.opacity = P(t, 31.9, 32.1) * (1 - P(t, 37.3, 37.5));
+  const k = clamp(Math.round(pos), 0, MT.length - 1);
+  s6num.textContent = `${String(k + 1).padStart(2, "0")} / ${String(MT.length).padStart(2, "0")}`;
+  s6num.style.opacity = P(t, 32.0, 32.2) * (1 - P(t, 36.45, 36.6));
+  s6fill.style.width = clamp((t - 31.875) / (MT.length * MD)) * 100 + "%";
+  s6bar.style.opacity = P(t, 31.9, 32.1) * (1 - P(t, 36.45, 36.6));
+  const cg = P(t, 36.75, 37.5, E.inOutCubic);
+  S(s6core, { left: 960 - 210 + "px", top: 430 - 210 + "px", opacity: cg, transform: `scale(${0.2 + cg * 1.4 + 0.08 * Math.sin(t * 40) * cg})` });
+}
+
+function applyRails(t) {
+  const L = { s1, s2, s3, s4, s5 };
+  const P2 = { s2: s2p, s3: s3p, s4: s4p, s5: s5p };
+  const st = {};
+  for (const k in L) st[k] = { x: 0, y: 0, b: 0 };
+  for (const r of RAILS) {
+    const p = P(t, r.t0, r.t0 + r.d, E.inOutExpo);
+    const DX = r.dx * 2100, DY = r.dy * 1250, mb = Math.sin(p * Math.PI) * 9;
+    if (t >= r.t0) { st[r.out].x += DX * p; st[r.out].y += DY * p; st[r.out].b = Math.max(st[r.out].b, mb); }
+    if (t < r.t0 + r.d) { st[r.inn].x -= DX * (1 - p); st[r.inn].y -= DY * (1 - p); st[r.inn].b = Math.max(st[r.inn].b, mb); }
+  }
+  for (const k in L) {
+    const { x, y, b } = st[k];
+    // ön plan (yazılar) 1,15 kat, pencere 1 kat hızla kayar → derinlik
+    L[k].style.transform = x || y ? `translate(${x * 1.15}px,${y * 1.15}px)` : "";
+    L[k].style.filter = b > 0.4 ? `blur(${b}px)` : "none";
+    if (P2[k]) P2[k].style.transform = x || y ? `translate(${-x * 0.15}px,${-y * 0.15}px)` : "";
+  }
 }
 
 function renderS7(t) {
@@ -828,6 +855,7 @@ function renderFX(t) {
   for (const [ft, a, d] of FLASH) if (win(t, ft, ft + d)) f = Math.max(f, a * Math.pow(1 - (t - ft) / d, 1.6));
   if (win(t, 31.6, 31.875)) f = Math.max(f, P(t, 31.6, 31.875, E.inCubic) * 0.9);
   if (win(t, 3.6, 3.75)) f = Math.max(f, P(t, 3.6, 3.75, E.inCubic) * 0.6);
+  if (win(t, 37.25, 37.5)) f = Math.max(f, P(t, 37.25, 37.5, E.inCubic) * 0.85);
   flash.style.opacity = f;
   const sh = shake(t);
   const kp = kickPulse(t);
@@ -852,6 +880,7 @@ window.renderFrame = (t) => {
   renderS5(t);
   renderS6(t);
   renderS7(t);
+  applyRails(t);
   renderFX(t);
 };
 window.ready = Promise.all([...document.images].map((i) => (i.complete ? Promise.resolve() : new Promise((r) => { i.onload = r; i.onerror = r; })))).then(() => document.fonts.ready);

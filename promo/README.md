@@ -2,11 +2,16 @@
 
 Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 45 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
-Akış (128 BPM müziğe kare kare senkron): **sorun** ("Defter. Hesap makinesi. Akşam kasa hesabı." üstü çizilir → "Artık değil.")
-→ **1. patlama** logo → **Satış** (barkod okutma, sayaçla toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış,
-ciro / brüt kâr / gider / net kâr kartları, kâr-zarar ve KDV) → **İş takibi** (kasiyer performansı, yoğun saatler ısı haritası)
-→ **Stok** (bitmeden haber, sipariş önerisi) → **2. patlama** "Ve dahası": etiket, toplu zam, Excel, telefon, gün sonu e-postası,
-işlem geçmişi → **final** (Satış · Stok · Finans · Ekip, "Dükkânınızı bugün büyütün.").
+Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Defter.
+Hesap makinesi. Akşam kasa hesabı." üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
+toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış, ciro / brüt kâr / gider / net kâr kartları; "Net kâr" kartı
+kâr-zarar denklemine uçar, KDV özeti) → **İş takibi** (kasiyer performansı, yoğun saatler ısı haritası) → **Stok** (bitmeden haber,
+sipariş önerisi) → **2. patlama** "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
+merkezde toplanıp logoya patlar → **final** (Satış · Stok · Finans · Ekip, "Dükkânınızı bugün büyütün.").
+
+Müzik: her bölümün kendi rengi var (gerilim → sinematik açılış → house grovu → tam enerji → yarım tempo 808 → nefes → patlama →
+bant durması → majöre çözülen final). 4 notalık **sonik logo** (La–Mi–Do–La) girişte, logoda, barkod biplerinde (biplerin notaları
+motifin notaları), satış "çiling"inde, ana melodide, stokta piyanoda ve finalde majör olarak tekrar eder.
 
 Ekranlar uygulamanın gerçek ekranlarıdır (ayrı demo veritabanı, "Köşe Market"); sayaçlardaki rakamlar o ekranlardan okunur.
 Müzik ve ses efektleri `music.py` ile sıfırdan sentezlenir; telif hakkı sorunu yoktur.
@@ -17,7 +22,7 @@ Müzik ve ses efektleri `music.py` ile sıfırdan sentezlenir; telif hakkı soru
 | `capture.mjs` | Demo sunucudan (port 3200) ekran görüntüleri + önemli öğelerin konumları ve rakamlar (`boxes.json`). Bu ayın örnek giderlerini ekler, gün sonu raporu e-postasını çeker. |
 | `composition.html` | Animasyonlu kurgu; her kare `renderFrame(t)` ile zamana göre çizilir. |
 | `render.mjs` | Kurguyu kare kare JPEG olarak çizer (ya da seçilen anların önizlemesini alır). |
-| `music.py` | 128 BPM müzik (gerilimli giriş, iki patlama, yükseliş) + geçiş/bip/tuş/zil/darbe efektleri → WAV (Python 3 + numpy). |
+| `music.py` | 128 BPM, bölüm bölüm değişen müzik + sonik logo + geçiş/bip/tuş/zil/darbe/bant durması efektleri → WAV (Python 3 + numpy). |
 | `encode.swift` | Kareler + WAV → MP4 (macOS AVFoundation; ffmpeg gerekmez). |
 
 ## Yeniden üretmek

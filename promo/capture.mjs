@@ -41,7 +41,6 @@ const BOX = {
   heatmap: '[data-testid="heatmap"]',
   abc: '[data-testid="abc-summary"]',
   labelSheet: '[data-testid="label-sheet"]',
-  bulkTable: '[data-testid="bulk-table"]',
   auditTable: '[data-testid="audit-table"]',
 };
 
@@ -149,14 +148,6 @@ for (const [name, n] of [["Kola 1 L", "6"], ["Cips Büyük Boy", "6"], ["Süt 1 
 await o.getByTestId("label-sheet").first().waitFor();
 await o.waitForTimeout(1200);
 await shot(o, "etiketler");
-
-await o.goto(`${BASE}/yonetim/toplu-fiyat`);
-await o.getByTestId("bulk-category").selectOption({ label: "İçecek" });
-await o.getByTestId("bulk-value").fill("10");
-await o.locator("select").nth(1).selectOption("end90");
-await o.getByTestId("bulk-preview").click();
-await o.getByTestId("bulk-table").waitFor();
-await shot(o, "toplu-fiyat");
 
 await o.goto(`${BASE}/raporlar?rapor=products`);
 await o.getByRole("button", { name: "Bu ay" }).click();
