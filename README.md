@@ -49,7 +49,7 @@ Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](do
 
 🎬 **[Market Kasa tanıtım videosu (45 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
 
-Tempolu reklam filmi: "Excel tabloları, WhatsApp'tan stok sorma, ay sonu sürprizleri… artık değil." → hızlı satış (barkod, para üstü) → **finans yönetimi** (ciro, brüt kâr, giderler, net kâr, kâr-zarar ve KDV) → **iş takibi** (kasiyer performansı, yoğun saatler) → **stok** (bitmeden haber, sipariş önerisi) → etiket, Excel, telefondan takip, gün sonu e-postası, işlem geçmişi. Müzikte akılda kalan 4 notalık bir "sonik logo" tekrar eder. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
+Tempolu reklam filmi: "Dükkânınızda hâlâ verimsiz satış, ekip yönetimi, plansız büyüme… artık değil." → hızlı satış (barkod, para üstü) → **finans yönetimi** (ciro, brüt kâr, giderler, net kâr, kâr-zarar ve KDV) → **iş takibi** (kasiyer performansı, yoğun saatler) → **stok** (bitmeden haber, sipariş önerisi) → etiket, Excel, telefondan takip, gün sonu e-postası, işlem geçmişi. Müzikte akılda kalan 4 notalık bir "sonik logo" tekrar eder. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
 
 Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 

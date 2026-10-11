@@ -2,8 +2,8 @@
 
 Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 45 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
-Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Excel tabloları.
-WhatsApp'tan stok sorma. Ay sonu sürprizleri." üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
+Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Dükkânınızda hâlâ…
+VERİMSİZ SATIŞ, EKİP YÖNETİMİ, PLANSIZ BÜYÜME" üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
 toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış, ciro / brüt kâr / gider / net kâr kartları; "Net kâr" kartı
 kâr-zarar denklemine uçar, KDV özeti) → **İş takibi** (kasiyer performansı, yoğun saatler ısı haritası) → **Stok** (bitmeden haber,
 sipariş önerisi) → **2. patlama** "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
