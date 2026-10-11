@@ -203,7 +203,7 @@
     <div><b>5</b>Windows'a kurulum, kullanım ve güncelleme</div>
     <div><b>6</b>İlk açılış: yönetici hesabı</div>
     <div><b>7</b>Giriş yapmak</div>
-    <div><b>8</b>Ekranları tanıyalım</div>
+    <div><b>8</b>Ekranları tanıyalım: Yönetici Paneli</div>
     <div><b>9</b>Satış yapmak (Kasa)</div>
     <div><b>10</b>Ürün eklemek ve düzenlemek</div>
     <div><b>11</b>Fiyat değiştirmek</div>
@@ -214,7 +214,7 @@
     <div><b>16</b>İade ve satış iptali</div>
     <div><b>17</b>Panel: günün özeti</div>
     <div><b>18</b>Gün sonu (Günü kapat)</div>
-    <div><b>19</b>Raporlar ve Excel</div>
+    <div><b>19</b>Raporlar, kasiyer performansı, giderler, kâr-zarar, analizler</div>
     <div><b>20</b>Telefondan takip</div>
     <div><b>21</b>Kasiyerler ve şifreler</div>
     <div><b>22</b>İşlem geçmişi</div>
@@ -564,8 +564,11 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 
   <h3>Sonra ne yapmalı?</h3>
   <p>Hesap oluşunca <b>Yönetici Paneli</b> açılır ve yeşil bir kutuda sırada ne olduğu yazar:</p>
-  <div class="fig" data-shot="yonetim-hosgeldin" data-only="1" data-crop="0,0,1280,420">
-    <ul class="legend one"><li><i>1</i><span>Bağlantılara tıklayarak sırayla: <b>kasiyer ekleyin</b> (Bölüm 21), <b>işletme adını girin</b> (Bölüm 23) ve <b>ürünlerinizi ekleyin</b> (Bölüm 10).</span></li></ul>
+  <div class="fig" data-shot="yonetim-hosgeldin" data-crop="0,0,1280,350">
+    <ul class="legend one">
+      <li><i>1</i><span>Bağlantılara tıklayarak sırayla: <b>kasiyer ekleyin</b> (Bölüm 21), <b>işletme adını girin</b> (Bölüm 23) ve <b>ürünlerinizi ekleyin</b> (Bölüm 10).</span></li>
+      <li><i>2</i><span>E-posta bağlı değilken bu mavi kutu görünür: <span class="ui">E-posta bağla</span> ile gün sonu raporunu her akşam e-postayla alırsınız (Bölüm 23.2).</span></li>
+    </ul>
   </div>
 </section>
 
@@ -600,7 +603,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     </div>
   </div>
   <ul class="dots">
-    <li>Kasiyer girince doğrudan <b>Kasa</b> ekranı, yönetici girince <b>Panel</b> açılır.</li>
+    <li>Kasiyer girince doğrudan <b>Kasa</b> ekranı, yönetici girince <b>Yönetici Paneli</b> (Genel bakış) açılır.</li>
     <li><b>5 kez yanlış</b> PIN ya da şifre girilirse giriş <b>5 dakika kilitlenir</b>. Bekleyip tekrar deneyin.</li>
     <li>İşiniz bitince sağ üstteki <span class="ui">Çıkış</span>'a basın. Özellikle kasiyer değişirken çıkış yapın; satışlar kimin adına yazılıyorsa o görünür.</li>
     <li>Her kasiyerin <b>kendi numarası ve hesabı</b> vardır; satışlar o kasiyerin adına kaydedilir. Kasiyer No'yu ve PIN'i yönetici verir (Bölüm 21).</li>
@@ -629,29 +632,45 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 
 <!-- ============================================================ 7 EKRANLAR -->
 <section class="flow-sec">
-  <h2 class="sec"><span class="num">8</span>Ekranları tanıyalım</h2>
+  <h2 class="sec"><span class="num">8</span>Ekranları tanıyalım: Yönetici Paneli</h2>
   <h3>8.1 Üst menü</h3>
   <div class="fig" data-shot="menu">
     <ul class="legend">
-      <li><i>1</i><span><b>Panel:</b> Günün cirosu, kârı ve satışları.</span></li>
+      <li><i>1</i><span><b>Yönetici Paneli:</b> Dükkânla ilgili her şey: özet, kasiyerler, ürün ve stok, muhasebe, raporlar, ayarlar.</span></li>
       <li><i>2</i><span><b>Kasa:</b> Satış ekranı.</span></li>
-      <li><i>3</i><span><b>İade:</b> Fiş numarasıyla iade almak.</span></li>
-      <li><i>4</i><span><b>Yönetici Paneli:</b> Ürün, fiyat, stok, rapor, kullanıcı ve ayarların hepsi.</span></li>
-      <li><i>5</i><span>Giriş yapan kişinin adı ve türü.</span></li>
-      <li><i>6</i><span><span class="ui">Çıkış</span>: Oturumu kapatır.</span></li>
+      <li><i>3</i><span>Giriş yapan kişinin adı ve türü.</span></li>
+      <li><i>4</i><span><span class="ui">Çıkış</span>: Oturumu kapatır.</span></li>
     </ul>
   </div>
-  <h3>8.2 Yönetici Paneli</h3>
-  <p>Yönetici işlerinin hepsine buradan ulaşılır. Her kutu bir ekrana gider; kutunun içinde ne işe yaradığı yazar. Alt sayfalardan geri dönmek için sol üstteki <span class="ui">← Yönetici Paneli</span> bağlantısını kullanın.</p>
-  <div class="fig" data-shot="yonetim">
+  <h3>8.2 Yönetici Paneli menüsü</h3>
+  <p>Yönetici Paneli'nde solda her zaman bir menü durur; istediğiniz ekrana tek tıkla geçersiniz. Açık olan ekran yeşil görünür. Telefonda ya da dar pencerede menü üstteki <span class="ui">☰ Yönetici menüsü</span> düğmesiyle açılır.</p>
+  <div class="side">
+    <div class="fig" data-shot="yonetim-menu" data-maxh="150"></div>
+    <div>
+      <ul class="legend one">
+        <li><i>1</i><span><b>Genel:</b> Genel bakış (aşağıda), Bugün ve gün sonu (Bölüm 17–18).</span></li>
+        <li><i>2</i><span><b>Satış ve kasiyerler:</b> Kasiyer performansı (Bölüm 19.2), iade ve satış iptali (Bölüm 16).</span></li>
+        <li><i>3</i><span><b>Ürün ve stok:</b> Ürünler, yeni ürün / barkod, toplu fiyat, kategoriler, mal girişi, stok sayımı, barkod etiketleri (Bölüm 10–15).</span></li>
+        <li><i>4</i><span><b>Muhasebe:</b> Kâr-zarar ve giderler (Bölüm 19.3–19.4).</span></li>
+        <li><i>5</i><span><b>Raporlar ve analiz:</b> Analizler (Bölüm 19.5), raporlar ve Excel (Bölüm 19.1).</span></li>
+        <li><i>6</i><span><b>Hesaplar ve ayarlar:</b> Kullanıcılar, Hesabım, işlem geçmişi, ayarlar ve yedekler (Bölüm 21–24).</span></li>
+      </ul>
+    </div>
+  </div>
+  <h3>8.3 Genel bakış</h3>
+  <p>Yönetici girince açılan sayfadır. Dükkânın durumunu tek bakışta gösterir.</p>
+  <div class="fig" data-shot="yonetim" data-crop="0,0,1280,1335" data-maxh="190">
     <ul class="legend">
-      <li><i>1</i><span><b>Ürünler ve fiyatlar:</b> ürün listesi, yeni ürün, toplu fiyat, kategoriler, barkod etiketi, Excel'den aktarma.</span></li>
-      <li><i>2</i><span><b>Stok:</b> mal girişi, stok sayımı.</span></li>
-      <li><i>3</i><span><b>Raporlar ve kayıtlar:</b> raporlar, işlem geçmişi.</span></li>
-      <li><i>4</i><span><b>Hesaplar ve ayarlar:</b> kullanıcılar, hesabım, ayarlar ve yedekler.</span></li>
+      <li><i>1</i><span><b>Dönem:</b> Bugün, Bu hafta ya da Bu ay. Her kartın altında önceki döneme göre artış (yeşil ▲) ya da düşüş (kırmızı ▼) yazar.</span></li>
+      <li><i>2</i><span><b>Özet kartlar:</b> Ciro, brüt kâr, giderler, <b>net kâr</b> (brüt kâr − giderler), kâr marjı, satış sayısı, ortalama sepet, iadeler.</span></li>
+      <li><i>3</i><span><b>Son 30 gün</b> ciro grafiği.</span></li>
+      <li><i>4</i><span><b>Kasiyerler:</b> Seçili dönemde her kasiyerin satışı. Ayrıntısı için <span class="ui">Ayrıntılı kasiyer performansı</span>.</span></li>
+      <li><i>5</i><span><b>Stok uyarıları:</b> Biten ve azalan ürünler.</span></li>
+      <li><i>6</i><span><b>Hızlı işlemler:</b> Sık kullanılan ekranlara kısa yol.</span></li>
     </ul>
   </div>
-  <h3>8.3 Kasiyer ne görür?</h3>
+  <p>Sayfada ayrıca bugünün durumu (gün açık mı, kapalı mı) ve son yapılan işlemler (fiyat değişikliği, iade, mal girişi…) görünür.</p>
+  <h3>8.4 Kasiyer ne görür?</h3>
   <div class="fig" data-shot="kasa-kasiyer" data-crop="0,0,1280,330">
     <ul class="legend">
       <li><i>1</i><span>Kasiyerin menüsünde <b>sadece Kasa</b> vardır.</span></li>
@@ -1061,9 +1080,10 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 
 <!-- ============================================================ 18 RAPOR -->
 <section class="flow-sec">
-  <h2 class="sec"><span class="num">19</span>Raporlar ve Excel</h2>
+  <h2 class="sec"><span class="num">19</span>Raporlar, kasiyer performansı, giderler, kâr-zarar, analizler</h2>
   <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
-  <p><b>Yönetici Paneli → Raporlar</b></p>
+  <h3>19.1 Raporlar ve Excel</h3>
+  <p><b>Yönetici Paneli → Raporlar ve Excel</b></p>
   <div class="fig" data-shot="raporlar">
     <ul class="legend">
       <li><i>1</i><span><b>Hazır tarih aralıkları:</b> Bugün, Dün, Bu hafta, Bu ay, Geçen ay.</span></li>
@@ -1075,6 +1095,10 @@ Devam etmek için bir tuşa basın . . .</pre></div>
   <table class="t">
     <tr><th style="width:30%">Rapor</th><th>Ne gösterir?</th></tr>
     <tr><td>Günlük özet</td><td>Gün gün satış sayısı, ciro, kâr, marj, iadeler.</td></tr>
+    <tr><td>Kasiyer performansı</td><td>Her kasiyerin satışı, kârı, iptal ve iadeleri, kasada geçen süresi (Bölüm 19.2).</td></tr>
+    <tr><td>Kâr-zarar</td><td>Satış, maliyet, giderler ve net kâr (Bölüm 19.4).</td></tr>
+    <tr><td>Giderler</td><td>Seçili tarihlerdeki giderlerin listesi.</td></tr>
+    <tr><td>Sipariş önerisi</td><td>Hangi üründen ne kadar almalı (Bölüm 19.5).</td></tr>
     <tr><td>Ürün kârlılığı</td><td>Hangi ürün ne kadar sattı, ne kadar kazandırdı.</td></tr>
     <tr><td>Kategori kârlılığı</td><td>Aynısı, kategori bazında.</td></tr>
     <tr><td>Düşük marjlı</td><td>Az kazandıran ya da zararına satılan ürünler. Fiyatını gözden geçirin.</td></tr>
@@ -1082,7 +1106,67 @@ Devam etmek için bir tuşa basın . . .</pre></div>
     <tr><td>Stok değeri</td><td>Raftaki malın maliyet ve satış değeri.</td></tr>
   </table>
 
-  <h2 class="sec" style="margin-top:6mm"><span class="num">20</span>Telefondan takip</h2>
+  <h3>19.2 Kasiyer performansı</h3>
+  <p><b>Yönetici Paneli → Kasiyer performansı</b>. Her kasiyerin ne kadar sattığını, ne kadar kâr getirdiğini ve ne kadar çalıştığını gösterir. Gün sonu raporu e-postasında da bu tablo ve Excel'i gelir.</p>
+  <div class="fig" data-shot="kasiyer-performansi" data-crop="244,66,1036,734">
+    <ul class="legend">
+      <li><i>1</i><span>Tarih aralığını seçin (Bugün, Bu hafta, Bu ay…).</span></li>
+      <li><i>2</i><span>Raporlar ekranının <span class="ui">Kasiyer performansı</span> sekmesidir.</span></li>
+      <li><i>3</i><span>Her kasiyer bir satır: satış sayısı ve tutarı, ortalama sepet, satılan adet, yaptığı indirim, brüt kâr ve marj, nakit/kart, iptal ettiği satışlar, satışlarından yapılan iadeler, çalıştığı gün, <b>kasada geçen süre</b> (o gün ilk ve son satışı arası) ve <b>saat başı satış</b>.</span></li>
+      <li><i>4</i><span><span class="ui">Excel'e aktar</span>.</span></li>
+    </ul>
+  </div>
+  <div class="box tip"><span class="t">Nasıl yorumlanır?</span><p>Çok iptal ya da iade, kasada dikkat gerektirebilir. Saat başı satış, yoğun saatlerde kimin daha hızlı çalıştığını gösterir. Hiç satışı olmayan aktif kasiyerler de sıfırla listelenir.</p></div>
+
+  <h3>19.3 Giderler</h3>
+  <p><b>Yönetici Paneli → Giderler</b>. Kira, elektrik, maaş gibi dükkân giderlerini buraya yazın; böylece program gerçek (net) kârınızı hesaplar.</p>
+  <div class="fig" data-shot="giderler" data-crop="244,66,1036,700">
+    <ul class="legend">
+      <li><i>1</i><span><b>Tarih:</b> Giderin ait olduğu gün (fatura tarihi).</span></li>
+      <li><i>2</i><span><b>Kategori:</b> Kira, personel / maaş, elektrik, su, doğalgaz, internet / telefon, vergi / SGK, muhasebe, bakım, nakliye, kırtasiye, diğer.</span></li>
+      <li><i>3</i><span><b>Açıklama</b> (isteğe bağlı).</span></li>
+      <li><i>4</i><span><b>Tutar:</b> Ödediğiniz toplam tutar (KDV dahil).</span></li>
+      <li><i>5</i><span><b>KDV:</b> Faturadaki KDV oranı. Kira ve maaş gibi KDV'siz giderlerde <b>KDV yok (%0)</b> seçin.</span></li>
+      <li><i>6</i><span><span class="ui">Ekle</span>.</span></li>
+      <li><i>7</i><span>Ayın giderleri ve toplamı. Satırdaki <span class="ui">Düzelt</span> ya da <span class="ui">Sil</span> ile değiştirebilirsiniz (her değişiklik işlem geçmişine yazılır).</span></li>
+    </ul>
+  </div>
+
+  <h3>19.4 Kâr-zarar</h3>
+  <p><b>Yönetici Paneli → Kâr-zarar</b>. Dükkânın gerçekten ne kazandığını gösterir.</p>
+  <div class="fig" data-shot="kar-zarar" data-crop="244,66,1036,994" data-maxh="170">
+    <ul class="legend">
+      <li><i>1</i><span>Dönem: Bu ay, Geçen ay, Bu yıl ya da istediğiniz tarihler.</span></li>
+      <li><i>2</i><span><b>Kâr-zarar tablosu:</b> Satışlar − iadeler = ciro; KDV'si çıkarılınca net satış; − satılan malın maliyeti = <b>brüt kâr</b>; − giderler = <b>net kâr</b>.</span></li>
+      <li><i>3</i><span><b>Net kâr</b> (zarar varsa kırmızı).</span></li>
+      <li><i>4</i><span><b>KDV özeti:</b> Satışlarda tahsil edilen KDV − mal alışlarında ödenen KDV − giderlerde ödenen KDV. Kabaca ödenecek KDV'yi gösterir; kesin hesap için muhasebecinize danışın.</span></li>
+      <li><i>5</i><span><b>Gider dağılımı:</b> Hangi gidere ne kadar gitti.</span></li>
+      <li><i>6</i><span><b>Son 12 ay:</b> Ay ay ciro, brüt kâr, giderler ve net kâr.</span></li>
+    </ul>
+  </div>
+  <div class="box tip"><span class="t">Muhasebeciye göndermek</span><p>Raporlar ekranındaki <b>Kâr-zarar</b> ve <b>Giderler</b> raporlarını <span class="ui">Excel'e aktar</span> ile indirip gönderebilirsiniz. Buradaki hesap iç takip içindir; resmî defterin yerini tutmaz.</p></div>
+
+  <h3>19.5 Analizler</h3>
+  <p><b>Yönetici Paneli → Analizler</b>. Son 30 ya da 90 güne bakarak dükkânın nasıl gittiğini ve ne sipariş etmeniz gerektiğini gösterir.</p>
+  <div class="fig" data-shot="analiz-ust" data-crop="244,66,1036,694" data-maxh="170">
+    <ul class="legend">
+      <li><i>1</i><span>Son 30 gün ya da son 90 gün.</span></li>
+      <li><i>2</i><span><b>Haftalık ciro:</b> Son haftaların karşılaştırması.</span></li>
+      <li><i>3</i><span><b>Stok yeterliliği ve sipariş önerisi:</b> Her ürünün günde ortalama kaç sattığı, stoğun <b>kaç gün yeteceği</b> ve 14 gün yetecek kadar <b>önerilen alım</b>. Durum: Bitti, 1 hafta içinde biter, 2 hafta içinde biter, Yeterli, Satılmıyor.</span></li>
+      <li><i>4</i><span><span class="ui">Sipariş listesi (Excel)</span>: Önerilen alımları tedarikçiye göndermek için Excel olarak indirir.</span></li>
+      <li><i>5</i><span>Mal gelince <span class="ui">Mal girişi</span> (Bölüm 14).</span></li>
+    </ul>
+  </div>
+  <div class="fig" data-shot="analiz-alt" data-crop="244,0,1036,500">
+    <ul class="legend">
+      <li><i>1</i><span><b>Yoğun saatler:</b> Haftanın hangi günü, hangi saatinde kaç satış yapıldığı. Koyu kutular en yoğun zamanlar: kasiyer planını buna göre yapın.</span></li>
+      <li><i>2</i><span><b>ABC analizi:</b> Cironun %80'ini getiren ürünler <b>A</b> (asla bitmemeli), sonraki %15'i <b>B</b>, kalanı <b>C</b> (az satan, fazla stok tutmayın).</span></li>
+    </ul>
+  </div>
+</section>
+
+<section class="flow-sec">
+  <h2 class="sec"><span class="num">20</span>Telefondan takip</h2>
   <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
   <div class="side3">
     <div class="fig" data-shot="telefon" style="width:58mm"></div>
@@ -1205,6 +1289,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
 <section class="flow-sec">
   <h3 style="margin-top:0">23.2 E-posta bağlamak (isteğe bağlı) ve günlük rapor</h3>
   <p>Bağlarsanız: şifrenizi e-postayla yenileyebilir, her akşam <b>günlük raporu</b> e-postayla alırsınız; şifre ve PIN değişiklikleri de e-posta koduyla yapılır. E-postalar dükkânın <b>Gmail</b> hesabından gönderilir.</p>
+  <div class="box tip"><span class="t">Daha kolay yol: Market Kasa e-posta servisi</span><p>E-posta bölümünde <b>"Sadece e-posta adresinizi yazmanız yeter"</b> yazıyorsa Gmail adımlarına gerek yoktur: <span class="ui">E-posta bağla</span> → e-posta adresiniz → <span class="ui">Kod gönder</span> → gelen 6 haneli kod → <span class="ui">Bağla</span>. Rapor ve kodlar "Market Kasa" adına bu adrese gelir; Hesabım'a ayrıca eklemeniz gerekmez. Bu yazı yoksa aşağıdaki adımları izleyin.</p></div>
   <ol class="steps">
         <li><b>myaccount.google.com</b> → <b>Güvenlik</b> → <b>2 Adımlı Doğrulama</b>'yı açın (kapalıysa).</li>
         <li>Arama kutusuna <b>Uygulama şifreleri</b> yazın → ad: <b>Market Kasa</b> → <span class="ui">Oluştur</span>. 16 harfli şifreyi not edin.</li>

@@ -31,7 +31,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 56 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 65 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -39,6 +39,7 @@ Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım.
 - **Satış:** okutma, adet, adla arama, nakit/kart, para üstü, bilgi fişi, indirim, bilinmeyen barkod, kısayollar, kasa mesajları
 - Ürün ekleme, Excel'den aktarma, fiyat değiştirme (tek ürün ve toplu), kategoriler, barkod etiketi
 - Mal girişi, stok sayımı, iade ve iptal, panel, gün sonu ve **günlük rapor e-postası**, raporlar, telefondan takip
+- **Yönetici Paneli:** menü, Genel bakış, **kasiyer performansı**, **giderler ve kâr-zarar** (net kâr, KDV özeti), **analizler** (yoğun saatler, ABC, sipariş önerisi)
 - Kasiyer hesapları ve numaraları, şifre/PIN değiştirme, isteğe bağlı e-posta (Gmail uygulama şifresi), işlem geçmişi, ayarlar, barkod okuyucu, yedekleme
 - Sorun çözme tablosu, kelimelerin anlamı ve kasanın yanına asılacak **günlük kullanım özeti**
 
@@ -209,14 +210,18 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | **Kasa** | Okut → sepete ekle → NAKİT (F8) / KART (F9) → tamamla. Ürün adıyla arama da yapılabilir. | Herkes |
 | **Panel** | Günün cirosu, kârı, satışları (kimin yaptığıyla), kritik stok, saatlik grafik. Satışa tıklayınca iptal/iade. **Günü Kapat**. | Yönetici |
 | **İade** | Fiş numarasıyla eski bir satışı bulup kısmi/tam iade. | Yönetici |
-| **Yönetici Paneli** | Aşağıdaki tüm yönetim ekranlarının toplandığı sayfa. | Yönetici |
+| **Yönetici Paneli** | Yöneticinin giriş sayfası. Solda menü (telefonda üstte **☰ Yönetici menüsü**), açılışta **Genel bakış**: bugün / bu hafta / bu ay ciro, brüt kâr, giderler, net kâr, marj, satış sayısı, ortalama sepet, iadeler (önceki döneme göre), son 30 gün grafiği, kasiyerler, stok uyarıları, son işlemler. | Yönetici |
+| **Kasiyer performansı** | Her kasiyerin satış sayısı ve tutarı, nakit/kart, ortalama sepet, satılan ürün, iptal ve iadeleri, kasada geçen süre ve saat başı satışı; tarih aralığı + Excel. Gün sonu e-postasında da gelir. | Yönetici |
+| **Kâr-zarar** | Bu ay / geçen ay / bu yıl ya da istenen aralık: net satış − maliyet = brüt kâr; − giderler = **net kâr**. KDV özeti (satış KDV − alış KDV − gider KDV), gider dağılımı, son 12 ay tablosu, Excel. | Yönetici |
+| **Giderler** | Kira, elektrik, su, maaş, vergi vb. giderleri tarih, kategori, tutar (KDV dahil) ve KDV oranıyla girme, düzeltme, silme. | Yönetici |
+| **Analizler** | Son 30/90 gün: haftalık ciro, en yoğun gün ve saatler (ısı haritası), ABC analizi (cironun %80'ini getiren ürünler), stok kaç gün yeter ve **sipariş önerisi**. | Yönetici |
 | **Ürünler** | Ürün ekle/düzenle, barkodlar, pasife alma, stok geçmişi. **Satış fiyatına tıklayıp** fiyatı listede hızlıca değiştirme. | Yönetici |
 | **Toplu fiyat güncelleme** | Bir kategoriye, seçili ürünlere veya hepsine % ya da ₺ zam/indirim; yuvarlama (0,50 / 1 ₺ / x,90); önce önizleme, maliyetin altına düşenler uyarılı. | Yönetici |
 | **Kategoriler** | Kategori ekle, adını değiştir, boş kategoriyi sil. | Yönetici |
 | **Mal Girişi** | Gelen malı okut → adet ve alış fiyatı → kaydet (ortalama maliyet güncellenir). | Yönetici |
 | **Stok Sayımı** | Rafta sayılan adedi girin; fark gerekçesiyle kaydedilir. | Yönetici |
 | **Etiketler** | A4 etiket kâğıdına barkod etiketi basma. | Yönetici |
-| **Raporlar** | Günlük özet, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
+| **Raporlar** | Günlük özet, kasiyer performansı, kâr-zarar, giderler, sipariş önerisi, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
 | **Ayarlar** | İşletme adı, açılış kasası, okuyucu, ses, etiket düzeni, günlük rapor e-postası ve saati, e-posta gönderim hesabı, Excel'den ürün içe aktarma, yedekler. | Yönetici |
 | **İşlem geçmişi** | Kim, ne zaman, ne yaptı: fiyat değişiklikleri, iptal/iade, mal girişi, sayım, ayarlar, girişler ve hatalı giriş denemeleri. | Yönetici |
 | **Kullanıcılar / Hesabım** | Kasiyer ekle (Kasiyer No otomatik)/pasife al, PIN değiştir (e-posta kodlu), başka yönetici ekle; kendi adınız, e-postanız ve şifreniz. | Yönetici |

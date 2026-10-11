@@ -95,7 +95,7 @@ await p.getByTestId("setup-submit").click();
 await p.waitForURL(/\/yonetim/);
 await p.request.patch(`${BASE}/api/settings`, { data: { businessName: "Köşe Market" } });
 await p.reload();
-await shot(p, "yonetim-hosgeldin", { notes: [p.getByRole("status").or(p.locator(".border-emerald-300")).first(), p.getByRole("navigation", { name: "Ana menü" })] });
+await shot(p, "yonetim-hosgeldin", { notes: [p.getByRole("status").or(p.locator(".border-emerald-300")).first(), '[data-testid="overview-email-cta"]'] });
 
 // ================================================================= 2. Kullanıcılar
 await p.goto(`${BASE}/yonetim/kullanicilar`);
@@ -117,11 +117,17 @@ await p.getByRole("dialog").waitFor({ state: "detached" });
 await p.goto(`${BASE}/yonetim/hesabim`);
 await shot(p, "hesabim", { notes: ['[data-testid="account-change-password"]', '[data-testid="account-email"]', '[data-testid="account-new-email"]'] });
 
-// ================================================================= 3. Yönetim paneli + menü
+// ================================================================= 3. Yönetici Paneli: üst menü + sol menü
 await p.goto(`${BASE}/yonetim`);
-await shot(p, "yonetim", { notes: [p.getByText("Ürünler ve fiyatlar").first(), p.getByText("Stok", { exact: true }).first(), p.getByText("Raporlar ve kayıtlar").first(), p.getByText("Hesaplar ve ayarlar").first()] });
 const nav = p.getByRole("navigation", { name: "Ana menü" });
-await shot(p, "menu", { clip: { x: 0, y: 0, width: VP.width, height: 64 }, pad: 0, notes: [nav.getByRole("link", { name: "Panel", exact: true }), nav.getByRole("link", { name: "Kasa", exact: true }), nav.getByRole("link", { name: "İade", exact: true }), nav.getByRole("link", { name: "Yönetici Paneli" }), '[data-testid="nav-user"]', p.getByRole("button", { name: "Çıkış" })] });
+await shot(p, "menu", { clip: { x: 0, y: 0, width: VP.width, height: 64 }, pad: 0, notes: [nav.getByRole("link", { name: "Yönetici Paneli" }), nav.getByRole("link", { name: "Kasa", exact: true }), '[data-testid="nav-user"]', p.getByRole("button", { name: "Çıkış" })] });
+{
+  await p.setViewportSize({ width: 1280, height: 1000 });
+  const side = p.getByTestId("owner-sidebar");
+  const grp = (t) => side.getByText(t, { exact: true });
+  await shot(p, "yonetim-menu", { clip: side, pad: 0, notes: [grp("Genel"), grp("Satış ve kasiyerler"), grp("Ürün ve stok"), grp("Muhasebe"), grp("Raporlar ve analiz"), grp("Hesaplar ve ayarlar")] });
+  await p.setViewportSize(VP);
+}
 
 // ================================================================= 4. Giriş ekranı
 await p.getByRole("button", { name: "Çıkış" }).click();
@@ -139,7 +145,7 @@ await p.getByTestId("login-username").fill("ayse");
 await p.getByTestId("login-password").fill("demo-sifre-2026");
 await shot(p, "giris-yonetici", { notes: ['[data-testid="login-tab-owner"]', '[data-testid="login-username"]', '[data-testid="login-password"]', '[data-testid="login-owner-submit"]'] });
 await p.getByTestId("login-owner-submit").click();
-await p.waitForURL(/\/panel/);
+await p.waitForURL(/\/yonetim/);
 
 // ================================================================= 5. Panel (dolu gün)
 await p.goto(`${BASE}/panel${DAY ? `?date=${DAY}` : ""}`);
@@ -318,6 +324,58 @@ await p.goto(`${BASE}/raporlar`);
 await p.getByTestId("report-table").waitFor();
 await p.waitForTimeout(900);
 await shot(p, "raporlar", { notes: [p.getByRole("button", { name: "Bu ay" }), p.locator('input[type="date"]').first(), p.getByRole("tablist", { name: "Rapor türü" }), '[data-testid="export-excel"]'] });
+
+await p.goto(`${BASE}/raporlar?rapor=cashiers`);
+await p.getByRole("button", { name: "Bu ay" }).click();
+await p.getByTestId("report-table").waitFor();
+await p.waitForTimeout(900);
+await shot(p, "kasiyer-performansi", { notes: [p.getByRole("button", { name: "Bu ay" }), p.getByRole("tab", { name: "Kasiyer performansı" }), p.getByTestId("report-table").locator("tbody tr").first(), '[data-testid="export-excel"]'] });
+
+await p.goto(`${BASE}/yonetim/giderler`);
+await p.getByTestId("expense-form").waitFor();
+for (const [cat, desc, amount, vat] of [["kira", "Dükkân kirası", "4500", "0"], ["elektrik", "Elektrik faturası", "960", "20"], ["personel", "Yarı zamanlı yardımcı", "2500", "0"], ["iletisim", "İnternet", "720", "20"]]) {
+  await p.getByTestId("expense-category").selectOption(cat);
+  await p.getByTestId("expense-description").fill(desc);
+  await p.getByTestId("expense-amount").fill(amount);
+  await p.getByTestId("expense-vat").selectOption(vat);
+  await p.getByTestId("expense-save").click();
+  await p.getByTestId("expense-list").getByText(desc, { exact: true }).waitFor();
+}
+await p.getByTestId("expense-category").selectOption("su");
+await p.getByTestId("expense-description").fill("Su faturası");
+await p.getByTestId("expense-amount").fill("450");
+await p.getByTestId("expense-vat").selectOption("10");
+await p.setViewportSize({ width: 1280, height: 1000 });
+await shot(p, "giderler", { notes: ['[data-testid="expense-date"]', '[data-testid="expense-category"]', '[data-testid="expense-description"]', '[data-testid="expense-amount"]', '[data-testid="expense-vat"]', '[data-testid="expense-save"]', '[data-testid="expense-list"]'] });
+await p.getByTestId("expense-description").fill("");
+await p.getByTestId("expense-amount").fill("");
+
+await p.goto(`${BASE}/yonetim/kar-zarar`);
+await p.getByTestId("pl-table").waitFor();
+await p.setViewportSize({ width: 1280, height: 1250 });
+await p.waitForTimeout(700);
+await shot(p, "kar-zarar", { notes: [p.getByRole("navigation", { name: "Dönem" }), '[data-testid="pl-table"]', '[data-testid="pl-net"]', p.getByRole("region", { name: "KDV özeti" }), p.getByRole("region", { name: "Gider dağılımı" }), '[data-testid="pl-months"]'] });
+
+await p.goto(`${BASE}/yonetim/analiz`);
+await p.getByTestId("stock-plan").waitFor();
+await p.setViewportSize({ width: 1280, height: 2400 });
+await p.waitForTimeout(900);
+await shot(p, "analiz-ust", { clip: { x: 0, y: 0, width: 1280, height: 1100 }, pad: 0, notes: [p.getByRole("navigation", { name: "Dönem" }), p.getByText(/hafta ciro/).first(), p.getByRole("region", { name: "Stok yeterliliği ve sipariş önerisi" }), p.getByRole("region", { name: "Stok yeterliliği ve sipariş önerisi" }).getByRole("link", { name: "Sipariş listesi (Excel)" }), p.getByRole("region", { name: "Stok yeterliliği ve sipariş önerisi" }).getByRole("link", { name: "Mal girişi", exact: true })] });
+{
+  const hm = p.getByRole("region", { name: "Yoğun saatler" });
+  const abc = p.getByRole("region", { name: "ABC analizi" });
+  const a = await hm.boundingBox();
+  const b = await abc.boundingBox();
+  const top = Math.min(a.y, b.y) - 12;
+  await shot(p, "analiz-alt", { clip: { x: 0, y: top, width: 1280, height: Math.max(a.y + a.height, b.y + b.height) - top + 12 }, pad: 0, full: true, notes: ['[data-testid="heatmap"]', '[data-testid="abc-summary"]'] });
+}
+
+await p.goto(`${BASE}/yonetim?donem=ay`);
+await p.getByTestId("overview-kpis").waitFor();
+await p.setViewportSize({ width: 1280, height: 1700 });
+await p.waitForTimeout(1200);
+await shot(p, "yonetim", { notes: [p.getByRole("link", { name: "Bu ay" }), '[data-testid="overview-kpis"]', p.getByText("Son 30 gün").first(), '[data-testid="overview-cashiers"]', '[data-testid="overview-stock"]', p.getByRole("region", { name: "Hızlı işlemler" })] });
+await p.setViewportSize(VP);
 
 await p.goto(`${BASE}/yonetim/islem-gecmisi`);
 await p.getByTestId("audit-table").waitFor();

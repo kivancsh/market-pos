@@ -90,6 +90,19 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Excel'e TL/yüzde yazarken metin üzerinden sayıya çevrilir (`kurusToExcelNumber`), float aritmetiği yok.
 - Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).
 - Migration 004: `users.email`, `users.cashier_no`, `verification_codes`, `daily_report_log`.
+- Migration 005: `expenses` (giderler; tutar KDV dahil, `vat_rate` 0/1/10/20, `net_kurus`/`vat_kurus` kayıtta sabit, silme = `deleted_at`).
+- Yönetici Paneli (kullanıcı kararı 11.10.2026): yönetici `/yonetim`'e (Genel bakış) düşer; `(owner)/layout.tsx` sol menü
+  `OwnerSidebar` (`OWNER_MENU`, yeni yönetici ekranı buraya eklenir), dar ekranda `OwnerMobileMenu`. Üst menüde yalnız Yönetici Paneli + Kasa.
+  Genel bakış `services/overview.ts`; kasiyer performansı `getCashierAggregates` (kullanıcı id'si, yoksa satıştaki ad ile gruplar;
+  satışsız aktif kasiyerler de listelenir) → rapor `cashiers` (+ gün sonu e-postasında tablo ve Excel eki).
+  Kâr-zarar `services/expenses.ts`: net satış − KDV hariç maliyet = brüt kâr; − KDV hariç giderler = net kâr; KDV özeti
+  (satış KDV − alış KDV − gider KDV). Analizler `services/analytics.ts` (haftalık, saat×gün ısı haritası, ABC, stok yeterliliği/sipariş önerisi 14 gün).
+  `/raporlar?rapor=<key>` doğrudan sekme açar.
+- Merkezi e-posta servisi (kullanıcı kararı 11.10.2026, "Merkezi servis"): `mail-service/` Cloudflare Worker + Resend; kurulumu
+  kullanıcı yapar (`mail-service/README.md`). Program kurulumu kayıt olur (installId.token, `settings.mail_service_creds` şifreli),
+  servis alıcı adresine kendi kodunu yollar; serbest içerik yalnız doğrulanmış alıcılara. Program tarafı `src/server/mail/service.ts`;
+  adres `DEFAULT_MAIL_SERVICE_URL` (boşsa servis yok, Gmail yolu). `mail_provider = "service"` iken `sendMail` servise gider.
+  `MARKET_KASA_MAIL_SERVICE` yalnız testler içindir. `mail-service/` Mac zip'inde kalır (Mac'te `next build` testlerin tiplerini de denetler).
 - Testlerde e-posta: `captureMail()` (tests/apiHelpers.ts); e2e'de `latestMailCode()` `data/e2e/mail`'den kodu okur.
 - Güncelleme (`src/server/update/`, kullanıcı kararı): sürüm `1.1.<GitHub derleme no>` → `app/version.json`, `windows/kasa-server.js` okuyup
   `MARKET_KASA_VERSION_INFO` ile verir (kanal "windows"); proje klasöründe
