@@ -269,7 +269,7 @@ function animCaption(c, t, tIn, tOut, x, y) {
 const s0 = el("div", "layer");
 const s0top = el("div", "abs", s0, "DÜKKÂNINIZDA HÂLÂ…");
 S(s0top, { left: "220px", top: "250px", fontSize: "26px", fontWeight: "800", letterSpacing: ".32em", color: "#94a3b8" });
-const PROB = ["Defter.", "Hesap makinesi.", "Akşam kasa hesabı."].map((txt, i) => {
+const PROB = ["Excel tabloları.", "WhatsApp'tan stok sorma.", "Ay sonu sürprizleri."].map((txt, i) => {
   const e = el("div", "abs ca", s0, txt);
   S(e, { left: "220px", top: 325 + i * 165 + "px", fontSize: "128px", fontWeight: "900", letterSpacing: "-0.035em", whiteSpace: "nowrap", transformOrigin: "0 50%" });
   const st = el("div", "strike", s0);
@@ -529,7 +529,7 @@ function renderS0(t) {
     p.e.style.filter = a < 0.99 || shatter > 0 ? `blur(${(1 - a) * 18 + shatter * 14}px)` : "none";
     const sw = P(t, p.ts, p.ts + 0.16, E.inOutCubic);
     const w = p.e.offsetWidth || 900;
-    S(p.st, { left: "205px", top: 325 + i * 165 + 74 + "px", width: w + 30 + "px", transform: `scaleX(${sw}) rotate(-1.5deg)`, opacity: (t >= p.ts ? 1 : 0) * (1 - shatter) });
+    S(p.st, { left: "205px", top: 325 + i * 165 + 74 + "px", width: w + 30 + "px", transform: `translate(${shatter * (i - 1) * 500}px, ${shatter * (i - 1) * 200 - shatter * 120}px) rotate(${shatter * (i - 1) * 12 - 1.5}deg) scaleX(${sw})`, opacity: (t >= p.ts ? 1 : 0) * (1 - shatter) ** 2 });
   });
   animWords(notAny, t, 3.28125, 99, 0.06, 0.25);
   notAny.box.style.transform = `scale(${1 + P(t, 3.28, 3.75, E.inCubic) * 0.25})`;

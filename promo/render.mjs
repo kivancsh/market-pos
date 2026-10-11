@@ -1,6 +1,6 @@
 // Kurguyu kare kare çizer (Playwright/Chromium). Kullanım:
 //   node promo/render.mjs <iş klasörü> preview 0.5 4.2 13.1 ...   → seçili anların PNG'si
-//   node promo/render.mjs <iş klasörü> frames [başlangıç karesi]  → tüm kareler (JPEG)
+//   node promo/render.mjs <iş klasörü> frames [başlangıç] [bitiş]  → kareler (JPEG); aralık verilirse yalnızca o kareler
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
@@ -31,12 +31,14 @@ if (mode === "preview") {
 } else {
   // frames <başlangıç karesi>: yarıda kalan çizime kaldığı yerden devam eder (önceki kareler silinmez)
   const dir = path.join(work, "frames");
+  // frames <başlangıç> [bitiş]: yalnızca bu kare aralığını yeniden çizer (diğer kareler silinmez)
   const from = Number(times[0] || 0);
-  if (!from) fs.rmSync(dir, { recursive: true, force: true });
+  if (!times.length) fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
   const total = Math.round(tl.duration * tl.fps);
+  const to = Math.min(total, Number(times[1] || total));
   const t0 = Date.now();
-  for (let i = from; i < total; i++) {
+  for (let i = from; i < to; i++) {
     await page.evaluate((tt) => window.renderFrame(tt), i / tl.fps);
     await page.screenshot({ path: path.join(dir, `f${String(i).padStart(5, "0")}.jpg`), type: "jpeg", quality: 93 });
     if (i % 150 === 0) console.log(`kare ${i}/${total} (${((Date.now() - t0) / 1000).toFixed(0)} sn)`);
