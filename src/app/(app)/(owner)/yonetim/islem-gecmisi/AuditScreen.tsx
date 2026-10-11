@@ -37,6 +37,7 @@ const GROUPS: { key: string; label: string }[] = [
   { key: "settings.", label: "Ayarlar" },
   { key: "backup.", label: "Yedek" },
   { key: "expense.", label: "Giderler" },
+  { key: "okc.", label: "Yazar kasa" },
   { key: "update.", label: "Program güncellemesi" },
 ];
 

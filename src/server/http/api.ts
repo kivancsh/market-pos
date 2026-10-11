@@ -29,6 +29,11 @@ function makeCtx(): Ctx {
   return g.__ctxFactory ? g.__ctxFactory() : { db: getDb(), now: () => new Date() };
 }
 
+/** Oturumsuz, cihazdan gelen istekler için bağlam (ör. yazar kasa). */
+export function deviceCtx(): Ctx {
+  return makeCtx();
+}
+
 export function errorBody(code: string, message: string, details?: unknown) {
   return { error: details === undefined ? { code, message } : { code, message, details } };
 }

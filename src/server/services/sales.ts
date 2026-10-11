@@ -19,6 +19,8 @@ import { conflict, forbidden, notFound, unprocessable } from "../errors";
 import { idSchema, kurusSchema, paymentMethodSchema, qtySchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
 import { stamp } from "./clock";
+import type { OkcSaleStatus } from "@/lib/okc";
+import { enqueueSaleForOkc, findSaleOkcStatus } from "./okc";
 import { applyStockChange } from "./stock";
 
 export const completeSaleSchema = z
@@ -76,6 +78,8 @@ export interface CompleteSaleResult {
   lowStock: LowStockItem[];
   /** allow_negative_stock açıkken yetersiz stokla yapılan satışlar için uyarı. */
   warnings: { code: "NEGATIVE_STOCK"; message: string; shortages: StockShortage[] }[];
+  /** Yazar kasa bağlıysa satışın yasal fiş durumu (fiş kesilene kadar kasa ekranı bekler); bağlı değilse null. */
+  okc: OkcSaleStatus | null;
 }
 
 interface MergedLine {
@@ -98,7 +102,14 @@ export function completeSale(ctx: Ctx, input: CompleteSaleInput, actor: Actor): 
       // 1. Çift kayıt koruması
       const existing = getSaleByClientRequestId(db, data.clientRequestId);
       if (existing) {
-        return { sale: existing, items: getSaleItems(db, existing.id), duplicate: true, lowStock: [], warnings: [] };
+        return {
+          sale: existing,
+          items: getSaleItems(db, existing.id),
+          duplicate: true,
+          lowStock: [],
+          warnings: [],
+          okc: findSaleOkcStatus(db, existing.id),
+        };
       }
 
       // 2. Gün kapalı mı?
@@ -275,7 +286,10 @@ export function completeSale(ctx: Ctx, input: CompleteSaleInput, actor: Actor): 
         }
       }
 
-      return { sale: getSaleById(db, saleId)!, items: getSaleItems(db, saleId), duplicate: false, lowStock, warnings };
+      // 9. Yazar kasa bağlıysa yasal fiş için kuyruğa al (aynı transaction: satış varsa kuyruk kaydı da vardır)
+      const okc = enqueueSaleForOkc(db, saleId, time.nowIso);
+
+      return { sale: getSaleById(db, saleId)!, items: getSaleItems(db, saleId), duplicate: false, lowStock, warnings, okc };
     })
     .immediate();
 }

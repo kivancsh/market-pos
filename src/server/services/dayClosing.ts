@@ -9,6 +9,7 @@ import { parseInput, z } from "../validation/zod";
 import { formatBusinessDate } from "@/lib/businessDate";
 import { formatTRY } from "@/lib/money";
 import { audit } from "./audit";
+import { getOkcDayHealth, type OkcDayHealth } from "./okc";
 import { stamp } from "./clock";
 
 export interface ClosingHistoryEntry {
@@ -38,6 +39,8 @@ export interface DayClosingView {
   reopenedAt: string | null;
   reopenReason: string | null;
   history: ClosingHistoryEntry[];
+  /** Yazar kasa: fişi kesilmemiş satışlar ve Z toplamı karşılaştırması (veri sağlığı) */
+  okc: OkcDayHealth;
 }
 
 /** Beklenen kasa nakdi = açılış kasası + nakit satışlar − nakit iadeler. */
@@ -45,7 +48,13 @@ export function expectedCash(summary: PeriodSummary, openingCashKurus: number): 
   return openingCashKurus + summary.cash.salesKurus - summary.cash.refundsKurus;
 }
 
-function view(businessDate: string, row: DayClosingRow | undefined, openingCashKurus: number, liveExpected: number): DayClosingView {
+function view(
+  businessDate: string,
+  row: DayClosingRow | undefined,
+  openingCashKurus: number,
+  liveExpected: number,
+  okc: OkcDayHealth,
+): DayClosingView {
   if (!row) {
     return {
       businessDate,
@@ -59,6 +68,7 @@ function view(businessDate: string, row: DayClosingRow | undefined, openingCashK
       reopenedAt: null,
       reopenReason: null,
       history: [],
+      okc,
     };
   }
   const json = JSON.parse(row.summaryJson) as Partial<ClosingSummaryJson>;
@@ -76,19 +86,24 @@ function view(businessDate: string, row: DayClosingRow | undefined, openingCashK
     reopenedAt: row.reopenedAt,
     reopenReason: row.reopenReason,
     history: json.history ?? [],
+    okc,
   };
 }
 
 export function getDayClosingView(ctx: Ctx, businessDate: string): DayClosingView {
   const opening = getSettings(ctx.db).openingCashKurus;
   const summary = getPeriodSummary(ctx.db, businessDate, businessDate);
-  return view(businessDate, getDayClosing(ctx.db, businessDate), opening, expectedCash(summary, opening));
+  const row = getDayClosing(ctx.db, businessDate);
+  const okc = getOkcDayHealth(ctx.db, businessDate, summary.salesTotalKurus, row?.okcZTotalKurus ?? null);
+  return view(businessDate, row, opening, expectedCash(summary, opening), okc);
 }
 
 export const closeDaySchema = z.object({
   businessDate: z.iso.date().optional(),
   countedCashKurus: kurusSchema.nullish(),
   note: optionalText(500),
+  /** Yazar kasanın Z raporundaki toplam satış (KDV dahil); girilirse programın cirosuyla karşılaştırılır */
+  okcZTotalKurus: kurusSchema.nullish(),
 });
 
 /**
@@ -133,11 +148,12 @@ export function closeDay(ctx: Ctx, input: z.input<typeof closeDaySchema>): DayCl
         countedCashKurus: counted,
         cashDifferenceKurus: counted === null ? null : counted - expected,
         note: data.note,
+        okcZTotalKurus: data.okcZTotalKurus ?? null,
       });
       audit(
         ctx,
         "day.close",
-        `${formatBusinessDate(date)} kapatıldı. Beklenen kasa ${formatTRY(expected)}${counted === null ? "" : `, sayılan ${formatTRY(counted)}, fark ${formatTRY(counted - expected)}`}`,
+        `${formatBusinessDate(date)} kapatıldı. Beklenen kasa ${formatTRY(expected)}${counted === null ? "" : `, sayılan ${formatTRY(counted)}, fark ${formatTRY(counted - expected)}`}${data.okcZTotalKurus == null ? "" : `, yazar kasa Z ${formatTRY(data.okcZTotalKurus)} (program ${formatTRY(summary.salesTotalKurus)})`}`,
       );
       return getDayClosingView(ctx, date);
     })

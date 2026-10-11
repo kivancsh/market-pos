@@ -31,7 +31,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 65 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Market Kasa Kullanma Kılavuzu (PDF, 66 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -222,6 +222,7 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | **Stok Sayımı** | Rafta sayılan adedi girin; fark gerekçesiyle kaydedilir. | Yönetici |
 | **Etiketler** | A4 etiket kâğıdına barkod etiketi basma. | Yönetici |
 | **Raporlar** | Günlük özet, kasiyer performansı, kâr-zarar, giderler, sipariş önerisi, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
+| **Yazar kasa (ÖKC)** | Ayarlar → Yazar kasa: Hugin (Cloud Link) bağlantısı, "yazar kasayı ayrı kullanıyorum" (hatırlatma + gün sonu Z karşılaştırması) ya da deneme simülatörü. Bağlıyken satış yazar kasaya gider, ödeme ve yasal fiş yazar kasada; fiş numarası programa kaydedilir, fiş kesilmezse satış iptal edilir. Pavo, belgesi gelince. Ayrıntı: [`docs/yazar-kasa-entegrasyonu.md`](docs/yazar-kasa-entegrasyonu.md). | Yönetici |
 | **Ayarlar** | İşletme adı, açılış kasası, okuyucu, ses, etiket düzeni, günlük rapor e-postası ve saati, e-posta gönderim hesabı, Excel'den ürün içe aktarma, yedekler. | Yönetici |
 | **İşlem geçmişi** | Kim, ne zaman, ne yaptı: fiyat değişiklikleri, iptal/iade, mal girişi, sayım, ayarlar, girişler ve hatalı giriş denemeleri. | Yönetici |
 | **Kullanıcılar / Hesabım** | Kasiyer ekle (Kasiyer No otomatik)/pasife al, PIN değiştir (e-posta kodlu), başka yönetici ekle; kendi adınız, e-postanız ve şifreniz. | Yönetici |

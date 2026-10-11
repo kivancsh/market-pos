@@ -3,6 +3,7 @@ import { getSettings, saveSettings, type Settings } from "../db/repositories/set
 import { kurusSchema } from "../validation/common";
 import { parseInput, z } from "../validation/zod";
 import { formatTRY } from "@/lib/money";
+import { OKC_MODE_LABELS, type OkcMode } from "@/lib/okc";
 import { audit } from "./audit";
 
 export const updateSettingsSchema = z
@@ -19,6 +20,8 @@ export const updateSettingsSchema = z
     labelRows: z.int().min(1).max(20),
     dailyReportEnabled: z.boolean(),
     dailyReportTime: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Saati 23:30 gibi yazın."),
+    // pavo_rest: Pavo'nun entegrasyon belgesi gelene kadar seçilemez
+    okcMode: z.enum(["off", "manual", "simulator", "hugin_cloud"], { error: "Bu yazar kasa bağlantısı henüz kullanılamıyor." }),
   })
   .partial()
   .strict();
@@ -36,6 +39,7 @@ const LABELS: Record<keyof Settings, string> = {
   labelRows: "etiket satır",
   dailyReportEnabled: "günlük rapor e-postası",
   dailyReportTime: "günlük rapor saati",
+  okcMode: "yazar kasa",
 };
 
 export function updateSettings(ctx: Ctx, input: z.input<typeof updateSettingsSchema>): Settings {
@@ -46,7 +50,13 @@ export function updateSettings(ctx: Ctx, input: z.input<typeof updateSettingsSch
       saveSettings(ctx.db, data);
       const after = getSettings(ctx.db);
       const fmt = (k: keyof Settings, v: unknown) =>
-        k === "openingCashKurus" ? formatTRY(v as number) : typeof v === "boolean" ? (v ? "açık" : "kapalı") : String(v);
+        k === "openingCashKurus"
+          ? formatTRY(v as number)
+          : k === "okcMode"
+            ? OKC_MODE_LABELS[v as OkcMode]
+            : typeof v === "boolean"
+              ? (v ? "açık" : "kapalı")
+              : String(v);
       const changes = (Object.keys(LABELS) as (keyof Settings)[])
         .filter((k) => before[k] !== after[k])
         .map((k) => `${LABELS[k]}: ${fmt(k, before[k])} → ${fmt(k, after[k])}`);

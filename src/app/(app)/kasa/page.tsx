@@ -12,6 +12,7 @@ export default async function KasaPage(props: PageProps<"/kasa">) {
   const s = getSettings(getDb());
   const settings: KasaSettings = {
     businessName: s.businessName,
+    okcMode: s.okcMode,
     cashierCanDiscount: s.cashierCanDiscount,
     scannerMaxIntervalMs: s.scannerMaxIntervalMs,
     scannerMinLength: s.scannerMinLength,

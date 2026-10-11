@@ -7,6 +7,7 @@ export function getClientSettings(): KasaSettings {
   const s = getSettings(getDb());
   return {
     businessName: s.businessName,
+    okcMode: s.okcMode,
     cashierCanDiscount: s.cashierCanDiscount,
     scannerMaxIntervalMs: s.scannerMaxIntervalMs,
     scannerMinLength: s.scannerMinLength,

@@ -218,7 +218,7 @@
     <div><b>20</b>Telefondan takip</div>
     <div><b>21</b>Kasiyerler ve şifreler</div>
     <div><b>22</b>İşlem geçmişi</div>
-    <div><b>23</b>Ayarlar ve barkod okuyucu</div>
+    <div><b>23</b>Ayarlar, barkod okuyucu ve yazar kasa</div>
     <div><b>24</b>Yedekleme ve geri yükleme</div>
     <div><b>25</b>Sorun çözme</div>
     <div><b>26</b>Kelimelerin anlamı</div>
@@ -1319,6 +1319,24 @@ Devam etmek için bir tuşa basın . . .</pre></div>
         <li><i>2</i><span>Gün kapatılmazsa raporun gideceği saat. Değiştirince <span class="ui">Ayarları kaydet</span>.</span></li>
       </ul>
     </div>
+
+  <h3>23.3 Yazar kasa (ÖKC) bağlantısı</h3>
+  <p><b>Ayarlar → Yazar kasa (ÖKC) bağlantısı</b> bölümünden çalışma şeklini seçin:</p>
+  <table class="t">
+    <tr><th style="width:34%">Seçenek</th><th>Ne olur?</th></tr>
+    <tr><td>Yazar kasa bağlantısı yok</td><td>Program yalnız iç takip yapar (yazar kasadan muaf dükkân).</td></tr>
+    <tr><td>Yazar kasayı ayrı kullanıyorum</td><td>Her satıştan sonra "yazar kasadan fişi kesmeyi unutmayın" hatırlatması çıkar. Gün sonunda yazar kasanın <b>Z raporu toplamını</b> Günü Kapat ekranına yazın; programın cirosuyla farkı %5'i geçerse program uyarır.</td></tr>
+    <tr><td>Hugin (Cloud Link)</td><td>Satış yazar kasaya kendiliğinden gider. Ödeme ve yasal fiş yazar kasada; fiş numarası programa geri gelir. Kurulumu bir kez yapılır (Hugin'e adres ve şifre bildirilir).</td></tr>
+    <tr><td>Deneme (simülatör)</td><td>Cihaz olmadan denemek ve kasiyerleri eğitmek için yazar kasa ekranda taklit edilir.</td></tr>
+  </table>
+  <p><b>Yazar kasa bağlıyken kasada:</b></p>
+  <ol class="steps">
+    <li>Ürünleri okutun, <span class="key">F8</span> nakit ya da <span class="key">F9</span> kart → <span class="ui">Satışı tamamla</span>.</li>
+    <li>Ekranda <b>"Yazar kasada ödemeyi tamamlayın"</b> çıkar. Yazar kasada "Siparişler" listesinden aynı fiş numaralı siparişi açıp ödemeyi alın.</li>
+    <li>Yazar kasa fişi basınca program kendiliğinden <b>"Satış tamamlandı · yazar kasa fiş no …"</b> gösterir.</li>
+  </ol>
+  <div class="box warn"><span class="t">Yazar kasa hata verirse</span><p>Hata mesajı ekranda görünür (ör. "Kâğıt bitti"). Sorunu giderip <span class="ui">Yazar kasaya tekrar gönder</span>'e basın. Fiş kesilemeyecekse <span class="ui">Fiş kesilmedi, satışı iptal et</span>: satış ciroya girmez, stok geri eklenir; <span class="ui">Ürünleri sepete geri al</span> ile aynı ürünleri yeniden satabilirsiniz.</p></div>
+  <div class="box tip"><span class="t">Gün sonunda</span><p>Fişi kesilmemiş satış kaldıysa Günü Kapat ekranı uyarır. Yazar kasanın Z toplamını yazarsanız program, kendi cirosuyla karşılaştırıp farkı gösterir.</p></div>
 </section>
 
 <!-- ============================================================ 23 YEDEK -->

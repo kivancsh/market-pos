@@ -5,6 +5,7 @@ import { formatTRY, parseTRYToKurus } from "@/lib/money";
 import { api, ApiError } from "@/client/api";
 import type { CartState } from "@/client/cart";
 import { Modal } from "@/client/components/Modal";
+import type { OkcSaleStatus } from "@/lib/okc";
 
 export interface SaleResponse {
   sale: {
@@ -15,9 +16,12 @@ export interface SaleResponse {
     cashReceivedKurus: number | null;
     changeKurus: number | null;
   };
+  items: { productId: number; qty: number }[];
   duplicate: boolean;
   lowStock: { productId: number; name: string; stockQty: number; minStock: number }[];
   warnings: { code: string; message: string }[];
+  /** Yazar kasa bağlıysa yasal fiş durumu */
+  okc: OkcSaleStatus | null;
 }
 
 const QUICK_TL = [50, 100, 200, 500, 1000];

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { formatBusinessDate, formatIstanbulDateTime } from "@/lib/businessDate";
 import { formatTRY } from "@/lib/money";
+import { OKC_STATUS_LABELS, type OkcSaleStatus } from "@/lib/okc";
 import { incrementalShare } from "@/lib/pricing";
 import { api, ApiError } from "../api";
 import { Modal } from "./Modal";
@@ -56,6 +57,8 @@ interface Detail {
   sale: Sale;
   items: Item[];
   returns: ReturnRow[];
+  /** Yazar kasa bağlıyken: yasal fiş durumu */
+  okc?: OkcSaleStatus | null;
 }
 
 type Mode = "view" | "void" | "return";
@@ -184,6 +187,17 @@ export function SaleDetailDialog({
           <Notice kind="error">
             {formatIstanbulDateTime(sale.voidedAt!)} tarihinde iptal edildi. Gerekçe: {sale.voidReason}
           </Notice>
+        )}
+        {data.okc && (
+          <p
+            className={`rounded-lg px-3 py-2 text-sm ${data.okc.status === "printed" ? "bg-emerald-50 text-emerald-900" : data.okc.status === "cancelled" ? "bg-slate-100 text-slate-700" : "bg-amber-50 text-amber-900"}`}
+            data-testid="sale-okc"
+          >
+            🧾 Yazar kasa: {OKC_STATUS_LABELS[data.okc.status]}
+            {data.okc.documentNo && <> · fiş no {data.okc.documentNo}</>}
+            {data.okc.zNo && data.okc.zNo !== "SIM" && <> · Z {data.okc.zNo}</>}
+            {data.okc.errorMessage && data.okc.status === "failed" && <> · {data.okc.errorMessage}</>}
+          </p>
         )}
         {done && <Notice kind="success">{done}</Notice>}
         {error && <Notice kind="error">{error}</Notice>}

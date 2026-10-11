@@ -47,5 +47,6 @@ export function saleResultView(r: CompleteSaleResult, role: Role) {
     duplicate: r.duplicate,
     lowStock: r.lowStock,
     warnings: r.warnings,
+    okc: r.okc,
   };
 }

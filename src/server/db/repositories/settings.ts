@@ -1,3 +1,4 @@
+import { OKC_MODES, type OkcMode } from "@/lib/okc";
 import type { DB } from "../types";
 
 export interface Settings {
@@ -15,6 +16,8 @@ export interface Settings {
   dailyReportEnabled: boolean;
   /** "HH:MM", İstanbul saati */
   dailyReportTime: string;
+  /** Yazar kasa (ÖKC) çalışma şekli; bkz. src/lib/okc.ts */
+  okcMode: OkcMode;
 }
 
 export const SETTING_KEYS = {
@@ -30,6 +33,7 @@ export const SETTING_KEYS = {
   labelRows: "label_rows",
   dailyReportEnabled: "daily_report_enabled",
   dailyReportTime: "daily_report_time",
+  okcMode: "okc_mode",
 } as const satisfies Record<keyof Settings, string>;
 
 const INTERNAL_BARCODE_SEQ = "internal_barcode_seq";
@@ -61,6 +65,7 @@ export function getSettings(db: DB): Settings {
     dailyReportTime: /^([01]\d|2[0-3]):[0-5]\d$/.test(m.get(SETTING_KEYS.dailyReportTime) ?? "")
       ? m.get(SETTING_KEYS.dailyReportTime)!
       : "23:30",
+    okcMode: (OKC_MODES as readonly string[]).includes(m.get(SETTING_KEYS.okcMode) ?? "") ? (m.get(SETTING_KEYS.okcMode) as OkcMode) : "off",
   };
 }
 

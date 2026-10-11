@@ -222,6 +222,12 @@ export function PanelScreen({ initialDate }: { initialDate: string | null }) {
             </>
           )}
           {data.closing.note && <> · not: {data.closing.note}</>}
+          {data.closing.okc.zTotalKurus !== null && (
+            <>
+              {" "}· yazar kasa Z: {formatTRY(data.closing.okc.zTotalKurus)}
+              {data.closing.okc.unhealthy && <strong className="text-red-700"> (programla farkı %5’ten büyük)</strong>}
+            </>
+          )}
         </Notice>
       )}
       {!data.closing.closed && data.closing.reopenedAt && (

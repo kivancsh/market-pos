@@ -98,6 +98,17 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   Kâr-zarar `services/expenses.ts`: net satış − KDV hariç maliyet = brüt kâr; − KDV hariç giderler = net kâr; KDV özeti
   (satış KDV − alış KDV − gider KDV). Analizler `services/analytics.ts` (haftalık, saat×gün ısı haritası, ABC, stok yeterliliği/sipariş önerisi 14 gün).
   `/raporlar?rapor=<key>` doğrudan sekme açar.
+- Yazar kasa / ÖKC (kullanıcı kararı 11.10.2026: "uygulamayı ÖKC'ye uyumlu yap", marka Hugin ya da Pavo): `src/lib/okc.ts`
+  (çalışma şekilleri: off, manual, simulator, hugin_cloud, pavo_rest), `src/server/services/okc.ts`, tablo `okc_documents` (migration 006).
+  Kural (GİB / Hugin FPU dokümanı): fiş yazar kasada başlar ve biter, tutar/KDV değişmeden gider. Akış: completeSale aynı transaction'da
+  `enqueueSaleForOkc` → kasa ekranı yasal fişi bekler (SuccessOverlay/OkcWait, 1 sn'de bir sorar) → fiş kesilince fiş/Z no saklanır;
+  hata → tekrar gönder ya da `cancelSaleOkc` (satış voidSale ile iptal, kasiyer de yapabilir) → ürünler sepete geri alınabilir.
+  Hugin Cloud Link: yazar kasa programa bağlanır: `GET /hugin/v1/orders`, `GET /hugin/v1/orders/{id}`, `POST .../result`, `POST /hugin/v1/sales`
+  (`src/app/hugin/v1`, oturumsuz, `X-ApiKey` = Ayarlar'daki şifre, şifreli saklı; proxy matcher /hugin'i dışlar). Biçim: github.com/huginsdk/cls-demo
+  (MIT) + fpu wiki; doğrulanmamış değerler (`HUGIN_DOCUMENT_TYPE`, cihazın fiş/Z alan adları) Hugin testinde kesinleşmeli; ham sonuç `result_json`'da.
+  Hugin'in GPL'li `fpu` kütüphanesinden kod alınmaz. Pavo: belge (REST uçları) Pavo'dan gelene kadar seçilemez. Gün sonu: Z toplamı
+  (`day_closings.okc_z_total_kurus`) programın satış toplamıyla karşılaştırılır, fark > %5 uyarı; fişi kesilmemiş satışlar sayılır.
+  Canlı kullanım için yazılım firmasının Hugin/Pavo ile entegrasyon anlaşması gerekir; ayrıntı `docs/yazar-kasa-entegrasyonu.md`.
 - Merkezi e-posta servisi (kullanıcı kararı 11.10.2026, "Merkezi servis"): `mail-service/` Cloudflare Worker + Resend; kurulumu
   kullanıcı yapar (`mail-service/README.md`). Program kurulumu kayıt olur (installId.token, `settings.mail_service_creds` şifreli),
   servis alıcı adresine kendi kodunu yollar; serbest içerik yalnız doğrulanmış alıcılara. Program tarafı `src/server/mail/service.ts`;

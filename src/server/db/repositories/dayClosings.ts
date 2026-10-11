@@ -17,6 +17,8 @@ export interface DayClosingRow {
   note: string | null;
   reopenedAt: string | null;
   reopenReason: string | null;
+  /** Yazar kasa Z raporu toplamı (girildiyse) */
+  okcZTotalKurus: number | null;
 }
 
 export function getDayClosing(db: DB, businessDate: string): DayClosingRow | undefined {
@@ -24,7 +26,8 @@ export function getDayClosing(db: DB, businessDate: string): DayClosingRow | und
     .prepare(
       `SELECT business_date AS businessDate, closed_at AS closedAt, summary_json AS summaryJson,
               expected_cash_kurus AS expectedCashKurus, counted_cash_kurus AS countedCashKurus,
-              cash_difference_kurus AS cashDifferenceKurus, note, reopened_at AS reopenedAt, reopen_reason AS reopenReason
+              cash_difference_kurus AS cashDifferenceKurus, note, reopened_at AS reopenedAt, reopen_reason AS reopenReason,
+              okc_z_total_kurus AS okcZTotalKurus
          FROM day_closings WHERE business_date = ?`,
     )
     .get(businessDate) as DayClosingRow | undefined;
@@ -33,13 +36,13 @@ export function getDayClosing(db: DB, businessDate: string): DayClosingRow | und
 export function upsertDayClosing(db: DB, row: Omit<DayClosingRow, "reopenedAt" | "reopenReason">): void {
   db.prepare(
     `INSERT INTO day_closings (business_date, closed_at, summary_json, expected_cash_kurus, counted_cash_kurus,
-                               cash_difference_kurus, note, reopened_at, reopen_reason)
-     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL)
+                               cash_difference_kurus, note, reopened_at, reopen_reason, okc_z_total_kurus)
+     VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?)
      ON CONFLICT(business_date) DO UPDATE SET
        closed_at = excluded.closed_at, summary_json = excluded.summary_json,
        expected_cash_kurus = excluded.expected_cash_kurus, counted_cash_kurus = excluded.counted_cash_kurus,
        cash_difference_kurus = excluded.cash_difference_kurus, note = excluded.note,
-       reopened_at = NULL, reopen_reason = NULL`,
+       reopened_at = NULL, reopen_reason = NULL, okc_z_total_kurus = excluded.okc_z_total_kurus`,
   ).run(
     row.businessDate,
     row.closedAt,
@@ -48,6 +51,7 @@ export function upsertDayClosing(db: DB, row: Omit<DayClosingRow, "reopenedAt" |
     row.countedCashKurus,
     row.cashDifferenceKurus,
     row.note,
+    row.okcZTotalKurus,
   );
 }
 

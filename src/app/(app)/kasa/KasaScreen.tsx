@@ -252,6 +252,19 @@ function Kasa({ role, settings, simulator }: { role: Role; settings: KasaSetting
     setPayMode(mode);
   }
 
+  /** Yazar kasa fiş kesmeyip satış iptal edilince ürünleri sepete geri koyar. */
+  function restoreCart(items: { productId: number; qty: number }[]) {
+    dispatch({ type: "reset", clientRequestId: uuidv4() });
+    for (const it of items) {
+      const product = catalog.items.find((c) => c.id === it.productId);
+      if (!product) continue;
+      dispatch({ type: "add", product, barcode: null });
+      if (it.qty > 1) dispatch({ type: "setQty", productId: it.productId, qty: it.qty });
+    }
+    void catalog.refresh();
+    void refreshStats();
+  }
+
   function onSaleCompleted(r: SaleResponse) {
     setPayMode(null);
     setSuccess(r);
@@ -271,6 +284,8 @@ function Kasa({ role, settings, simulator }: { role: Role; settings: KasaSetting
       const target = e.target as HTMLElement | null;
       const inText = !!target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
       if (success) {
+        // Yazar kasa fişi beklenirken (ya da hata varken) pencere tuşla kapanmaz
+        if (success.okc && success.okc.status !== "printed" && success.okc.status !== "cancelled") return;
         if (e.key === "Enter" || e.key === "Escape") {
           e.preventDefault();
           setSuccess(null);
@@ -570,6 +585,13 @@ function Kasa({ role, settings, simulator }: { role: Role; settings: KasaSetting
       {success && (
         <SuccessOverlay
           result={success}
+          okcMode={settings.okcMode}
+          onOkc={(okc) => setSuccess((cur) => (cur && cur.sale.id === okc.saleId ? { ...cur, okc } : cur))}
+          onRestoreCart={(items) => {
+            restoreCart(items);
+            setSuccess(null);
+            focusBarcode();
+          }}
           onClose={() => {
             setSuccess(null);
             focusBarcode();

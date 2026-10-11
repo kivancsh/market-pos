@@ -30,6 +30,12 @@ export const AUDIT_ACTIONS = {
   "expense.create": "Gider eklendi",
   "expense.update": "Gider düzeltildi",
   "expense.delete": "Gider silindi",
+  "okc.printed": "Yazar kasa fişi kesildi",
+  "okc.failed": "Yazar kasa hatası",
+  "okc.retry": "Yazar kasaya yeniden gönderildi",
+  "okc.cancel": "Yazar kasa fişi kesilmedi, satış iptal",
+  "okc.unmatched": "Eşleşmeyen yazar kasa satışı",
+  "okc.key": "Yazar kasa bağlantı şifresi",
 } as const;
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
 

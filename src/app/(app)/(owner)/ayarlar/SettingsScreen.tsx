@@ -11,6 +11,7 @@ import { beepError, beepSuccess } from "@/client/sound";
 import type { Settings } from "@/server/db/repositories/settings";
 import type { MailStatus } from "@/server/mail";
 import type { UpdateInfo } from "@/server/update";
+import { OkcSection } from "./OkcSection";
 import { UpdateSection } from "./UpdateSection";
 import { errText } from "@/client/errors";
 import { MICROSOFT_UNSUPPORTED, isMicrosoftPersonal } from "@/lib/mailAddress";
@@ -59,7 +60,10 @@ export function SettingsScreen({
     if (openingK === null) return setNotice({ kind: "error", text: "Açılış kasasını 500 veya 500,00 gibi yazın." });
     setBusy(true);
     try {
-      const r = await api<Settings>("/api/settings", { method: "PATCH", body: { ...s, openingCashKurus: openingK } });
+      // Yazar kasa çalışma şekli kendi bölümünden anında kaydedilir; burada eski değeri geri yazmayalım
+      const rest: Partial<Settings> = { ...s };
+      delete rest.okcMode;
+      const r = await api<Settings>("/api/settings", { method: "PATCH", body: { ...rest, openingCashKurus: openingK } });
       setS(r);
       setOpening(formatKurusPlain(r.openingCashKurus));
       setNotice({ kind: "success", text: "Ayarlar kaydedildi. Kasa ekranı açıksa yenileyin (F5) ki yeni ayarlar geçerli olsun." });
@@ -179,6 +183,7 @@ export function SettingsScreen({
         </div>
       </form>
 
+      <OkcSection initialMode={initial.okcMode} />
       <MailSection initial={initialMail} serviceAvailable={mailService} />
       <ImportSection />
       <BackupSection />

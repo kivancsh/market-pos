@@ -41,5 +41,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  // /hugin: yazar kasanın (Hugin Cloud Link) oturumsuz uçları; kendi şifreleriyle korunur
+  matcher: ["/((?!api|hugin|_next/static|_next/image|favicon.ico).*)"],
 };
