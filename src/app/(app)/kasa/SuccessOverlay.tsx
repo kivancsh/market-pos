@@ -246,7 +246,7 @@ function OkcWait({
                 <button
                   type="button"
                   disabled={busy}
-                  autoFocus
+                  // Bilerek odaklanmaz: okuyucunun Enter'ı ya da yanlışlıkla basılan Enter ödemeyi "alındı" saymasın
                   onClick={() => void act("simulate", { outcome: "paid" })}
                   className="h-14 rounded-xl bg-emerald-600 text-lg font-bold text-white disabled:bg-slate-300"
                   data-testid="okc-sim-paid"

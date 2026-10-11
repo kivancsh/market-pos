@@ -36,6 +36,9 @@ export const AUDIT_ACTIONS = {
   "okc.cancel": "Yazar kasa fişi kesilmedi, satış iptal",
   "okc.unmatched": "Eşleşmeyen yazar kasa satışı",
   "okc.key": "Yazar kasa bağlantı şifresi",
+  "assistant.report": "Aylık rapor oluşturuldu",
+  "assistant.targets": "Aylık hedefler değişti",
+  "assistant.ai": "Yapay zekâ bağlantısı",
 } as const;
 export type AuditAction = keyof typeof AUDIT_ACTIONS;
 

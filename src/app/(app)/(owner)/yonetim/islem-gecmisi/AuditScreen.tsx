@@ -38,6 +38,7 @@ const GROUPS: { key: string; label: string }[] = [
   { key: "backup.", label: "Yedek" },
   { key: "expense.", label: "Giderler" },
   { key: "okc.", label: "Yazar kasa" },
+  { key: "assistant.", label: "Yapay zekâ asistanı" },
   { key: "update.", label: "Program güncellemesi" },
 ];
 

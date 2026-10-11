@@ -222,6 +222,7 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | **Stok Sayımı** | Rafta sayılan adedi girin; fark gerekçesiyle kaydedilir. | Yönetici |
 | **Etiketler** | A4 etiket kâğıdına barkod etiketi basma. | Yönetici |
 | **Raporlar** | Günlük özet, kasiyer performansı, kâr-zarar, giderler, sipariş önerisi, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
+| **Yapay zekâ asistanı** | Her ay sonunda işletmenin her kalemini (ciro, kâr, ürün, kategori, fiyat/maliyet aşınması, stok, gider, gün/saat, sepet, iade, kasa) ve personeli analiz eder; gelecek ay için gerçekçi hedefler koyar ve ay boyunca gidişatı izler; özet ve **Aylık alınabilecek aksiyonlar** (₺ etki aralığıyla) sunar, e-postayla gönderir. Anthropic Claude bağlanırsa danışman gibi yorumlar (isteğe bağlı; anahtar yönetici ekranından girilir). | Yönetici |
 | **Yazar kasa (ÖKC)** | Ayarlar → Yazar kasa: Hugin (Cloud Link) bağlantısı, "yazar kasayı ayrı kullanıyorum" (hatırlatma + gün sonu Z karşılaştırması) ya da deneme simülatörü. Bağlıyken satış yazar kasaya gider, ödeme ve yasal fiş yazar kasada; fiş numarası programa kaydedilir, fiş kesilmezse satış iptal edilir. Pavo, belgesi gelince. Ayrıntı: [`docs/yazar-kasa-entegrasyonu.md`](docs/yazar-kasa-entegrasyonu.md). | Yönetici |
 | **Ayarlar** | İşletme adı, açılış kasası, okuyucu, ses, etiket düzeni, günlük rapor e-postası ve saati, e-posta gönderim hesabı, Excel'den ürün içe aktarma, yedekler. | Yönetici |
 | **İşlem geçmişi** | Kim, ne zaman, ne yaptı: fiyat değişiklikleri, iptal/iade, mal girişi, sayım, ayarlar, girişler ve hatalı giriş denemeleri. | Yönetici |
@@ -315,7 +316,7 @@ Program e-postasız da tam çalışır. **Market Kasa e-posta servisi** açıld�
 
 ## 10. Bilinen sınırlar ve sonraki adımlar
 
-**Bu sürümde yok:** e-fatura/e-arşiv, yazar kasa (ÖKC) bağlantısı, tartılı ürünler (kg), çoklu şube, müşteri/sadakat programı.
+**Bu sürümde yok:** e-fatura/e-arşiv, Pavo yazar kasa sürücüsü (belgesi bekleniyor), tartılı ürünler (kg), çoklu şube, müşteri/sadakat programı.
 
 **Bilinmesi gerekenler:**
 - Program tek bilgisayarda çalışır; diğer cihazlar (telefon, ikinci kasa) aynı Wi-Fi'den bu bilgisayara bağlanır. Bilgisayar kapalıyken sistem kapalıdır.

@@ -90,6 +90,7 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
 - Excel'e TL/yüzde yazarken metin üzerinden sayıya çevrilir (`kurusToExcelNumber`), float aritmetiği yok.
 - Migration 002: `returns.cost_total_kurus`, `return_items.cost_kurus` (KDV dahil maliyet payı).
 - Migration 004: `users.email`, `users.cashier_no`, `verification_codes`, `daily_report_log`.
+- Migration 007: yapay zekâ asistanı tabloları (`monthly_reports`, `monthly_targets`, `monthly_action_status`).
 - Migration 005: `expenses` (giderler; tutar KDV dahil, `vat_rate` 0/1/10/20, `net_kurus`/`vat_kurus` kayıtta sabit, silme = `deleted_at`).
 - Yönetici Paneli (kullanıcı kararı 11.10.2026): yönetici `/yonetim`'e (Genel bakış) düşer; `(owner)/layout.tsx` sol menü
   `OwnerSidebar` (`OWNER_MENU`, yeni yönetici ekranı buraya eklenir), dar ekranda `OwnerMobileMenu`. Üst menüde yalnız Yönetici Paneli + Kasa.
@@ -108,6 +109,17 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   (MIT) + fpu wiki; doğrulanmamış değerler (`HUGIN_DOCUMENT_TYPE`, cihazın fiş/Z alan adları) Hugin testinde kesinleşmeli; ham sonuç `result_json`'da.
   Hugin'in GPL'li `fpu` kütüphanesinden kod alınmaz. Pavo: belge (REST uçları) Pavo'dan gelene kadar seçilemez. Gün sonu: Z toplamı
   (`day_closings.okc_z_total_kurus`) programın satış toplamıyla karşılaştırılır, fark > %5 uyarı; fişi kesilmemiş satışlar sayılır.
+- Yapay zekâ asistanı (kullanıcı kararı 11.10.2026: aylık rapor + gerçekçi hedef + gidişat + personel analizi + "Aylık alınabilecek
+  aksiyonlar"): `src/server/services/assistant/` — `facts.ts` (yerel analiz, bütün rakamlar tam sayıyla burada), `actions.ts` (kural tabanlı
+  öneriler, ₺ etki aralığıyla), `targets.ts` (hedef: son 28 günün hafta günü ortalaması × hedef ayın gün dağılımı, büyüme %2–8; gidişat hafta
+  günü ağırlıklı), `ai.ts` (Claude), `index.ts` (akış, zamanlayıcı, e-posta), `email.ts`. Tablolar `monthly_reports`, `monthly_targets`,
+  `monthly_action_status` (migration 007). Ekran `/yonetim/asistan`. Ay bitince zamanlayıcı (5 dk'da bir) geçen ayın raporunu üretir,
+  gelecek ayın otomatik hedeflerini yazar (yöneticinin girdiği hedefe dokunmaz), yorum hazır olunca (ya da 4 başarısız denemeden sonra) e-postalar.
+  Ay sürerken "ara rapor" (is_partial) alınabilir; ay bitince son hâliyle değişir. Yapay zekâ isteğe bağlı: yönetici kendi Anthropic anahtarını
+  ekranda girer (`ai_api_key_enc`, mail ile aynı AES-GCM), `.env`'de anahtar yok, sohbette anahtar istenmez. Model `claude-opus-5-5`, adaptive thinking,
+  effort high, yapılandırılmış çıktı (Zod), sunucu tarafı yedek `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`), stream + finalMessage.
+  Yapay zekâya yalnız hesaplanmış rakamlar (TL/% metin) gider; kasiyerler takma adla ("Kasiyer 1001", "Yönetici"), işletme adı gitmez; yapay zekâ
+  rakam üretmez, uydurma takma ad / kural anahtarı temizlenir. Testlerde `setTestAiRunner` (gerçek API çağrılmaz).
   Canlı kullanım için yazılım firmasının Hugin/Pavo ile entegrasyon anlaşması gerekir; ayrıntı `docs/yazar-kasa-entegrasyonu.md`.
 - Merkezi e-posta servisi (kullanıcı kararı 11.10.2026, "Merkezi servis"): `mail-service/` Cloudflare Worker + Resend; kurulumu
   kullanıcı yapar (`mail-service/README.md`). Program kurulumu kayıt olur (installId.token, `settings.mail_service_creds` şifreli),

@@ -370,6 +370,46 @@ await shot(p, "analiz-ust", { clip: { x: 0, y: 0, width: 1280, height: 1100 }, p
   await shot(p, "analiz-alt", { clip: { x: 0, y: top, width: 1280, height: Math.max(a.y + a.height, b.y + b.height) - top + 12 }, pad: 0, full: true, notes: ['[data-testid="heatmap"]', '[data-testid="abc-summary"]'] });
 }
 
+// Yapay zekâ asistanı: bu ayın ara raporu (demo veride anahtar yok → yerel analiz ve kural tabanlı öneriler)
+{
+  await p.setViewportSize({ width: 1280, height: 1000 });
+  await p.goto(`${BASE}/yonetim/asistan`);
+  await p.getByTestId("assistant-targets").waitFor();
+  const month = p.getByTestId("assistant-month");
+  const current = await month.locator("option", { hasText: "(bu ay)" }).getAttribute("value");
+  if ((await month.inputValue()) !== current) {
+    await month.selectOption(current);
+    await p.getByTestId("assistant-empty").or(p.getByTestId("assistant-report")).first().waitFor();
+  }
+  await p.getByTestId("assistant-generate").click();
+  await p.getByTestId("assistant-report").waitFor();
+  await p.goto(`${BASE}/yonetim/asistan?ay=${current}`);
+  await p.getByTestId("assistant-report").waitFor();
+  await p.setViewportSize({ width: 1280, height: 6000 });
+  await p.waitForTimeout(900);
+  const gen = await p.getByTestId("assistant-generate").boundingBox();
+  await shot(p, "asistan-ust", {
+    clip: { x: 0, y: 0, width: 1280, height: gen.y + gen.height + 16 },
+    pad: 0,
+    full: true,
+    notes: ['[data-testid="assistant-month"]', '[data-testid="target-revenue"]', '[data-testid="targets-edit"]', '[data-testid="ai-connect"]', '[data-testid="assistant-generate"]'],
+  });
+  const rep = await p.getByTestId("assistant-report").boundingBox();
+  const ana = await p.getByTestId("area-fiyat").boundingBox();
+  await shot(p, "asistan-rapor", {
+    clip: { x: 0, y: rep.y - 12, width: 1280, height: ana.y + ana.height - rep.y + 24 },
+    pad: 0,
+    full: true,
+    notes: ['[data-testid="assistant-headline"]', p.getByText("Kâr potansiyeli / ay").first(), '[data-testid="area-ciro"] summary', '[data-testid="area-fiyat"] summary'],
+  });
+  await shot(p, "asistan-aksiyon", {
+    clip: '[data-testid="assistant-plan"]',
+    pad: 8,
+    full: true,
+    notes: [p.getByTestId("assistant-plan").getByRole("heading"), p.getByTestId("plan-action").first().locator("p.font-bold"), p.getByTestId("plan-action").first().getByText("Beklenen etki").first(), p.getByTestId("plan-action").first().getByTestId("plan-action-done")],
+  });
+}
+
 await p.goto(`${BASE}/yonetim?donem=ay`);
 await p.getByTestId("overview-kpis").waitFor();
 await p.setViewportSize({ width: 1280, height: 1700 });

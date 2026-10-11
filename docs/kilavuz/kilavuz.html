@@ -214,7 +214,7 @@
     <div><b>16</b>İade ve satış iptali</div>
     <div><b>17</b>Panel: günün özeti</div>
     <div><b>18</b>Gün sonu (Günü kapat)</div>
-    <div><b>19</b>Raporlar, kasiyer performansı, giderler, kâr-zarar, analizler</div>
+    <div><b>19</b>Raporlar, kasiyer performansı, giderler, kâr-zarar, analizler, yapay zekâ asistanı</div>
     <div><b>20</b>Telefondan takip</div>
     <div><b>21</b>Kasiyerler ve şifreler</div>
     <div><b>22</b>İşlem geçmişi</div>
@@ -1163,6 +1163,58 @@ Devam etmek için bir tuşa basın . . .</pre></div>
       <li><i>2</i><span><b>ABC analizi:</b> Cironun %80'ini getiren ürünler <b>A</b> (asla bitmemeli), sonraki %15'i <b>B</b>, kalanı <b>C</b> (az satan, fazla stok tutmayın).</span></li>
     </ul>
   </div>
+</section>
+
+<!-- ============================================================ 19.6 YAPAY ZEKÂ ASİSTANI -->
+<section class="page">
+  <h3>19.6 Yapay zekâ asistanı: aylık rapor, hedefler ve aksiyonlar</h3>
+  <div class="who"><span class="tag owner">YÖNETİCİ</span></div>
+  <p class="lead"><b>Yönetici Paneli → Yapay zekâ asistanı</b>. Her ay sonunda işletmenizin bütün kalemlerini inceler, gelecek ay için <b>gerçekçi hedefler</b> koyar ve <b>daha çok kazanmak için neleri nasıl yapmanız gerektiğini</b> tek tek yazar. Ay içinde hedeflerin gidişatını her gün gösterir.</p>
+  <div class="fig" data-shot="asistan-ust" data-crop="244,0,1036,9999" data-maxh="150">
+    <ul class="legend">
+      <li><i>1</i><span><b>Ay seçimi:</b> Geçmiş ayların raporları burada saklanır.</span></li>
+      <li><i>2</i><span><b>Hedef kartı:</b> Gerçekleşen / hedef. Siyah çizgi bugüne kadar olması gerekeni gösterir (haftanın günlerine göre: Cumartesi çok satıyorsanız Cumartesi daha çok beklenir). Altında <b>ay sonu tahmini</b>. Durum: Hedefin önünde, Yolunda, Geride.</span></li>
+      <li><i>3</i><span><span class="ui">Hedefleri düzenle</span>: Önerilen hedefleri kendiniz değiştirebilirsiniz (ör. ciro ₺150.000). Sizin girdiğiniz hedefe program dokunmaz.</span></li>
+      <li><i>4</i><span><b>Yapay zekâ bağlantısı (isteğe bağlı):</b> Aşağıdaki "Yapay zekâyı bağlamak" kutusuna bakın.</span></li>
+      <li><i>5</i><span><span class="ui">Raporu oluştur</span>: Ay bitmeden de bir <b>ara rapor</b> alabilirsiniz. Ay bitince rapor kendiliğinden son hâlini alır.</span></li>
+    </ul>
+  </div>
+  <div class="box tip"><span class="t">Rapor ne zaman gelir?</span><p>Ay bittikten sonra program ilk açıldığında (genelde ayın 1'i sabahı) geçen ayın raporu <b>kendiliğinden</b> hazırlanır, gelecek ayın hedefleri konur ve rapor yöneticilerin e-postasına gider (e-posta bağlıysa, Bölüm 23.2).</p></div>
+  <h3>Hedefler nasıl hesaplanır?</h3>
+  <ul class="dots">
+    <li><b>Taban:</b> Son 4 haftanın haftanın günlerine göre ortalaması × gelecek ayın gün dağılımı (5 Cumartesili bir ay daha yüksek çıkar).</li>
+    <li><b>Büyüme:</b> Son 4 hafta önceki 4 haftaya göre büyüyorsa %3 ile %8 arası; düşüyorsa %2 (önce düşüşü durdurmak). Veri azsa temkinli %3.</li>
+    <li><b>Marj:</b> Maliyeti artan ürünlerin fiyatı güncellenirse ulaşılabilecek kadar (en çok 1 puan).</li>
+    <li><b>Gider bütçesi:</b> Son 3 ayın ortalaması; bunun üstüne çıkmamak. <b>Net kâr</b> = brüt kâr hedefi − gider bütçesi.</li>
+  </ul>
+</section>
+
+<section class="page">
+  <h3>Raporun bölümleri</h3>
+  <div class="fig" data-shot="asistan-rapor" data-crop="244,0,1036,9999" data-maxh="120">
+    <ul class="legend">
+      <li><i>1</i><span><b>Başlık ve temel rakamlar:</b> Ciro, brüt kâr, marj, giderler sonrası net kâr, satış sayısı, ortalama sepet; önceki aya göre değişim.</span></li>
+      <li><i>2</i><span><b>Kâr potansiyeli:</b> Önerilerin hepsi yapılırsa aylık ne kadar ek kâr beklendiği (temkinli aralık).</span></li>
+      <li><i>3</i><span><b>Kalem kalem analiz:</b> Ciro, kârlılık, ürünler, kategoriler, fiyat ve maliyet, stok, giderler, gün ve saatler, sepet, iade ve iptal, kasa kontrolü. Her biri rakamlarıyla; tıklayınca açılır.</span></li>
+      <li><i>4</i><span><b>Fiyat ve maliyet:</b> Alış fiyatı artmış ama satış fiyatı aynı kalmış ürünler, zararına satılanlar ve <b>önerilen yeni fiyat</b> (geçen ayki kârı geri getirir, 50 kuruşa yuvarlanır).</span></li>
+    </ul>
+  </div>
+  <p>Analizden sonra sırasıyla: <b>Personel analizi</b> (her kasiyerin satışı, sepeti, iptal ve indirim oranı, saatlik satışı; ekibin geri kalanıyla karşılaştırılır), <b>Hedefler</b> (bu ayın sonucu, gelecek ayın hedefleri), <b>Özet</b> ve en sonda <b>Aylık alınabilecek aksiyonlar</b>.</p>
+</section>
+
+<section class="page">
+  <h3>Aylık alınabilecek aksiyonlar</h3>
+  <div class="fig" data-shot="asistan-aksiyon" data-maxh="150">
+    <ul class="legend">
+      <li><i>1</i><span>Önem sırasına göre yapılacaklar listesi.</span></li>
+      <li><i>2</i><span><b>Ne yapılacak</b> (hangi ürün, hangi fiyat, hangi gün, hangi kişi) ve altında <b>neden</b> ile <b>adımlar</b>.</span></li>
+      <li><i>3</i><span><b>Beklenen etki</b> (aylık ek kâr, nakde dönecek stok ya da önlenecek kayıp) ve <b>nasıl ölçüleceği</b>.</span></li>
+      <li><i>4</i><span>Yaptıklarınızı <span class="ui">Yapıldı</span> ile işaretleyin. Gelecek ayın raporu "geçen ayın aksiyonları ne oldu?" bölümünde bunları değerlendirir.</span></li>
+    </ul>
+  </div>
+  <div class="box"><span class="t">Yapay zekâyı bağlamak (isteğe bağlı)</span><p>Rapor yapay zekâ olmadan da çalışır: bütün rakamlar ve öneriler bilgisayarınızda hesaplanır. <b>Anthropic Claude</b> bağlanırsa bu rakamları bir danışman gibi yorumlar: her alana not verir (İyi / Orta / Zayıf), personeli tek tek değerlendirir, önerileri birleştirip haftalara böler (1. hafta, 2. hafta…), riskleri ve gelecek ayın odağını yazar.<br>
+  1) <b>console.anthropic.com</b>'da hesap açın ve Billing'den kredi yükleyin (kullandıkça ödenir; ayda bir rapor düşük tutardadır). 2) API Keys → <b>Create Key</b>. 3) Anahtarı Yapay zekâ asistanı ekranındaki kutuya yapıştırıp <span class="ui">Bağla</span>'ya basın. Program anahtarı dener ve bilgisayarda şifreli saklar.</p></div>
+  <div class="box warn"><span class="t">Gizlilik ve rakamlar</span><p>Yapay zekâya yalnızca hesaplanmış rakamlar ve ürün adları gider; kasiyer adları gitmez ("Kasiyer 1001" olarak geçer, ekranda yine adıyla görürsünüz). Yapay zekâ rakam üretmez; bütün rakamlar programdaki kayıtlardan gelir. İnternet yoksa ya da anahtar geçersizse rapor yine hazırlanır, yorum sonra eklenir.</p></div>
 </section>
 
 <section class="flow-sec">

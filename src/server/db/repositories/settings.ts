@@ -90,3 +90,16 @@ export function incrementInternalBarcodeSeq(db: DB): number {
   ).run(INTERNAL_BARCODE_SEQ, String(next));
   return next;
 }
+
+/** Ayarlar tablosunda tek bir ham değer (şifreli anahtarlar vb. için; Settings arayüzünde görünmez). */
+export function getRawSetting(db: DB, key: string): string | null {
+  return (db.prepare("SELECT value FROM settings WHERE key = ?").get(key) as { value: string } | undefined)?.value ?? null;
+}
+
+export function setRawSetting(db: DB, key: string, value: string): void {
+  db.prepare("INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value").run(key, value);
+}
+
+export function deleteRawSetting(db: DB, key: string): void {
+  db.prepare("DELETE FROM settings WHERE key = ?").run(key);
+}

@@ -17,6 +17,7 @@ export const OWNER_MENU: { title: string; items: Item[] }[] = [
     items: [
       { href: "/yonetim", label: "Genel bakış", icon: "🏠" },
       { href: "/panel", label: "Bugün ve gün sonu", icon: "📅" },
+      { href: "/yonetim/asistan", label: "Yapay zekâ asistanı", icon: "✨" },
     ],
   },
   {
