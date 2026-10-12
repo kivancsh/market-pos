@@ -1,9 +1,9 @@
-# Market Kasa servisi (e-posta + bulut yapay zekâ) — kurulum rehberi
+# Optiva servisi (e-posta + bulut yapay zekâ) — kurulum rehberi
 
-Bu klasör, programların (müşteri bilgisayarlarındaki Market Kasa'ların) e-posta gönderdiği ve isteğe bağlı olarak aylık raporlarını
+Bu klasör, programların (müşteri bilgisayarlarındaki Optiva'ların) e-posta gönderdiği ve isteğe bağlı olarak aylık raporlarını
 **bulut yapay zekâ (Claude)** ile yorumlattığı **merkezi servistir**. Dükkânlar hiçbir hesap açmaz; tek hesap sizdedir (bkz. 7. bölüm).
 Müşteri Gmail ayarı, uygulama şifresi vb. ile uğraşmaz: Ayarlar → **E-posta bağla**'ya sadece kendi adresini yazar,
-gelen 6 haneli kodu girer; gün sonu raporu ve şifre kodları bundan sonra "Market Kasa" adına bu servisten gider.
+gelen 6 haneli kodu girer; gün sonu raporu ve şifre kodları bundan sonra "Optiva" adına bu servisten gider.
 
 Bu kurulumu **bir kez** siz yaparsınız (yaklaşık 30–45 dakika). Hesap açma ve ödeme adımlarını siz yaparsınız;
 gizli anahtarları kimseyle (Claude dahil) paylaşmayın, sadece aşağıda söylenen yere yazın.
@@ -12,7 +12,7 @@ gizli anahtarları kimseyle (Claude dahil) paylaşmayın, sadece aşağıda söy
 
 | Ne | Neden | Ücret |
 |---|---|---|
-| Alan adı (ör. `marketkasa.com`) | E-postalar bu adresten gider (`bildirim@marketkasa.com`) | yılda ~10 $ |
+| Alan adı (ör. `optivaapp.com`) | E-postalar bu adresten gider (`bildirim@optivaapp.com`) | yılda ~10 $ |
 | Cloudflare hesabı | Servis burada çalışır | Ücretsiz plan yeterli |
 | Resend hesabı | E-postayı teslim eder | Ücretsiz: ayda 3.000 e-posta (günde 100). Fazlası: ayda 20 $ → 50.000 e-posta |
 
@@ -36,20 +36,20 @@ Kabaca: her dükkân günde 1 rapor gönderir → ücretsiz plan ~**90 dükkâna
 ## 2. Alan adı
 
 1. Cloudflare panelinde soldan **Domain Registration → Register Domains**.
-2. İstediğiniz adı arayın (ör. `marketkasa.com`, `marketkasa.com.tr` burada satılmaz; `.com`/`.app`/`.net` olur) ve satın alın.
+2. İstediğiniz adı arayın (ör. `optivaapp.com`, `optiva.com.tr` burada satılmaz; `.com`/`.app`/`.net` olur) ve satın alın.
    Alan adı zaten başka bir yerde varsa: **Add a domain** ile Cloudflare'e ekleyip ad sunucularını Cloudflare'inkilerle değiştirin.
 
 ## 3. Resend hesabı ve alan adı doğrulama
 
 1. https://resend.com/signup adresinden hesap açın.
-2. **Domains → Add Domain** → alan adınızı yazın (ör. `marketkasa.com`), bölge olarak **eu-west-1 (Ireland)** seçin.
+2. **Domains → Add Domain** → alan adınızı yazın (ör. `optivaapp.com`), bölge olarak **eu-west-1 (Ireland)** seçin.
 3. Resend size birkaç DNS kaydı (TXT/MX) gösterir. **"Sign in to Cloudflare"** (otomatik) düğmesi varsa ona basın;
    yoksa her kaydı Cloudflare → alan adınız → **DNS → Records → Add record** ile aynen ekleyin.
 4. Resend'de **Verify DNS Records**'a basın. Birkaç dakika içinde durum **Verified** olur.
 
 ## 4. Resend API anahtarı
 
-1. Resend → **API Keys → Create API Key**. Ad: `market-kasa-mail`, izin: **Sending access**, alan adı: sizinki.
+1. Resend → **API Keys → Create API Key**. Ad: `optiva-mail`, izin: **Sending access**, alan adı: sizinki.
 2. Çıkan anahtarı (`re_...`) **sadece bir kez** gösterir. Kopyalayın; 5. adımda terminale yapıştıracaksınız.
    Bu anahtarı hiçbir dosyaya, sohbete veya GitHub'a yazmayın.
 
@@ -75,7 +75,7 @@ npx wrangler kv namespace create KV
 
 Çıktıda `id = "...."` görünür. `wrangler.toml` dosyasında `KV_NAMESPACE_ID` yazan yere bu id'yi yazın.
 Aynı dosyada `FROM_ADDRESS` satırındaki `ALAN-ADINIZ.com`'u kendi alan adınızla değiştirin
-(ör. `Market Kasa <bildirim@marketkasa.com>`).
+(ör. `Optiva <bildirim@optivaapp.com>`).
 
 Resend anahtarını servise gizli olarak kaydedin (komut anahtarı sorar; 4. adımdaki `re_...` anahtarını yapıştırıp Enter):
 
@@ -89,7 +89,7 @@ Yayına alın:
 npx wrangler deploy
 ```
 
-Çıktının sonunda servis adresi yazar, ör. `https://market-kasa-mail.<hesabiniz>.workers.dev`.
+Çıktının sonunda servis adresi yazar, ör. `https://optiva-mail.<hesabiniz>.workers.dev`.
 Tarayıcıda bu adresin sonuna `/v1/health` ekleyip açın: `{"ok":true}` görmelisiniz.
 
 ## 6. Programı servise bağlama (bunu Claude yapabilir)
@@ -103,13 +103,13 @@ Tarayıcıda bu adresin sonuna `/v1/health` ekleyip açın: `{"ok":true}` görme
 
 ## 7. Bulut yapay zekâ (isteğe bağlı)
 
-Market Kasa'nın **yerleşik asistanı** aylık raporu her bilgisayarda hesapsız ve internetsiz yazar. Bu adımı yaparsanız, servis adresi
+Optiva'nın **yerleşik asistanı** aylık raporu her bilgisayarda hesapsız ve internetsiz yazar. Bu adımı yaparsanız, servis adresi
 tanımlı bütün programlar raporlarını ayrıca Claude'a yorumlatır (dükkânlarda hesap ya da anahtar gerekmez; yönetici asistan ekranından
 kapatabilir). Ücret sizin Anthropic hesabınızdan düşer.
 
 1. https://console.anthropic.com adresinde hesap açın. **Billing** bölümünden kredi yükleyin.
 2. **Limits** bölümünden aylık harcama üst sınırı koyun (ör. 20 $). Sınır dolarsa programlar yerleşik yorumla devam eder.
-3. **API Keys → Create Key** (ad: `market-kasa-servis`). Anahtarı (`sk-ant-...`) kopyalayın; hiçbir dosyaya, sohbete ya da GitHub'a yazmayın.
+3. **API Keys → Create Key** (ad: `optiva-servis`). Anahtarı (`sk-ant-...`) kopyalayın; hiçbir dosyaya, sohbete ya da GitHub'a yazmayın.
 4. Terminalde:
 
 ```bash
@@ -129,7 +129,7 @@ Kapatmak için: `npx wrangler secret delete ANTHROPIC_API_KEY` (programlar yerle
 ## Bakım
 
 - Gönderilen e-postalar ve hatalar: Resend → **Emails / Logs**.
-- Servis hataları: `npx wrangler tail` (canlı kayıt) ya da Cloudflare → Workers → market-kasa-mail → **Logs**.
+- Servis hataları: `npx wrangler tail` (canlı kayıt) ya da Cloudflare → Workers → optiva-mail → **Logs**.
 - Servis kodunu değiştirdikten sonra: `cd ~/market-pos/mail-service` ve `npx wrangler deploy`.
 - Resend anahtarı sızdıysa: Resend'de anahtarı silin, yenisini oluşturup `npx wrangler secret put RESEND_API_KEY` ile değiştirin.
 - Anthropic anahtarı sızdıysa: Console'da silin, yenisini `npx wrangler secret put ANTHROPIC_API_KEY` ile girin. Harcama: Console → **Usage**.

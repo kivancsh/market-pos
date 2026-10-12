@@ -1,7 +1,7 @@
-# Windows kurulum dosyası (Market-Kasa-Setup.exe)
+# Windows kurulum dosyası (Optiva-Setup.exe)
 # GitHub'ın Windows bilgisayarında: testler → derleme → paket → kurulum dosyası → gerçek kurulum testi → yayın.
 # Sonuç her zaman şu adresten indirilebilir:
-#   https://github.com/<kullanıcı>/<repo>/releases/latest/download/Market-Kasa-Setup.exe
+#   https://github.com/<kullanıcı>/<repo>/releases/latest/download/Optiva-Setup.exe
 name: Windows kurulum dosyası
 
 on:
@@ -69,12 +69,12 @@ jobs:
           }
           Copy-Item wv2\runtimes\win-x64\native\WebView2Loader.dll build\win\
 
-      - name: Uygulamayı derle (Market Kasa.exe)
+      - name: Uygulamayı derle (Optiva.exe)
         shell: pwsh
         run: |
           $csc = "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe"
           & $csc /nologo /codepage:65001 /target:winexe /optimize+ /platform:anycpu `
-            /win32icon:windows\MarketKasa.ico "/out:build\win\Market Kasa.exe" `
+            /win32icon:windows\MarketKasa.ico "/out:build\win\Optiva.exe" `
             /r:System.Windows.Forms.dll /r:System.Drawing.dll `
             /r:build\win\Microsoft.Web.WebView2.Core.dll /r:build\win\Microsoft.Web.WebView2.WinForms.dll `
             windows\launcher\MarketKasa.cs
@@ -90,9 +90,9 @@ jobs:
           }
           & $iscc /Qp "/DAppVersion=$env:MARKET_KASA_VERSION" windows\installer.iss
           if ($LASTEXITCODE -ne 0) { exit 1 }
-          Get-Item build\dist\Market-Kasa-Setup.exe | Format-List Name, Length
+          Get-Item build\dist\Optiva-Setup.exe | Format-List Name, Length
 
-      - name: Mac paketi (Market-Kasa-Mac.zip — Mac kurulumu ve Mac güncellemesi)
+      - name: Mac paketi (Optiva-Mac.zip — Mac kurulumu ve Mac güncellemesi)
         shell: bash
         run: |
           mkdir -p build/mac
@@ -100,12 +100,12 @@ jobs:
           # Proje dosyaları (tanıtım videosu hariç) + version.json; kişisel dosyalar depoda zaten yok
           # autocrlf kapalı: Windows'ta satır sonları CRLF'e çevrilirse Mac betikleri (.sh, .command) çalışmaz
           git -c core.autocrlf=false -c core.eol=lf archive --format=zip --prefix=market-pos/ --add-file=build/mac/version.json \
-            -o build/dist/Market-Kasa-Mac.zip HEAD -- . ':(exclude)promo'
-          python windows/check-mac-zip.py build/dist/Market-Kasa-Mac.zip
+            -o build/dist/Optiva-Mac.zip HEAD -- . ':(exclude)promo'
+          python windows/check-mac-zip.py build/dist/Optiva-Mac.zip
 
       - name: En son sürüm bilgisi (latest.json — programlar güncellemeyi buradan öğrenir)
         shell: bash
-        run: node windows/write-latest.mjs build/dist/Market-Kasa-Setup.exe build/dist/latest.json "$(git log -1 --format=%s)" build/dist/Market-Kasa-Mac.zip
+        run: node windows/write-latest.mjs build/dist/Optiva-Setup.exe build/dist/latest.json "$(git log -1 --format=%s)" build/dist/Optiva-Mac.zip
 
       - name: Gerçek kurulum testi (kur, aç, kullan, kaldır)
         timeout-minutes: 15
@@ -115,8 +115,8 @@ jobs:
       - name: Kurulum dosyasını sakla
         uses: actions/upload-artifact@v4
         with:
-          name: Market-Kasa-Setup
-          path: build/dist/Market-Kasa-Setup.exe
+          name: Optiva-Setup
+          path: build/dist/Optiva-Setup.exe
           retention-days: 30
 
       - name: Yayınla (Releases → en son sürüm)
@@ -126,8 +126,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release delete windows -y --cleanup-tag || true
-          gh release create windows build/dist/Market-Kasa-Setup.exe build/dist/Market-Kasa-Mac.zip build/dist/latest.json \
+          # Ad değişikliği (Market Kasa → Optiva): 1.1.27 ve öncesi güncellemeyi eski dosya adlarıyla indirir; aynı dosyalar o adlarla da yayınlanır
+          cp build/dist/Optiva-Setup.exe build/dist/Market-Kasa-Setup.exe
+          cp build/dist/Optiva-Mac.zip build/dist/Market-Kasa-Mac.zip
+          gh release create windows build/dist/Optiva-Setup.exe build/dist/Optiva-Mac.zip build/dist/latest.json \
+            build/dist/Market-Kasa-Setup.exe build/dist/Market-Kasa-Mac.zip \
             --target "$GITHUB_SHA" \
-            --title "Market Kasa $MARKET_KASA_VERSION — Windows ve Mac" \
+            --title "Optiva $MARKET_KASA_VERSION — Windows ve Mac" \
             --notes-file windows/RELEASE_NOTES.md \
             --latest

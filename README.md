@@ -1,4 +1,4 @@
-# Market Kasa
+# Optiva
 
 Küçük bir dükkân için **barkodlu satış, stok ve kârlılık takip** sistemi.
 Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde ve gün sonunda ciro, kâr ve stok durumu görülür.
@@ -31,7 +31,7 @@ Barkod okuyucuyla satış yapılır, stok kendiliğinden düşer, gün içinde v
 
 ## Kullanma kılavuzu (PDF)
 
-📘 **[Market Kasa Kullanma Kılavuzu (PDF, 66 sayfa)](docs/Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf)**
+📘 **[Optiva Kullanma Kılavuzu (PDF, 70 sayfa)](docs/Optiva%20Kullanma%20K%C4%B1lavuzu.pdf)**
 
 Bilgisayardan anlamayan biri için yazılmış, resimli ve adım adım anlatım. Her ekran görüntüsünün üzerinde kırmızı numaralar, altında "burası ne işe yarar" açıklaması vardır.
 
@@ -47,7 +47,7 @@ Kılavuzu yeniden üretmek (ekranlar değişince): [`docs/kilavuz/README.md`](do
 
 ## Tanıtım videosu
 
-🎬 **[Market Kasa tanıtım videosu (45 sn, 1080p, müzikli)](promo/market-kasa-tanitim.mp4)**
+🎬 **[Optiva tanıtım videosu (52,5 sn, 1080p, müzikli)](promo/optiva-tanitim.mp4)**
 
 Tempolu reklam filmi: "Dükkânınızda hâlâ verimsiz satış, dağınık ekip yönetimi, plansız büyüme… artık değil." → hızlı satış (barkod, para üstü) → **finans yönetimi** (ciro, brüt kâr, giderler, net kâr, kâr-zarar ve KDV) → **iş takibi** (kasiyer performansı, yoğun saatler) → **stok** (bitmeden haber, sipariş önerisi) → etiket, Excel, telefondan takip, gün sonu e-postası, işlem geçmişi. Müzikte akılda kalan 4 notalık bir "sonik logo" tekrar eder. Ekranlar uygulamanın gerçek ekranlarıdır; müzik ve efektler bu proje için sentezlendi (telifsiz).
 
@@ -57,15 +57,15 @@ Videoyu yeniden üretmek: [`promo/README.md`](promo/README.md).
 
 ## Windows'a kurulum (Setup.exe)
 
-🪟 **[Market-Kasa-Setup.exe'yi indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Market-Kasa-Setup.exe)**
+🪟 **[Optiva-Setup.exe'yi indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Optiva-Setup.exe)**
 
-Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → Kur → Bitti**. Bilgisayarda başka hiçbir şeyin kurulu olması gerekmez ve yönetici izni istemez. Masaüstüne ve Başlat menüsüne **Market Kasa** simgesi gelir.
+Klasik Windows kurulumu: dosyaya çift tıklayın → **Sonraki → Sonraki → Kur → Bitti**. Bilgisayarda başka hiçbir şeyin kurulu olması gerekmez ve yönetici izni istemez. Masaüstüne ve Başlat menüsüne **Optiva** simgesi gelir.
 
 - İlk çalıştırmada "Windows kişisel bilgisayarınızı korudu" uyarısı çıkarsa: **Ek bilgi → Yine de çalıştır**.
 - Resimli anlatım: kılavuzun **5. bölümü**.
-- Simgeye tıklayınca program **kendi penceresinde** açılır (Microsoft Edge WebView2 ile; Windows 10/11'de hazır gelir). Pencere açıkken tekrar tıklarsanız pencere öne gelir. Pencereyi kapatmak programı kapatmaz; menü **Market Kasa → Programı tamamen kapat** ile kapanır.
-- Başlat menüsü → Market Kasa: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
-- Bilgiler `%LOCALAPPDATA%\Market Kasa` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
+- Simgeye tıklayınca program **kendi penceresinde** açılır (Microsoft Edge WebView2 ile; Windows 10/11'de hazır gelir). Pencere açıkken tekrar tıklarsanız pencere öne gelir. Pencereyi kapatmak programı kapatmaz; menü **Optiva → Programı tamamen kapat** ile kapanır.
+- Başlat menüsü → Optiva: **Yedek Al**, **Yedekler klasörü**, **Yönetici Şifresi Sıfırla**.
+- Bilgiler `%LOCALAPPDATA%\Optiva` klasöründedir; programı kaldırmak ya da güncellemek bilgileri **silmez**.
 
 Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında otomatik üretilir ve **gerçekten kurulup açılarak test edilir**. Ayrıntılar: [`windows/README.md`](windows/README.md).
 
@@ -75,8 +75,8 @@ Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında oto
 - Program açılıştan kısa süre sonra ve **6 saatte bir** GitHub'daki en son sürüme bakar. Yeni sürüm varsa yöneticiye yeşil bir şerit çıkar: "Yeni sürüm var".
 - **Ayarlar → Güncelle**: önce **otomatik yedek** alınır, yeni kurulum dosyası indirilir ve boyutu + parmak izi (SHA-256) doğrulanır. Sonra pencere kapanır, kurulum sessizce yapılır ve program 1–2 dakika içinde **kendiliğinden yeniden açılır**. Bilgiler yerinde kalır; veritabanı değişikliği gerekiyorsa ilk açılışta otomatik yapılır.
 - Güncelleme **kendiliğinden kurulmaz**; satış sırasında program kapanmasın diye yönetici düğmeye basınca yapılır. Kasiyerler bildirimi görmez.
-- Windows'ta Güncelle düğmesi yalnızca kasa bilgisayarındaki **Market Kasa penceresinde** çalışır (telefonda/tarayıcıda ne yapılacağı yazar).
-- **Mac**'te (GitHub'dan indirilen `Market-Kasa-Mac.zip` kurulumu) aynı düğme: yedek → Mac paketi indirilip doğrulanır → program birkaç dakika kapanır, yeni sürüm kurulup derlenir ve başlatılır; sayfa kendiliğinden yenilenir. Bir adım başarısız olursa **eski sürüme kendiliğinden geri dönülür** ve Ayarlar'da nedeni yazar (ayrıntı: `data/updates/update.log`). Bilgiler (`data/`, `backups/`, `.env`) hiç değişmez.
+- Windows'ta Güncelle düğmesi yalnızca kasa bilgisayarındaki **Optiva penceresinde** çalışır (telefonda/tarayıcıda ne yapılacağı yazar).
+- **Mac**'te (GitHub'dan indirilen `Optiva-Mac.zip` kurulumu) aynı düğme: yedek → Mac paketi indirilip doğrulanır → program birkaç dakika kapanır, yeni sürüm kurulup derlenir ve başlatılır; sayfa kendiliğinden yenilenir. Bir adım başarısız olursa **eski sürüme kendiliğinden geri dönülür** ve Ayarlar'da nedeni yazar (ayrıntı: `data/updates/update.log`). Bilgiler (`data/`, `backups/`, `.env`) hiç değişmez.
 - Geliştirme kopyasında (git ile alınmış klasör) güncelleme denetlenmez; orada kod doğrudan değişir.
 - Sürüm notu olarak kod gönderiminin başlığı gösterilir.
 - Bu özellikten **önceki** sürümleri kullananlar bir kereliğine yeni Setup.exe'yi indirip kurmalıdır; sonrakiler programın içinden güncellenir.
@@ -85,15 +85,15 @@ Kurulum dosyası her kod güncellemesinde GitHub'ın Windows bilgisayarında oto
 
 ## Kolay kurulum: masaüstü simgesi (Mac)
 
-🍎 **[Market-Kasa-Mac.zip'i indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Market-Kasa-Mac.zip)** — açınca `market-pos` klasörü çıkar.
+🍎 **[Optiva-Mac.zip'i indir (en son sürüm)](https://github.com/kivancsh/market-pos/releases/latest/download/Optiva-Mac.zip)** — açınca `market-pos` klasörü çıkar.
 
 > **Klasörü nereye koymalı?** Kullanıcı klasörünüze (Finder → Git → Ana Klasör). iCloud'da "Masaüstü ve Belgeler" eşitlemesi açıksa klasörü **Masaüstü'ne veya Belgeler'e koymayın**: satış bilgilerinin tutulduğu veritabanı eşitleme sırasında bozulabilir ve program yavaşlar. Kurulum böyle bir yerde çalıştırılırsa uyarır.
 
-1. Klasördeki **Kurulum** dosyasına çift tıklayın (ilk seferde macOS "doğrulanamadı" derse: dosyaya sağ tıklayın → **Aç** → **Aç**). Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Market Kasa" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
-2. Programı açmak için masaüstündeki **Market Kasa** simgesine çift tıklayın. Program **kendi penceresinde** açılır (tarayıcı gerekmez; adres çubuğu/sekme yok, Dock'ta kendi simgesi). Sunucu arka planda çalışır. Simgeyi Dock'a da sürükleyebilirsiniz.
-3. Pencerenin üst menüsü: **Market Kasa** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetici Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
+1. Klasördeki **Kurulum** dosyasına çift tıklayın (ilk seferde macOS "doğrulanamadı" derse: dosyaya sağ tıklayın → **Aç** → **Aç**). Eksikleri tamamlar (paketler, ayar dosyası, derleme) ve **masaüstüne "Optiva" uygulama simgesini** koyar. (Node.js kurulu değilse indirme sayfasını açar; kurduktan sonra tekrar çift tıklayın.)
+2. Programı açmak için masaüstündeki **Optiva** simgesine çift tıklayın. Program **kendi penceresinde** açılır (tarayıcı gerekmez; adres çubuğu/sekme yok, Dock'ta kendi simgesi). Sunucu arka planda çalışır. Simgeyi Dock'a da sürükleyebilirsiniz.
+3. Pencerenin üst menüsü: **Optiva** (Telefondan bağlanma, Tarayıcıda aç, Programı tamamen kapat) · **Dosya** (Yazdır ⌘P) · **Görünüm** (Yenile ⌘R, Yakınlaştır/Uzaklaştır) · **Git** (Kasa ⌘1, Panel ⌘2, Yönetici Paneli ⌘3). Bilgi fişi ayrı küçük pencerede açılıp yazdırılır; Excel raporları İndirilenler klasörüne iner.
 4. **İlk açılışta** tek adımlık kurulum ekranı gelir: adınızı, kullanıcı adınızı ve en az 8 karakterlik şifrenizi yazıp **Hesabı oluştur**'a basın; hesap hemen açılır. E-posta isteğe bağlıdır (bkz. [E-posta](#e-posta-isteğe-bağlı-şifre-sıfırlama-ve-günlük-rapor)). Sonra **Yönetici Paneli → Kullanıcılar**'dan kasiyerleri (ad + PIN) ekleyin; her kasiyere otomatik bir **Kasiyer No** verilir (1001, 1002…).
-5. Pencereyi kapatmak programı kapatmaz (telefondan takip sürer). Program; menüden **Market Kasa → Programı tamamen kapat** denene ya da bilgisayar kapanana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
+5. Pencereyi kapatmak programı kapatmaz (telefondan takip sürer). Program; menüden **Optiva → Programı tamamen kapat** denene ya da bilgisayar kapanana kadar çalışır. Bilgisayarı açtıktan sonra simgeye bir kez tıklamanız yeterlidir.
 
 Klasördeki diğer çift tıklanabilir dosyalar:
 
@@ -222,7 +222,7 @@ Elinizde okuyucu yokken menüdeki **Simülatör** ile her ürünü "okutabilir",
 | **Stok Sayımı** | Rafta sayılan adedi girin; fark gerekçesiyle kaydedilir. | Yönetici |
 | **Etiketler** | A4 etiket kâğıdına barkod etiketi basma. | Yönetici |
 | **Raporlar** | Günlük özet, kasiyer performansı, kâr-zarar, giderler, sipariş önerisi, ürün/kategori kârlılığı, düşük marjlı, satmayanlar, stok değeri + Excel. | Yönetici |
-| **Yapay zekâ asistanı** | Her ay sonunda işletmenin her kalemini (ciro, kâr, ürün, kategori, fiyat/maliyet aşınması, stok, gider, gün/saat, sepet, iade, kasa) ve personeli analiz eder; gelecek ay için gerçekçi hedefler koyar ve ay boyunca gidişatı izler; özet ve **Aylık alınabilecek aksiyonlar** (₺ etki aralığıyla) sunar, e-postayla gönderir. Yorumu **yerleşik asistan** yazar: dükkânda hiçbir hesap ya da internet gerekmez. Market Kasa servisinde bulut yapay zekâ (Claude) açıksa yorum ayrıca onunla güçlendirilir (dükkân hesap açmaz; kurulum: [`mail-service/README.md`](mail-service/README.md) 7. bölüm). | Yönetici |
+| **Yapay zekâ asistanı** | Her ay sonunda işletmenin her kalemini (ciro, kâr, ürün, kategori, fiyat/maliyet aşınması, stok, gider, gün/saat, sepet, iade, kasa) ve personeli analiz eder; gelecek ay için gerçekçi hedefler koyar ve ay boyunca gidişatı izler; özet ve **Aylık alınabilecek aksiyonlar** (₺ etki aralığıyla) sunar, e-postayla gönderir. Yorumu **yerleşik asistan** yazar: dükkânda hiçbir hesap ya da internet gerekmez. Optiva servisinde bulut yapay zekâ (Claude) açıksa yorum ayrıca onunla güçlendirilir (dükkân hesap açmaz; kurulum: [`mail-service/README.md`](mail-service/README.md) 7. bölüm). | Yönetici |
 | **Yazar kasa (ÖKC)** | Ayarlar → Yazar kasa: Hugin (Cloud Link) bağlantısı, "yazar kasayı ayrı kullanıyorum" (hatırlatma + gün sonu Z karşılaştırması) ya da deneme simülatörü. Bağlıyken satış yazar kasaya gider, ödeme ve yasal fiş yazar kasada; fiş numarası programa kaydedilir, fiş kesilmezse satış iptal edilir. Pavo, belgesi gelince. Ayrıntı: [`docs/yazar-kasa-entegrasyonu.md`](docs/yazar-kasa-entegrasyonu.md). | Yönetici |
 | **Ayarlar** | İşletme adı, açılış kasası, okuyucu, ses, etiket düzeni, günlük rapor e-postası ve saati, e-posta gönderim hesabı, Excel'den ürün içe aktarma, yedekler. | Yönetici |
 | **İşlem geçmişi** | Kim, ne zaman, ne yaptı: fiyat değişiklikleri, iptal/iade, mal girişi, sayım, ayarlar, girişler ve hatalı giriş denemeleri. | Yönetici |
@@ -286,16 +286,16 @@ Tüm veriler tek bir dosyadadır: `data/store.db`.
 - **Şifre ve PIN'leri sadece yönetici değiştirir/sıfırlar** (kasiyerlerinki dahil). E-posta bağlı değilse doğrudan değişir (yönetici kendi şifresinde mevcut şifresini de yazar). E-posta bağlıysa her seferinde yöneticinin e-postasına **6 haneli onay kodu** gider; kod doğru girilmeden değişiklik yapılmaz (10 dakika geçerli, 5 yanlışta iptal).
 - Kendi şifrenizi veya e-postanızı değiştirmek: Yönetici Paneli → **Hesabım** (e-posta eklerken adrese kod gider).
 - Bir hesabın şifresi/PIN'i değişince ya da hesap pasife alınınca o hesabın açık oturumları kapanır.
-- **Yönetici şifresini unuttuysanız:** kasa bilgisayarında **Yönetici Şifresi Sıfırla** (Windows: Başlat menüsü → Market Kasa; Mac: klasördeki dosya; ya da Terminal'de `npm run users -- reset-password`). E-posta bağladıysanız giriş ekranı → **Yönetici** → **Şifremi unuttum** ile e-postanıza gelen kodla da yenileyebilirsiniz.
+- **Yönetici şifresini unuttuysanız:** kasa bilgisayarında **Yönetici Şifresi Sıfırla** (Windows: Başlat menüsü → Optiva; Mac: klasördeki dosya; ya da Terminal'de `npm run users -- reset-password`). E-posta bağladıysanız giriş ekranı → **Yönetici** → **Şifremi unuttum** ile e-postanıza gelen kodla da yenileyebilirsiniz.
 
 5 kez yanlış PIN veya şifre girilirse giriş **5 dakika** kilitlenir (tahmin edilmesini zorlaştırmak için). Şifreler ve PIN'ler veritabanında açık halde değil, geri çözülemeyen şekilde (scrypt) saklanır.
 
 ### E-posta (isteğe bağlı): şifre sıfırlama ve günlük rapor
 
-Program e-postasız da tam çalışır. **Market Kasa e-posta servisi** açıldığında (kurulumu: [mail-service/README.md](mail-service/README.md)) bağlamak çok kolaydır: Ayarlar → **E-posta bağla** → sadece e-posta adresinizi yazın → gelen 6 haneli kodu girin; rapor ve kodlar "Market Kasa" adına gelir. Servis açık değilse (ya da **Kendi Gmail hesabımla göndereyim (gelişmiş)** seçilirse) aşağıdaki yol kullanılır. **Ayarlar → E-posta gönderimi → E-posta bağla** ile bağlarsanız: şifrenizi e-postayla yenileyebilir, her akşam günlük raporu alırsınız; şifre/PIN değişiklikleri de e-posta koduyla yapılır. Ardından Yönetici Paneli → **Hesabım**'dan kendi e-posta adresinizi ekleyin (adrese kod gelir). E-postalar **dükkânın kendi e-posta hesabından** gönderilir. Gmail önerilir (iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). **Outlook / Hotmail gönderen olarak kullanılamaz:** Microsoft 2026'dan beri programların şifreyle e-posta göndermesine izin vermiyor. Hotmail adresiniz yine **alıcı** olabilir (kodlar ve rapor oraya gelir); gönderen için bir Gmail hesabı açın. Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
+Program e-postasız da tam çalışır. **Optiva e-posta servisi** açıldığında (kurulumu: [mail-service/README.md](mail-service/README.md)) bağlamak çok kolaydır: Ayarlar → **E-posta bağla** → sadece e-posta adresinizi yazın → gelen 6 haneli kodu girin; rapor ve kodlar "Optiva" adına gelir. Servis açık değilse (ya da **Kendi Gmail hesabımla göndereyim (gelişmiş)** seçilirse) aşağıdaki yol kullanılır. **Ayarlar → E-posta gönderimi → E-posta bağla** ile bağlarsanız: şifrenizi e-postayla yenileyebilir, her akşam günlük raporu alırsınız; şifre/PIN değişiklikleri de e-posta koduyla yapılır. Ardından Yönetici Paneli → **Hesabım**'dan kendi e-posta adresinizi ekleyin (adrese kod gelir). E-postalar **dükkânın kendi e-posta hesabından** gönderilir. Gmail önerilir (iCloud, Yandex ve diğer SMTP hesapları da seçilebilir). **Outlook / Hotmail gönderen olarak kullanılamaz:** Microsoft 2026'dan beri programların şifreyle e-posta göndermesine izin vermiyor. Hotmail adresiniz yine **alıcı** olabilir (kodlar ve rapor oraya gelir); gönderen için bir Gmail hesabı açın. Gmail'in normal şifresi burada çalışmaz; bir kerelik **uygulama şifresi** alınır:
 
 1. **myaccount.google.com** → **Güvenlik** → **2 Adımlı Doğrulama**'yı açın (kapalıysa).
-2. Arama kutusuna **Uygulama şifreleri** yazın → ad olarak **Market Kasa** → **Oluştur**.
+2. Arama kutusuna **Uygulama şifreleri** yazın → ad olarak **Optiva** → **Oluştur**.
 3. Çıkan 16 harfli şifreyi **Ayarlar → E-posta gönderimi → E-posta bağla** (ya da Hesabı değiştir) ekranına yazın. Program bağlanmayı hemen dener; hata varsa Türkçe açıklar.
 
 Şifre veritabanında şifrelenmiş olarak saklanır. **Ayarlar → E-posta gönderimi**'nden deneme e-postası gönderebilir, **Bugünün raporunu şimdi gönder**'e basabilirsiniz.

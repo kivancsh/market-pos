@@ -1,11 +1,11 @@
 #!/bin/bash
-# Masaüstüne "Market Kasa" uygulamasını oluşturur: program kendi penceresinde açılır,
+# Masaüstüne "Optiva" uygulamasını oluşturur: program kendi penceresinde açılır,
 # sunucu arka planda çalışır (pencereyi kapatmak programı kapatmaz).
 # Kullanım: scripts/create-app.sh [proje klasörü] [uygulama yolu]
 set -euo pipefail
 
 PROJECT="$(cd "${1:-$(dirname "$0")/..}" && pwd)"
-APP="${2:-$HOME/Desktop/Market Kasa.app}"
+APP="${2:-$HOME/Desktop/Optiva.app}"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
@@ -14,7 +14,7 @@ if [ -e "$APP" ]; then
   if [ -f "$APP/Contents/Resources/project-path.txt" ]; then
     rm -rf "$APP"
   else
-    echo "❌ '$APP' zaten var ve Market Kasa'ya ait değil. Adını değiştirip tekrar deneyin." >&2
+    echo "❌ '$APP' zaten var ve Optiva'ya ait değil. Adını değiştirip tekrar deneyin." >&2
     exit 1
   fi
 fi
@@ -25,10 +25,10 @@ if [ ! -x "$BIN" ]; then
   exit 1
 fi
 
-# Uygulama paketi: kendi penceresinde açılan Market Kasa (mac/MarketKasa.swift)
+# Uygulama paketi: kendi penceresinde açılan Optiva (mac/MarketKasa.swift)
 mkdir -p "$TMP/app/Contents/MacOS" "$TMP/app/Contents/Resources"
-cp "$BIN" "$TMP/app/Contents/MacOS/Market Kasa"
-chmod +x "$TMP/app/Contents/MacOS/Market Kasa"
+cp "$BIN" "$TMP/app/Contents/MacOS/Optiva"
+chmod +x "$TMP/app/Contents/MacOS/Optiva"
 cp "$PROJECT/assets/MarketKasa.icns" "$TMP/app/Contents/Resources/MarketKasa.icns"
 printf '%s' "$PROJECT" > "$TMP/app/Contents/Resources/project-path.txt"
 printf 'APPL????' > "$TMP/app/Contents/PkgInfo"
@@ -38,10 +38,10 @@ cat > "$TMP/app/Contents/Info.plist" <<'PLIST'
 <plist version="1.0">
 <dict>
   <key>CFBundleDevelopmentRegion</key><string>tr</string>
-  <key>CFBundleExecutable</key><string>Market Kasa</string>
+  <key>CFBundleExecutable</key><string>Optiva</string>
   <key>CFBundleIdentifier</key><string>com.marketkasa.app</string>
-  <key>CFBundleName</key><string>Market Kasa</string>
-  <key>CFBundleDisplayName</key><string>Market Kasa</string>
+  <key>CFBundleName</key><string>Optiva</string>
+  <key>CFBundleDisplayName</key><string>Optiva</string>
   <key>CFBundleIconFile</key><string>MarketKasa</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleShortVersionString</key><string>2.0</string>
@@ -50,7 +50,7 @@ cat > "$TMP/app/Contents/Info.plist" <<'PLIST'
   <key>LSApplicationCategoryType</key><string>public.app-category.business</string>
   <key>NSHighResolutionCapable</key><true/>
   <key>NSPrincipalClass</key><string>NSApplication</string>
-  <key>NSHumanReadableCopyright</key><string>Market Kasa — barkodlu satış, stok ve kâr takibi</string>
+  <key>NSHumanReadableCopyright</key><string>Optiva — barkodlu satış, stok ve kâr takibi</string>
   <key>NSAppTransportSecurity</key>
   <dict>
     <key>NSAllowsLocalNetworking</key><true/>

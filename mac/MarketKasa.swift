@@ -1,7 +1,7 @@
-// Market Kasa — Mac uygulaması: programı tarayıcı yerine kendi penceresinde açar.
+// Optiva — Mac uygulaması: programı tarayıcı yerine kendi penceresinde açar.
 // Safari'nin motoru (WebKit/WKWebView) kullanılır; ek bir şey kurulmaz.
 // Sunucu yine arka planda çalışır (scripts/service.sh): pencereyi kapatmak programı kapatmaz,
-// telefondan takip sürer. Tamamen kapatmak için menü: Market Kasa → Programı tamamen kapat.
+// telefondan takip sürer. Tamamen kapatmak için menü: Optiva → Programı tamamen kapat.
 //
 // Derleme: mac/build.sh (evrensel ikili: Apple Silicon + Intel). Uygulama paketi: scripts/create-app.sh
 import Cocoa
@@ -93,11 +93,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     if starting { return }
     guard serviceScript != nil else {
       fatalAlert(
-        "Market Kasa klasörü bulunamadı.",
+        "Optiva klasörü bulunamadı.",
         "Klasörü taşıdıysanız, klasördeki 'Kurulum' dosyasına tekrar çift tıklayın.\n\n\(projectDir ?? "")")
       return
     }
-    showLoading("Market Kasa başlatılıyor…")
+    showLoading("Optiva başlatılıyor…")
     checkRunning { [weak self] running in
       guard let self else { return }
       if running {
@@ -109,7 +109,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
         return
       }
       self.starting = true
-      self.showLoading("Market Kasa başlatılıyor…\nİlk açılışta ya da güncellemeden sonra birkaç dakika sürebilir.")
+      self.showLoading("Optiva başlatılıyor…\nİlk açılışta ya da güncellemeden sonra birkaç dakika sürebilir.")
       self.runService("start") { code, _ in
         self.starting = false
         if code == 0 {
@@ -127,7 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
           13: "program açılırken kapandı", 14: "program zamanında yanıt vermedi",
         ]
         self.fatalAlert(
-          "Market Kasa başlatılamadı: \(reasons[code] ?? "bilinmeyen bir hata").",
+          "Optiva başlatılamadı: \(reasons[code] ?? "bilinmeyen bir hata").",
           "Ayrıntılar: \(self.projectDir ?? "")/data/logs")
       }
     }
@@ -159,7 +159,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     window = NSWindow(
       contentRect: NSRect(x: 0, y: 0, width: 1280, height: 820),
       styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
-    window.title = "Market Kasa"
+    window.title = "Optiva"
     window.minSize = NSSize(width: 900, height: 600)
     window.center()
     window.setFrameAutosaveName("MarketKasaMain")
@@ -175,7 +175,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     window.contentView!.addSubview(webView)
     titleObserver = webView.observe(\.title, options: [.new]) { [weak self] wv, _ in
       let t = wv.title ?? ""
-      self?.window.title = t.isEmpty ? "Market Kasa" : t
+      self?.window.title = t.isEmpty ? "Optiva" : t
     }
 
     loadingView = NSView(frame: window.contentView!.bounds)
@@ -246,16 +246,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
       main.addItem(top)
     }
     submenu(
-      "Market Kasa",
+      "Optiva",
       [
-        item("Market Kasa Hakkında", #selector(NSApplication.orderFrontStandardAboutPanel(_:))),
+        item("Optiva Hakkında", #selector(NSApplication.orderFrontStandardAboutPanel(_:))),
         .separator(),
         item("Telefondan bağlanma…", #selector(showPhoneInfo)),
         item("Tarayıcıda aç", #selector(openInBrowser)),
         .separator(),
         item("Programı tamamen kapat…", #selector(stopServerAndQuit)),
         .separator(),
-        item("Market Kasa'yı gizle", #selector(NSApplication.hide(_:)), "h"),
+        item("Optiva'yı gizle", #selector(NSApplication.hide(_:)), "h"),
         item("Diğerlerini gizle", #selector(NSApplication.hideOtherApplications(_:)), "h", [.command, .option]),
         item("Tümünü göster", #selector(NSApplication.unhideAllApplications(_:))),
         .separator(),
@@ -353,7 +353,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
     a.alertStyle = .warning
     a.messageText = "Program tamamen kapatılsın mı?"
     a.informativeText =
-      "Kapatınca kasa ve panel çalışmaz, telefondan da bağlanılamaz. Tekrar açmak için Market Kasa simgesine tıklayın."
+      "Kapatınca kasa ve panel çalışmaz, telefondan da bağlanılamaz. Tekrar açmak için Optiva simgesine tıklayın."
     a.addButton(withTitle: "Kapat")
     a.addButton(withTitle: "Vazgeç")
     a.beginSheetModal(for: window) { r in
@@ -587,7 +587,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, WKNa
       contentRect: NSRect(x: 0, y: 0, width: w, height: h), styleMask: [.titled, .closable, .resizable, .miniaturizable],
       backing: .buffered, defer: false)
     win.isReleasedWhenClosed = false
-    win.title = "Market Kasa"
+    win.title = "Optiva"
     win.delegate = self
     let wv = WKWebView(frame: win.contentView!.bounds, configuration: configuration)
     wv.autoresizingMask = [.width, .height]

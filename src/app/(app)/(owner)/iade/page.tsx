@@ -1,6 +1,6 @@
 import { ReturnScreen } from "./ReturnScreen";
 
-export const metadata = { title: "İade · Market Kasa" };
+export const metadata = { title: "İade · Optiva" };
 
 export default function ReturnPage() {
   return <ReturnScreen />;

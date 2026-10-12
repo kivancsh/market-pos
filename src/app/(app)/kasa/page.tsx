@@ -4,7 +4,7 @@ import { getSettings } from "@/server/db/repositories/settings";
 import type { KasaSettings } from "@/client/types";
 import { KasaScreen } from "./KasaScreen";
 
-export const metadata = { title: "Kasa · Market Kasa" };
+export const metadata = { title: "Kasa · Optiva" };
 
 export default async function KasaPage(props: PageProps<"/kasa">) {
   const role = await requirePageRole();

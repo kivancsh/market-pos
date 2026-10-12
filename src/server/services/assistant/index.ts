@@ -3,7 +3,7 @@
  *
  * 1) Yerel analiz (facts) + kural tabanlı aksiyonlar + gelecek ayın gerçekçi hedefleri hesaplanır ve kaydedilir;
  *    yerleşik asistan (narrative.ts) bütün yorumu ve haftalık planı hemen yazar (internetsiz, hesapsız).
- * 2) Market Kasa servisi tanımlıysa bulut yapay zekâ (Claude) bu rakamlardan yorumu güçlendirir (rakam üretmez); olmazsa yerleşik yorum kalır.
+ * 2) Optiva servisi tanımlıysa bulut yapay zekâ (Claude) bu rakamlardan yorumu güçlendirir (rakam üretmez); olmazsa yerleşik yorum kalır.
  * 3) Ay bitince (ertesi ayın ilk açılışında) rapor otomatik oluşturulur ve yöneticilere e-postayla gider.
  * Ay sürerken "ara rapor" istenebilir; ay bitince son hâliyle yenilenir.
  */

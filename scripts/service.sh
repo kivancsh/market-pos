@@ -1,7 +1,7 @@
 #!/bin/bash
-# Market Kasa arka plan servisi (Terminal penceresi olmadan).
+# Optiva arka plan servisi (Terminal penceresi olmadan).
 # Kullanım: scripts/service.sh start | stop | status | ip
-# Masaüstündeki "Market Kasa" uygulaması bu betiği çağırır.
+# Masaüstündeki "Optiva" uygulaması bu betiği çağırır.
 #
 # start çıkış kodları: 0 çalışıyor · 10 Node.js yok · 11 paket kurulamadı · 12 derleme hatası
 #                      13 sunucu açılırken kapandı · 14 zaman aşımı
@@ -40,8 +40,17 @@ needs_build() {
   [ -n "$(find src package.json next.config.ts -newer .next/BUILD_ID -type f 2>/dev/null | head -1)" ]
 }
 
+# Ad değişikliği (Market Kasa → Optiva): bu kuruluma ait eski masaüstü simgesini "Optiva" ile değiştir (yalnızca bir kez)
+rename_desktop_app() {
+  local old="$HOME/Desktop/Market Kasa.app" new="$HOME/Desktop/Optiva.app"
+  [ -d "$old" ] && [ ! -e "$new" ] || return 0
+  [ "$(cat "$old/Contents/Resources/project-path.txt" 2>/dev/null)" = "$PWD" ] || return 0
+  bash scripts/create-app.sh "$PWD" "$new" >>"$LOGDIR/setup.log" 2>&1 && rm -rf "$old"
+}
+
 start() {
   wait_for_update
+  rename_desktop_app || true
   if is_running; then exit 0; fi
   command -v node >/dev/null 2>&1 || exit 10
   if [ ! -d node_modules ]; then

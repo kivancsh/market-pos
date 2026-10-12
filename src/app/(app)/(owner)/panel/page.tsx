@@ -1,6 +1,6 @@
 import { PanelScreen } from "./PanelScreen";
 
-export const metadata = { title: "Panel · Market Kasa" };
+export const metadata = { title: "Panel · Optiva" };
 
 export default async function PanelPage(props: PageProps<"/panel">) {
   const sp = await props.searchParams;

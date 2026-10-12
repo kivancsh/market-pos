@@ -9,7 +9,7 @@ import type { UpdateInfo } from "@/server/update";
 
 const DOWNLOAD_PAGE = "https://github.com/kivancsh/market-pos/releases/latest";
 
-/** Windows'taki Market Kasa penceresi bu nesneyi sayfaya ekler (güncellemeyi o kurar). */
+/** Windows'taki Optiva penceresi bu nesneyi sayfaya ekler (güncellemeyi o kurar). */
 interface Host {
   installUpdate?: boolean;
 }
@@ -94,7 +94,7 @@ export function UpdateSection({ initial }: { initial: UpdateInfo }) {
   async function install() {
     if (!info.latest) return;
     const ok = window.confirm(
-      `Market Kasa ${info.latest.version} sürümüne güncellensin mi?\n\n` +
+      `Optiva ${info.latest.version} sürümüne güncellensin mi?\n\n` +
         "• Önce otomatik yedek alınır.\n" +
         (info.channel === "mac"
           ? "• Program birkaç dakika (yeni sürüm derlenirken 2–5 dk) kapanır, sonra kendiliğinden açılır. Bu sırada kasa ve telefon bağlantısı çalışmaz.\n" +
@@ -122,7 +122,7 @@ export function UpdateSection({ initial }: { initial: UpdateInfo }) {
   }
 
   const latest = info.latest;
-  // Mac'te kurulum sunucuda yapılır (hangi cihazdan basıldığı fark etmez); Windows'ta Market Kasa penceresi kurar
+  // Mac'te kurulum sunucuda yapılır (hangi cihazdan basıldığı fark etmez); Windows'ta Optiva penceresi kurar
   const canInstall = info.canDownload && (info.channel === "mac" || inWindow);
   const last = info.lastInstall;
   return (
@@ -157,8 +157,8 @@ export function UpdateSection({ initial }: { initial: UpdateInfo }) {
         <p className="mt-3 rounded-xl bg-emerald-50 p-3 font-medium text-emerald-900" role="status" data-testid="update-installing">
           {info.channel === "mac"
             ? `Güncelleme kuruluyor (${installing.target}). Program birkaç dakika kapalı kalacak; yeni sürüm hazır olunca bu sayfa kendiliğinden yenilenecek.`
-            : "Güncelleme kuruluyor. Pencere kapanacak; 1–2 dakika sonra Market Kasa yeni sürümüyle kendiliğinden açılacak."}
-          {slow && " Hâlâ açılmadıysa masaüstündeki Market Kasa simgesine tıklayın."}
+            : "Güncelleme kuruluyor. Pencere kapanacak; 1–2 dakika sonra Optiva yeni sürümüyle kendiliğinden açılacak."}
+          {slow && " Hâlâ açılmadıysa masaüstündeki Optiva simgesine tıklayın."}
         </p>
       ) : (
         <>
@@ -178,7 +178,7 @@ export function UpdateSection({ initial }: { initial: UpdateInfo }) {
                 </button>
               ) : (
                 <p className="mt-2 text-sm text-emerald-900">
-                  Güncellemeyi kasa bilgisayarındaki <b>Market Kasa penceresinden</b> yapın (Ayarlar → Güncelle). Ya da yeni kurulum dosyasını{" "}
+                  Güncellemeyi kasa bilgisayarındaki <b>Optiva penceresinden</b> yapın (Ayarlar → Güncelle). Ya da yeni kurulum dosyasını{" "}
                   <a href={DOWNLOAD_PAGE} target="_blank" rel="noreferrer" className="underline">
                     buradan indirip
                   </a>{" "}

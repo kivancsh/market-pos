@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getClientSettings } from "@/server/pageData";
 import { ProductDetail } from "./ProductDetail";
 
-export const metadata = { title: "Ürün · Market Kasa" };
+export const metadata = { title: "Ürün · Optiva" };
 
 export default async function ProductPage(props: PageProps<"/urunler/[id]">) {
   const { id } = await props.params;

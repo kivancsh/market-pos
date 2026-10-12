@@ -3,7 +3,7 @@ import { getDb } from "@/server/db/connection";
 import { secretChangeNeedsCode } from "@/server/services/users";
 import { UsersScreen } from "./UsersScreen";
 
-export const metadata = { title: "Kullanıcılar · Market Kasa" };
+export const metadata = { title: "Kullanıcılar · Optiva" };
 
 export default async function UsersPage() {
   const me = await requirePageUser("owner");

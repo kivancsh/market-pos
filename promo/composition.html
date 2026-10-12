@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8" />
-<title>Market Kasa Tanıtım</title>
+<title>Optiva Tanıtım</title>
 <style>
   :root { --em: #10b981; --em2: #059669; --em3: #34d399; --amber: #fbbf24; --red: #f43f5e; --ink: #050912; --slate: #cbd5e1; --ca: 0; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -286,16 +286,16 @@ const sparks = Array.from({ length: 90 }, () => ({ e: el("div", "spark", s1), a:
 const logo = el("img", "abs", s1); logo.src = `${ASSETS}/icon.png`; S(logo, { width: "280px", height: "280px", filter: "drop-shadow(0 40px 70px rgba(0,0,0,.55))" });
 const s1title = el("div", "abs ca", s1); S(s1title, { width: "1920px", textAlign: "center", fontSize: "176px", fontWeight: "900", letterSpacing: "-0.04em", top: "520px" });
 const s1letters = [];
-"Market Kasa".split("").forEach((ch, i) => { const s = el("span", "wi", s1title, ch === " " ? "&nbsp;" : ch); if (i >= 7) s.classList.add("grad"); s1letters.push(s); });
-const s1sweep = el("div", "sweep", s1, "Market Kasa"); S(s1sweep, { width: "1920px", textAlign: "center", fontSize: "176px", fontWeight: "900", letterSpacing: "-0.04em", top: "520px" });
+"Optiva".split("").forEach((ch, i) => { const s = el("span", "wi", s1title, ch === " " ? "&nbsp;" : ch); if (i >= 4) s.classList.add("grad"); s1letters.push(s); });
+const s1sweep = el("div", "sweep", s1, "Optiva"); S(s1sweep, { width: "1920px", textAlign: "center", fontSize: "176px", fontWeight: "900", letterSpacing: "-0.04em", top: "520px" });
 const s1tag = kinetic(s1, "Dükkânınızın tamamı. {Tek} {ekranda.}", "abs ktitle", { width: "1920px", textAlign: "center", top: "780px", fontSize: "70px", fontWeight: "800" });
 
 // ================================================================== SAHNE 2 · Satış (7,5–15)
 const s2 = el("div", "layer");
 const s2p = el("div", "persp", s2);
-const KASA = makeBrowser(s2p, 1080, "Market Kasa — Kasa", ["kasa-0", "kasa-1", "kasa-2", "kasa-3", "kasa-4", "pay-0", "pay-1", "pay-done"]);
+const KASA = makeBrowser(s2p, 1080, "Optiva — Kasa", ["kasa-0", "kasa-1", "kasa-2", "kasa-3", "kasa-4", "pay-0", "pay-1", "pay-done"]);
 const kRingA = ring(KASA), kRingB = ring(KASA, "amber");
-const s2capA = caption(s2, { pill: "SATIŞ", n: 1, title: "Okut. {Sat.} Bitti.", size: 96, width: 620, sub: "Barkodu okutun, gerisini Market Kasa halleder." });
+const s2capA = caption(s2, { pill: "SATIŞ", n: 1, title: "Okut. {Sat.} Bitti.", size: 96, width: 620, sub: "Barkodu okutun, gerisini Optiva halleder." });
 const s2capB = caption(s2, { pill: "SATIŞ", n: 1, title: "Para üstünü {o} hesaplar.", size: 84, width: 620, sub: "Nakit mi, kart mı? Tek tuş: F8 / F9." });
 const ctr = el("div", "counter", s2, '<div class="cl">TOPLAM</div><div class="cv">₺0,00</div>');
 const ctrL = ctr.querySelector(".cl"), ctrV = ctr.querySelector(".cv");
@@ -318,8 +318,8 @@ const confetti = Array.from({ length: 90 }, () => {
 // ================================================================== SAHNE 3 · Finans (15–22,5)
 const s3 = el("div", "layer");
 const s3p = el("div", "persp", s3);
-const DASH = makeBrowser(s3p, 1240, "Market Kasa — Yönetici Paneli", ["genel-bakis"]);
-const PL = makeBrowser(s3p, 1080, "Market Kasa — Kâr-zarar", ["kar-zarar"]);
+const DASH = makeBrowser(s3p, 1240, "Optiva — Yönetici Paneli", ["genel-bakis"]);
+const PL = makeBrowser(s3p, 1080, "Optiva — Kâr-zarar", ["kar-zarar"]);
 const plRingA = ring(PL, "amber"), plRingB = ring(PL);
 const s3capA = caption(s3, { pill: "FİNANS YÖNETİMİ", n: 2, title: "Kârınızı {kuruşu} {kuruşuna} bilin.", size: 76, width: 1700 });
 S(s3capA.box, { textAlign: "center" });
@@ -346,7 +346,7 @@ const s3chips = [["KDV özeti", ICON.check], ["Son 12 ay", ICON.check], ["Excel'
 // ================================================================== SAHNE 4 · İş takibi (22,5–28,125)
 const s4 = el("div", "layer");
 const s4p = el("div", "persp", s4);
-const KAS = makeBrowser(s4p, 1120, "Market Kasa — Kasiyer performansı", ["kasiyer"]);
+const KAS = makeBrowser(s4p, 1120, "Optiva — Kasiyer performansı", ["kasiyer"]);
 const ksRing = ring(KAS);
 const s4capA = caption(s4, { pill: "İŞ TAKİBİ", n: 3, title: "Ekibiniz {nasıl} çalışıyor?", size: 78, width: 580 });
 const s4chips = [["Kim ne kadar sattı", ICON.user], ["Ortalama sepet", ICON.basket], ["İptal ve iadeler", ICON.undo], ["Kasada geçen süre", ICON.clock]].map(([txt, icn], i) => ({
@@ -375,7 +375,7 @@ const hotCall = el("div", "chip", s4, `<span class="ic" style="background:linear
 // ================================================================== SAHNE 5 · Stok (28,125–31,875)
 const s5 = el("div", "layer");
 const s5p = el("div", "persp", s5);
-const STK = makeBrowser(s5p, 1120, "Market Kasa — Analizler", ["yogun-saatler"]);
+const STK = makeBrowser(s5p, 1120, "Optiva — Analizler", ["yogun-saatler"]);
 const stRing = ring(STK, "amber");
 const s5cap = caption(s5, { pill: "STOK", n: 4, title: "Bitmeden {haber} verir.", size: 92, width: 600 });
 const ALERTS = [
@@ -393,7 +393,7 @@ const s6 = el("div", "layer");
 const s6p = el("div", "persp", s6);
 S(s6p, { perspective: "1700px", perspectiveOrigin: "50% 42%" });
 const MD = 2 * BT; // her özellik 2 vuruş
-const MAIL_HEAD = `<div class="mh"><b>${(BOXES._mailSubject || "Köşe Market günlük rapor").replace(/</g, "&lt;")}</b><span>Market Kasa · her akşam · ekte: ürün kârlılığı.xlsx, kasiyer performansı.xlsx</span></div>`;
+const MAIL_HEAD = `<div class="mh"><b>${(BOXES._mailSubject || "Köşe Market günlük rapor").replace(/</g, "&lt;")}</b><span>Optiva · her akşam · ekte: ürün kârlılığı.xlsx, kasiyer performansı.xlsx</span></div>`;
 const MT = [
   { shot: "etiketler", title: "Barkod {etiketi}", sub: "Fiyatlı etiketleri A4'e basın", focus: [560, 120, 760, 520] },
   { shot: "raporlar", title: "Excel {raporları}", sub: "Ürün ve kategori kârlılığı, tek tıkla", focus: [260, 80, 1180, 700] },
@@ -410,7 +410,7 @@ const MT = [
     obj = el("div", "mail", s6p, `${MAIL_HEAD}<img class="mb" src="${ASSETS}/shots/eposta.png">`);
     w = 780; h = 720;
   } else {
-    obj = makeBrowser(s6p, 960, `Market Kasa — ${m.title.replace(/[{}]/g, "")}`, [m.shot]);
+    obj = makeBrowser(s6p, 960, `Optiva — ${m.title.replace(/[{}]/g, "")}`, [m.shot]);
     w = 960; h = 642;
   }
   const root = obj.root || obj;
@@ -460,9 +460,9 @@ const aiPill = el("div", "pill abs", sAI, '<span class="n" style="background:lin
 S(aiPill, { fontSize: "20px", height: "52px" });
 const aiLineA = kinetic(sAI, "Diğer programlar rakam gösterir.", "abs ktitle", { width: "1920px", textAlign: "center", fontSize: "62px", fontWeight: "750", color: "#94a3b8" });
 const aiStrike = el("div", "strike", sAI); S(aiStrike, { height: "8px", background: "#64748b", boxShadow: "none" });
-const aiLineB = kinetic(sAI, "Market Kasa {ne} {yapacağınızı} söyler.", "abs ktitle ca", { width: "1920px", textAlign: "center", fontSize: "104px" });
+const aiLineB = kinetic(sAI, "Optiva {ne} {yapacağınızı} söyler.", "abs ktitle ca", { width: "1920px", textAlign: "center", fontSize: "104px" });
 // 2. ölçü: rapor ekranı + tarama + notlar
-const AIB = makeBrowser(sAIp, 1080, "Market Kasa — Yapay zekâ asistanı", ["asistan", "asistan-plan"]);
+const AIB = makeBrowser(sAIp, 1080, "Optiva — Yapay zekâ asistanı", ["asistan", "asistan-plan"]);
 const aiRing = ring(AIB);
 const scanBeam = el("div", "abs", AIB.ov); S(scanBeam, { left: "0px", width: "100%", height: "160px", background: "linear-gradient(180deg, transparent, rgba(16,185,129,.16) 70%, rgba(52,211,153,.55) 96%, #ecfdf5 100%)", boxShadow: "0 12px 30px rgba(52,211,153,.55)" });
 const scanTag = el("div", "abs", AIB.ov, "Analiz ediliyor…"); S(scanTag, { left: "auto", right: "18px", padding: "8px 16px", borderRadius: "999px", background: "rgba(2,44,34,.85)", color: "#6ee7b7", fontWeight: "800", fontSize: "18px", letterSpacing: ".06em" });
@@ -515,8 +515,8 @@ const s7glow = el("div", "abs", s7); S(s7glow, { width: "1400px", height: "1400p
 const s7shocks = [0, 1].map(() => el("div", "shock", s7));
 const s7sparks = Array.from({ length: 70 }, () => ({ e: el("div", "spark", s7), a: rnd() * Math.PI * 2, v: 400 + rnd() * 1000, s: 0.5 + rnd() * 1.2 }));
 const s7logo = el("img", "abs", s7); s7logo.src = `${ASSETS}/icon.png`; S(s7logo, { width: "190px", height: "190px", filter: "drop-shadow(0 30px 60px rgba(0,0,0,.5))" });
-const s7title = el("div", "abs ca", s7, 'Market <span class="grad">Kasa</span>'); S(s7title, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
-const s7sweep = el("div", "sweep", s7, "Market Kasa"); S(s7sweep, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
+const s7title = el("div", "abs ca", s7, 'Opti<span class="grad">va</span>'); S(s7title, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
+const s7sweep = el("div", "sweep", s7, "Optiva"); S(s7sweep, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
 const s7words = ["Satış", "Stok", "Finans", "Ekip", "Yapay zekâ"].map((w, i) => {
   const e = el("div", i === 4 ? "abs grad" : "abs", s7, w);
   S(e, { fontSize: "60px", fontWeight: "850", whiteSpace: "nowrap", letterSpacing: "-0.01em" });
@@ -887,7 +887,7 @@ const aiKick = (t) => Math.exp(-(((t - AIS) % BT) + BT) % BT / 0.12);
 function renderAI(t) {
   if (!show(sAI, win(t, AIS - 0.05, AIE + 0.02))) return;
   const cx = W / 2, cy = 330, kp = aiKick(t);
-  // --- 1. ölçü: küre patlar; "Diğer programlar rakam gösterir. Market Kasa ne yapacağınızı söyler."
+  // --- 1. ölçü: küre patlar; "Diğer programlar rakam gösterir. Optiva ne yapacağınızı söyler."
   shockAt(aiShocks, t, AIS, cx, cy, 0.09, 1800);
   burst(aiSparks, t, AIS, cx, cy, 1.4);
   const pl = P(t, AIS, AIS + 0.5, E.outBack);

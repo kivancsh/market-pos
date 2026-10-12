@@ -6,6 +6,18 @@ Tek dükkânlık barkodlu satış / stok / kârlılık sistemi (iç takip; yasal
 Sahibi yazılımcı değil: kararları sade Türkçe açıkla. Arayüz Türkçe, kod İngilizce.
 Bu dosyadaki iş kuralları **değiştirilemez**; teknik sorun çıkarırsa dur ve kullanıcıya sor.
 
+## Ad: Optiva (eski adı Market Kasa)
+Kullanıcı kararı 12.10.2026: ürünün adı **Optiva**. Görünen her yerde Optiva yazılır (logo yazısı "Opti" + renkli "va").
+Şunlar **bilerek eski adla kalır**, değiştirme (kurulu sürümleri, oturumları ya da şifreli ayarları bozar):
+ortam değişkenleri `MARKET_KASA_*` / `MARKET_*`, `localStorage` anahtarları `marketKasa.*`, `window.marketKasaHost`,
+`market-kasa:install-update` mesajı, `MarketKasaLauncher` / `MarketKasaShowWindow` adları, şifreleme tuzları
+`market-kasa-mail:` / `market-kasa-code:`, `LOCAL_AI_MODEL = "market-kasa-yerel"`, `com.marketkasa.app`, dosya adları
+`mac/bin/MarketKasa`, `MarketKasa.swift/.cs/.ico/.icns`, `scripts/market-kasa.command`, Mac zip içindeki `market-pos/` klasörü, depo adı.
+Yayında `Optiva-Setup.exe` / `Optiva-Mac.zip` yanında aynı dosyaların `Market-Kasa-Setup.exe` / `Market-Kasa-Mac.zip` kopyaları da
+durur (1.1.27 ve öncesi güncellemeyi bu adlarla indirir). Windows bilgileri `%LOCALAPPDATA%\Optiva`; eski `Market Kasa` klasörü
+başlatıcıda (`ResolveRoot`) tek adımda taşınır, olmazsa eskisiyle devam edilir; kurulum eski klasör varken yenisini açmaz
+(`NoLegacyData`), eski exe/kısayolları siler. Mac'te `service.sh start` eski `Market Kasa.app` simgesini `Optiva.app` ile değiştirir.
+
 ## Komutlar
 Node `~/.local/node/bin` altında (Bash'te `export PATH="$HOME/.local/node/bin:$PATH"`).
 `npm run lint` · `npm run typecheck` · `npm test` · `npm run test:e2e` · `npm run seed` · `npm run backup` · `npm run check:integrity`
@@ -119,7 +131,7 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   Kullanıcı kararı 12.10.2026 ("kurulacak bilgisayarda Claude/yapay zekâ hesabı yok, sıfır bilgisayar gibi düşün"): dükkânda anahtar/hesap YOK.
   (1) Yerleşik asistan `narrative.ts` her raporda bütün yorumu yazar (internetsiz; notlar, bulgular, personel, haftalık plan, mevsim
   takvimi `src/lib/seasonal.ts`, riskler, odak) → `ai_model = "market-kasa-yerel"`. (2) Bulut yapay zekâ isteğe bağlı ve merkezi:
-  program `/v1/ai/monthly`'ye (Market Kasa servisi, `mail-service/`, kurulum kimliğiyle) yalnız veri paketini yollar; servis yazılım
+  program `/v1/ai/monthly`'ye (Optiva servisi, `mail-service/`, kurulum kimliğiyle) yalnız veri paketini yollar; servis yazılım
   sahibinin tek `ANTHROPIC_API_KEY`'iyle sabit istemle Claude'u çağırır (`mail-service/src/ai.ts`: claude-opus-5-5, adaptive thinking,
   effort high, Zod çıktı, `fallbacks: "default"` + beta `server-side-fallback-2026-07-01`). Şema/istem/paket ortak: `src/lib/assistantAi.ts`.
   Sınırlar: kurulum başına günde 4 / 30 günde 12, servis geneli günde 300. Servis adresi boşsa ya da yönetici kapattıysa (`ai_cloud_enabled`)
@@ -137,8 +149,8 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   `MARKET_KASA_VERSION_INFO` ile verir (kanal "windows"); proje klasöründe
   (Mac) kanal "dev", denetim yok. Yayında `latest.json` (sürüm, boyut, SHA-256). Denetim açılışta + 6 saatte bir; yönetici
   Ayarlar → Güncelle: yedek → indir (`MARKET_UPDATE_DIR`, başlatıcı verir) → SHA-256 doğrula → sayfa `market-kasa:install-update`
-  mesajı → `Market Kasa.exe` sessiz kurulumu `/relaunch=1` ile başlatıp kapanır → kurulum programı yeniden açar. Asla kendiliğinden kurulmaz.
-  Mac (kullanıcı kararı): yayında `Market-Kasa-Mac.zip` (git archive, promo hariç, `version.json` kanal "mac"; `windows/check-mac-zip.py` denetler,
+  mesajı → `Optiva.exe` sessiz kurulumu `/relaunch=1` ile başlatıp kapanır → kurulum programı yeniden açar. Asla kendiliğinden kurulmaz.
+  Mac (kullanıcı kararı): yayında `Optiva-Mac.zip` (git archive, promo hariç, `version.json` kanal "mac"; `windows/check-mac-zip.py` denetler,
   CRLF/izin). `scripts/service.sh` version.json'u `MARKET_KASA_VERSION_INFO` ile verir; Güncelle → `/api/update/install` →
   `scripts/mac-update.sh` (arka planda): durdur → eskiyi `data/updates/previous`'a al → yeni dosyalar (data/backups/.env asla) →
   paketler değiştiyse `npm ci` → derle → başlat; hata olursa eskiye döner, sonucu `data/updates/last-result.json`'a yazar.

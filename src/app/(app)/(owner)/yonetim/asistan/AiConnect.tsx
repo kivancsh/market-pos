@@ -6,7 +6,7 @@ import { Modal } from "@/client/components/Modal";
 import type { AiStatus } from "@/server/services/assistant/ai";
 
 /**
- * Bulut yapay zekâ ayarı (yalnız Market Kasa servisi tanımlı kurulumlarda görünür). Dükkânda hesap ya da anahtar gerekmez;
+ * Bulut yapay zekâ ayarı (yalnız Optiva servisi tanımlı kurulumlarda görünür). Dükkânda hesap ya da anahtar gerekmez;
  * yönetici yalnızca açıp kapatır. Kapalıyken rapor verisi servise hiç gitmez, yerleşik asistan çalışır.
  */
 export function AiConnect({ status, onChange }: { status: AiStatus; onChange: () => void }) {
@@ -41,7 +41,7 @@ export function AiConnect({ status, onChange }: { status: AiStatus; onChange: ()
               hazırlar.
             </p>
             <p>
-              <b>Bulut yapay zekâ</b> açıkken rapor, Market Kasa servisi üzerinden yapay zekâ (Claude) ile daha derin yorumlanır. Sizin bir hesap
+              <b>Bulut yapay zekâ</b> açıkken rapor, Optiva servisi üzerinden yapay zekâ (Claude) ile daha derin yorumlanır. Sizin bir hesap
               açmanız gerekmez. Servise yalnızca hesaplanmış rakamlar ve ürün adları gider; kasiyer adları gitmez (“Kasiyer 1001” olarak geçer),
               müşteri bilgisi zaten tutulmaz.
             </p>

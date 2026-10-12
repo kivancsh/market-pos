@@ -265,7 +265,7 @@ function OwnerPassword({ next, forgotByEmail }: { next: string; forgotByEmail: b
           <b>Şifrenizi kasa bilgisayarından yenileyin:</b>
           <ul className="mt-1 list-disc space-y-0.5 pl-5">
             <li>
-              Windows: <b>Başlat menüsü → Market Kasa → Yönetici Şifresi Sıfırla</b>
+              Windows: <b>Başlat menüsü → Optiva → Yönetici Şifresi Sıfırla</b>
             </li>
             <li>
               Mac: <b>market-pos</b> klasöründeki <b>Yönetici Şifresi Sıfırla</b> dosyasına çift tıklayın

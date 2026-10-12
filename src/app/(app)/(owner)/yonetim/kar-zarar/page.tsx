@@ -7,7 +7,7 @@ import { getDb } from "@/server/db/connection";
 import { todayOf } from "@/server/services/dayClosing";
 import { getMonthlyProfitLoss, getProfitLoss } from "@/server/services/expenses";
 
-export const metadata = { title: "Kâr-zarar · Market Kasa" };
+export const metadata = { title: "Kâr-zarar · Optiva" };
 
 const PRESETS = [
   { key: "bu-ay", label: "Bu ay" },

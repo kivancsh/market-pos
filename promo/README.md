@@ -1,12 +1,12 @@
 # Tanıtım videosu
 
-Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 52,5 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
+Hazır video: [`optiva-tanitim.mp4`](optiva-tanitim.mp4) — 52,5 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
 Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Dükkânınızda hâlâ…
 VERİMSİZ SATIŞ, DAĞINIK EKİP YÖNETİMİ, PLANSIZ BÜYÜME" üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
 toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış, ciro / brüt kâr / gider / net kâr kartları; "Net kâr" kartı
 kâr-zarar denklemine uçar, KDV özeti) → **İş takibi** (kasiyer performansı, yoğun saatler ısı haritası) → **Stok** (bitmeden haber,
-sipariş önerisi; "VE ASIL FARK") → **2. patlama: Yapay zekâ asistanı** (en güçlü an; küre açılır, "Diğer programlar rakam gösterir. Market Kasa ne
+sipariş önerisi; "VE ASIL FARK") → **2. patlama: Yapay zekâ asistanı** (en güçlü an; küre açılır, "Diğer programlar rakam gösterir. Optiva ne
 yapacağınızı söyler.", gerçek rapor ekranı taranır ve notlar çıkar, aksiyon planı haftası ve ₺ etkisiyle daktiloyla yazılır, gerçekçi hedef
 ve ay sonu tahmini çubuğu dolar; "Hesap gerektirmez · İnternetsiz çalışır · Her ay otomatik") → "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
 merkezde toplanıp logoya patlar → **final** (Satış · Stok · Finans · Ekip · Yapay zekâ, "Dükkânınızı bugün büyütün.").
@@ -47,7 +47,7 @@ MAIL_DEV_DIR=data/promo/mail node promo/capture.mjs $W/shots
 python3 promo/music.py $W/music.wav
 node promo/render.mjs $W frames            # önizleme için: node promo/render.mjs $W preview 3 13 20.5 (saniye)
 swiftc -O -swift-version 5 promo/encode.swift -o $W/encode
-$W/encode $W/frames $W/music.wav promo/market-kasa-tanitim.mp4 30 8000000
+$W/encode $W/frames $W/music.wav promo/optiva-tanitim.mp4 30 8000000
 # 4) Demo sunucuyu kapat ve demo veriyi sil
 kill $(lsof -tiTCP:3200 -sTCP:LISTEN); rm -rf data/promo
 ```

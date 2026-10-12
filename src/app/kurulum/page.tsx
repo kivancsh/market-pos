@@ -4,7 +4,7 @@ import { getDb } from "@/server/db/connection";
 import { hasOwner } from "@/server/services/users";
 import { SetupForm } from "./SetupForm";
 
-export const metadata = { title: "Kurulum · Market Kasa" };
+export const metadata = { title: "Kurulum · Optiva" };
 
 /** İlk açılış: yönetici hesabı oluşturma. Kurulum yapıldıysa girişe yönlenir. */
 export default async function SetupPage() {

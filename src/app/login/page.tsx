@@ -8,7 +8,7 @@ import { isMailConfigured } from "@/server/mail";
 import { hasOwner } from "@/server/services/users";
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Giriş · Market Kasa" };
+export const metadata = { title: "Giriş · Optiva" };
 
 export default async function LoginPage(props: PageProps<"/login">) {
   await connection(); // her istekte DB'den oku (derlemede sabitlenmesin)

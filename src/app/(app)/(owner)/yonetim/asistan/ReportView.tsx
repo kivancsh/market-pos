@@ -511,7 +511,7 @@ export function ReportView({ report, onPlanChange }: { report: MonthlyReportView
 
       <p className="text-xs text-slate-500">
         Rapor {formatIstanbulDateTime(report.updatedAt)} tarihinde hazırlandı · {formatBusinessDate(f.from)} – {formatBusinessDate(f.to)}
-        {report.aiSource === "cloud" ? ` · yorum: bulut yapay zekâ (${report.aiModel})` : " · yorum: Market Kasa yerleşik asistanı (bu bilgisayarda)"}
+        {report.aiSource === "cloud" ? ` · yorum: bulut yapay zekâ (${report.aiModel})` : " · yorum: Optiva yerleşik asistanı (bu bilgisayarda)"}
         {report.emailedAt ? ` · e-postayla gönderildi` : ""}. Rakamlar programdaki kayıtlardan hesaplanır; asistan yalnızca yorumlar.
       </p>
     </div>

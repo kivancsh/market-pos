@@ -12,6 +12,6 @@ export const POST = apiRoute(["owner"], async ({ req, ctx }) => {
   const data = parseInput(z.object({ email: emailSchema, code: z.string().max(20) }), await readJson(req));
   const mail = await confirmServiceVerification(ctx.db, data.email, data.code, true);
   const user = setVerifiedOwnEmail(ctx, data.email);
-  ctx.db.transaction(() => audit(ctx, "settings.update", `E-posta gönderimi Market Kasa e-posta servisine bağlandı (${data.email})`)).immediate();
+  ctx.db.transaction(() => audit(ctx, "settings.update", `E-posta gönderimi Optiva e-posta servisine bağlandı (${data.email})`)).immediate();
   return { mail, user };
 });

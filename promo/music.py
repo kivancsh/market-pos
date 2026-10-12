@@ -7,7 +7,7 @@ Tanıtım videosu müziği + ses efektleri (tamamen burada sentezlenir; telif yo
   iş takibi (yarım tempo, derin 808 bas, arp) → stok (nefes, piyano, kalp atışı → yükseliş) →
   2. patlama: yapay zekâ asistanı (en güçlü; dijital pırıltı arpeji, her ölçüde sonik logo, tarama/daktilo/zil) →
   karusel → bant durması → final (majöre çözülen mutlu son).
-"Sonik logo": 4 notalık Market Kasa motifi (La–Mi–Do–La). Girişte fısıltı gibi, logoda büyük, satış
+"Sonik logo": 4 notalık Optiva motifi (La–Mi–Do–La). Girişte fısıltı gibi, logoda büyük, satış
 "çiling"inde, barkod biplerinde (motifin notalarına akortlu), ana melodinin her ölçüsünün başında,
 stokta piyanoda ve finalde majör olarak duyulur — tekrar ettikçe akılda kalır.
 Sahne ve efekt zamanları promo/timeline.json'dan.

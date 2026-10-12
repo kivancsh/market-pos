@@ -5,7 +5,7 @@ import { mailServiceAvailable } from "@/server/mail/service";
 import { getUpdateInfo } from "@/server/update";
 import { SettingsScreen } from "./SettingsScreen";
 
-export const metadata = { title: "Ayarlar · Market Kasa" };
+export const metadata = { title: "Ayarlar · Optiva" };
 
 export default function SettingsPage() {
   const db = getDb();

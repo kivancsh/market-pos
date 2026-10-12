@@ -1,12 +1,14 @@
 @echo off
-rem Market Kasa - veritabaninin anlik yedegini alir ve yedek klasorunu acar.
+rem Optiva - veritabaninin anlik yedegini alir ve yedek klasorunu acar.
 chcp 65001 >nul
-title Market Kasa - Yedek al
-set "ROOT=%LOCALAPPDATA%\Market Kasa"
+title Optiva - Yedek al
+set "ROOT=%LOCALAPPDATA%\Optiva"
+rem Ad degisikligi: bilgiler henuz tasinmadiysa eski klasor
+if not exist "%ROOT%\data\store.db" if exist "%LOCALAPPDATA%\Market Kasa\data\store.db" set "ROOT=%LOCALAPPDATA%\Market Kasa"
 set "DB_PATH=%ROOT%\data\store.db"
 set "BACKUP_DIR=%ROOT%\backups"
 if not exist "%DB_PATH%" (
-  echo Henuz veri yok. Once Market Kasa programini acin.
+  echo Henuz veri yok. Once Optiva programini acin.
   echo.
   pause
   exit /b 1

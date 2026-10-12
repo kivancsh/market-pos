@@ -1,6 +1,6 @@
 #!/bin/bash
-# Market Kasa KURULUM. Finder'da çift tıklayın.
-# Eksikleri tamamlar ve masaüstüne "Market Kasa" uygulama simgesini koyar.
+# Optiva KURULUM. Finder'da çift tıklayın.
+# Eksikleri tamamlar ve masaüstüne "Optiva" uygulama simgesini koyar.
 
 cd "$(dirname "$0")" || exit 1
 export PATH="$HOME/.local/node/bin:/usr/local/bin:/opt/homebrew/bin:$PATH"
@@ -12,7 +12,7 @@ finish() {
 }
 
 echo "=============================================="
-echo "  Market Kasa — Kurulum"
+echo "  Optiva — Kurulum"
 echo "=============================================="
 echo
 
@@ -65,8 +65,8 @@ fi
 
 # 5) Masaüstü simgesi
 chmod +x scripts/market-kasa.command scripts/create-app.sh scripts/service.sh *.command 2>/dev/null
-if bash scripts/create-app.sh "$(pwd)" "$HOME/Desktop/Market Kasa.app"; then
-  echo "✓ Masaüstüne 'Market Kasa' simgesi kondu."
+if bash scripts/create-app.sh "$(pwd)" "$HOME/Desktop/Optiva.app"; then
+  echo "✓ Masaüstüne 'Optiva' simgesi kondu."
 else
   finish 1
 fi
@@ -75,10 +75,10 @@ echo
 echo "=============================================="
 echo "  KURULUM TAMAM"
 echo
-echo "  • Programı açmak için masaüstündeki 'Market Kasa' simgesine çift tıklayın."
+echo "  • Programı açmak için masaüstündeki 'Optiva' simgesine çift tıklayın."
 echo "    Program kendi penceresinde açılır; sunucu arka planda çalışır."
 echo "  • Pencereyi kapatmak programı kapatmaz (telefondan takip sürer)."
-echo "    Tamamen kapatmak için üst menü: Market Kasa → Programı tamamen kapat."
+echo "    Tamamen kapatmak için üst menü: Optiva → Programı tamamen kapat."
 echo "  • Dock'a eklemek için simgeyi Dock'a sürükleyin."
 echo "  • İlk açılışta yönetici hesabınızı oluşturursunuz (ad, kullanıcı adı, şifre)."
 echo "    Kasiyerleri sonra Yönetici Paneli → Kullanıcılar'dan eklersiniz (her kasiyere bir Kasiyer No verilir)."

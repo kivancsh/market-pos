@@ -21,7 +21,7 @@ await page.pdf({
   preferCSSPageSize: true,
   displayHeaderFooter: true,
   headerTemplate: "<div></div>",
-  footerTemplate: '<div style="width:100%;font-size:8px;color:#94a3b8;padding:0 14mm;display:flex;justify-content:space-between;font-family:-apple-system,Helvetica,Arial"><span>Market Kasa · Kullanma Kılavuzu</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>',
+  footerTemplate: '<div style="width:100%;font-size:8px;color:#94a3b8;padding:0 14mm;display:flex;justify-content:space-between;font-family:-apple-system,Helvetica,Arial"><span>Optiva · Kullanma Kılavuzu</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>',
 });
 await browser.close();
 console.log("✓", out);

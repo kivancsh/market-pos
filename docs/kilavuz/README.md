@@ -1,6 +1,6 @@
 # Kullanma kılavuzu (kaynak dosyalar)
 
-Hazır kılavuz: [`docs/Market Kasa Kullanma Kılavuzu.pdf`](../Market%20Kasa%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 70 sayfa, resimli; Mac ve Windows kurulumu, yazar kasa (ÖKC) bağlantısı, Yönetici Paneli, kasiyer performansı, giderler ve kâr-zarar, analizler, yapay zekâ asistanı (aylık rapor, hedefler, aksiyonlar), e-posta ve günlük rapor, program güncellemesi dahil).
+Hazır kılavuz: [`docs/Optiva Kullanma Kılavuzu.pdf`](../Optiva%20Kullanma%20K%C4%B1lavuzu.pdf) (A4, 70 sayfa, resimli; Mac ve Windows kurulumu, yazar kasa (ÖKC) bağlantısı, Yönetici Paneli, kasiyer performansı, giderler ve kâr-zarar, analizler, yapay zekâ asistanı (aylık rapor, hedefler, aksiyonlar), e-posta ve günlük rapor, program güncellemesi dahil).
 
 Bu klasör, PDF'i yeniden üretmek içindir (ör. ekranlar değişince):
 
@@ -32,7 +32,7 @@ for f in glob.glob('/tmp/kilavuz-shots/*.png'):
 shutil.copy('/tmp/kilavuz-shots/notes.json', o)
 Image.open('assets/app-icon-1024.png').resize((400,400)).save(o+'/icon.png')"
 # 4) PDF
-node docs/kilavuz/build-pdf.mjs /tmp/kilavuz-jpg "docs/Market Kasa Kullanma Kılavuzu.pdf"
+node docs/kilavuz/build-pdf.mjs /tmp/kilavuz-jpg "docs/Optiva Kullanma Kılavuzu.pdf"
 # 5) Demo sunucuyu kapat ve demo veriyi sil
 kill $(lsof -tiTCP:3300 -sTCP:LISTEN); rm -rf data/guide
 ```

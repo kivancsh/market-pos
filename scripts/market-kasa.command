@@ -1,5 +1,5 @@
 #!/bin/bash
-# Market Kasa'yı başlatır (masaüstü simgesi ve "Market Kasa Başlat" bu dosyayı çalıştırır).
+# Optiva'yı başlatır (masaüstü simgesi ve "Optiva Başlat" bu dosyayı çalıştırır).
 # Eksik olanları kendisi tamamlar: paketler, PIN dosyası (.env), derleme. Sonra tarayıcıyı açar.
 # Kapatmak için bu pencerede Ctrl + C'ye basın ya da pencereyi kapatın.
 
@@ -14,7 +14,7 @@ pause_and_exit() {
 }
 
 echo "=============================================="
-echo "  Market Kasa başlatılıyor"
+echo "  Optiva başlatılıyor"
 echo "=============================================="
 echo
 

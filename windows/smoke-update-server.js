@@ -1,5 +1,5 @@
 // Sadece Windows kurulum testi için (pakete girmez): GitHub'ın yerine geçen küçük dosya sunucusu.
-// Klasördeki latest.json, Market-Kasa-Setup.exe ve Market-Kasa-Mac.zip dosyalarını verir; program "yeni sürüm"ü buradan bulur.
+// Klasördeki latest.json, Optiva-Setup.exe ve Optiva-Mac.zip dosyalarını verir; program "yeni sürüm"ü buradan bulur.
 // Kullanım: node windows/smoke-update-server.js <klasör> <port>
 "use strict";
 /* eslint-disable @typescript-eslint/no-require-imports -- Node CommonJS betiği */
@@ -8,7 +8,7 @@ const http = require("node:http");
 const path = require("node:path");
 
 const [dir, port] = process.argv.slice(2);
-const FILES = new Set(["latest.json", "Market-Kasa-Setup.exe", "Market-Kasa-Mac.zip"]);
+const FILES = new Set(["latest.json", "Optiva-Setup.exe", "Optiva-Mac.zip"]);
 
 http
   .createServer((req, res) => {

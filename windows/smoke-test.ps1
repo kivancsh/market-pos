@@ -1,10 +1,10 @@
-# Market Kasa — Windows kurulum testi (GitHub Actions'ta, gerçek Windows'ta çalışır).
+# Optiva — Windows kurulum testi (GitHub Actions'ta, gerçek Windows'ta çalışır).
 # Kur → başlat → hesap aç → sayfaları/raporu/yedeği dene → durdur → yeniden başlat (veri kalıcı mı?) → kaldır (veri kalıyor mu?)
 $ErrorActionPreference = 'Stop'
 $base = 'http://127.0.0.1:3000'
-$root = Join-Path $env:LOCALAPPDATA 'Market Kasa'
-$appDir = Join-Path $env:LOCALAPPDATA 'Programs\Market Kasa'
-$exe = Join-Path $appDir 'Market Kasa.exe'
+$root = Join-Path $env:LOCALAPPDATA 'Optiva'
+$appDir = Join-Path $env:LOCALAPPDATA 'Programs\Optiva'
+$exe = Join-Path $appDir 'Optiva.exe'
 
 function Step($m) { Write-Host "`n=== $m" -ForegroundColor Cyan }
 function Fail($m) {
@@ -29,17 +29,22 @@ function RunExe($file, $argList, $timeoutSec = 300) {
   return $p.ExitCode
 }
 
+Step 'Ad değişikliği hazırlığı: eski "Market Kasa" bilgi klasörü (önceki sürümden kalmış gibi)'
+$legacy = Join-Path $env:LOCALAPPDATA 'Market Kasa'
+New-Item -ItemType Directory -Force (Join-Path $legacy 'backups') | Out-Null
+Set-Content (Join-Path $legacy 'backups\eski-surum-isareti.txt') 'eski sürümden' -Encoding utf8
+
 Step 'Kurulum (sessiz)'
-$setup = Resolve-Path 'build\dist\Market-Kasa-Setup.exe'
+$setup = Resolve-Path 'build\dist\Optiva-Setup.exe'
 $code = RunExe $setup @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NORESTART', '/TASKS=desktopicon')
 if ($code -ne 0) { Fail "Kurulum çıkış kodu $code" }
 foreach ($f in @($exe, "$appDir\node\node.exe", "$appDir\app\server.js", "$appDir\app\kasa-server.js", "$appDir\app\tools\users-cli.js", "$appDir\unins000.exe", "$appDir\Microsoft.Web.WebView2.Core.dll", "$appDir\Microsoft.Web.WebView2.WinForms.dll", "$appDir\WebView2Loader.dll")) {
   if (-not (Test-Path $f)) { Fail "Kurulumdan sonra eksik: $f" }
 }
 $desktop = [Environment]::GetFolderPath('Desktop')
-if (-not (Test-Path (Join-Path $desktop 'Market Kasa.lnk'))) { Fail 'Masaüstü kısayolu yok' }
-$startMenu = Join-Path ([Environment]::GetFolderPath('Programs')) 'Market Kasa'
-foreach ($l in @('Market Kasa.lnk', 'Yönetici Şifresi Sıfırla.lnk', 'Yedek Al.lnk')) {
+if (-not (Test-Path (Join-Path $desktop 'Optiva.lnk'))) { Fail 'Masaüstü kısayolu yok' }
+$startMenu = Join-Path ([Environment]::GetFolderPath('Programs')) 'Optiva'
+foreach ($l in @('Optiva.lnk', 'Yönetici Şifresi Sıfırla.lnk', 'Yedek Al.lnk')) {
   if (-not (Test-Path (Join-Path $startMenu $l))) { Fail "Başlat menüsünde eksik kısayol: $l" }
 }
 Get-ChildItem -Recurse $appDir -Include *.db, *.sqlite, session-secret, .env* | ForEach-Object { Fail "Pakette kişisel dosya var: $($_.FullName)" }
@@ -52,7 +57,7 @@ Remove-Item -Recurse -Force $env:MAIL_DEV_DIR -ErrorAction SilentlyContinue
 $updSite = Join-Path ([IO.Path]::GetTempPath()) 'market-kasa-update-site'
 Remove-Item -Recurse -Force $updSite -ErrorAction SilentlyContinue
 New-Item -ItemType Directory $updSite | Out-Null
-Copy-Item $setup (Join-Path $updSite 'Market-Kasa-Setup.exe')
+Copy-Item $setup (Join-Path $updSite 'Optiva-Setup.exe')
 $updSha = (Get-FileHash $setup -Algorithm SHA256).Hash.ToLower()
 @{ version = '99.0.0'; sha256 = $updSha; size = (Get-Item $setup).Length; notes = 'Deneme güncellemesi' } | ConvertTo-Json |
   Set-Content (Join-Path $updSite 'latest.json') -Encoding utf8
@@ -61,6 +66,9 @@ $env:MARKET_KASA_UPDATE_BASE = 'http://127.0.0.1:8790'
 $code = RunExe $exe @('--start')
 if ($code -ne 0) { Fail "Başlatıcı --start çıkış kodu $code" }
 if ((RunExe $exe @('--status')) -ne 0) { Fail '--status çalışmıyor diyor' }
+# Eski "Market Kasa" klasörü bütün hâlinde Optiva'ya taşınmış olmalı (veri kaybı yok)
+if (Test-Path $legacy) { Fail 'Eski Market Kasa klasörü taşınmadı' }
+if (-not (Test-Path (Join-Path $root 'backups\eski-surum-isareti.txt'))) { Fail 'Eski klasördeki dosya Optiva klasörüne gelmedi' }
 $me = Invoke-RestMethod "$base/api/auth/me"
 if (-not $me.needsSetup) { Fail 'İlk açılışta kurulum ekranı bekleniyordu' }
 $r = Invoke-WebRequest "$base/" -MaximumRedirection 5 -UseBasicParsing
@@ -133,7 +141,7 @@ $backupDir = Join-Path $root 'backups'
 $backupsBefore = @(Get-ChildItem $backupDir -Filter *.db).Count
 $d = PostJson '/api/update/download' @{} $s
 if ($d.version -ne '99.0.0') { Fail "İndirme sonucu beklenmedik: $($d | ConvertTo-Json -Compress)" }
-$dl = Join-Path $root 'updates\Market-Kasa-Setup.exe'
+$dl = Join-Path $root 'updates\Optiva-Setup.exe'
 if (-not (Test-Path $dl)) { Fail 'İndirilen kurulum dosyası yok' }
 if ((Get-FileHash $dl -Algorithm SHA256).Hash.ToLower() -ne $updSha) { Fail 'İndirilen dosyanın parmak izi tutmuyor' }
 if (@(Get-ChildItem $backupDir -Filter *.db).Count -le $backupsBefore) { Fail 'Güncellemeden önce yedek alınmadı' }
@@ -155,7 +163,7 @@ if (-not ((Invoke-RestMethod "$base/api/products" -WebSession $s).items | Where-
 if ((Get-Content (Join-Path $root 'logs\launcher.log') -Raw) -notmatch 'Güncelleme kurulumu başlatıldı') { Fail 'Başlatıcı güncellemeyi kaydetmedi' }
 Write-Host "Güncelleme çalıştı: $ver → (deneme) 99.0.0, program yeniden açıldı"
 # Kurulumun yeniden açtığı pencereyi kapat (sonraki adımlarda dosyalar kilitli kalmasın)
-Get-Process -Name 'Market Kasa' -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name 'Optiva' -ErrorAction SilentlyContinue | Stop-Process -Force
 Stop-Process -Id $updServer.Id -Force -ErrorAction SilentlyContinue
 $env:MARKET_KASA_UPDATE_BASE = $null
 
@@ -186,6 +194,6 @@ $code = RunExe "$appDir\unins000.exe" @('/VERYSILENT', '/SUPPRESSMSGBOXES', '/NO
 for ($i = 0; $i -lt 60 -and (Test-Path $exe); $i++) { Start-Sleep -Seconds 1 }
 if (Test-Path $exe) { Fail 'Program kaldırılamadı' }
 if (-not (Test-Path (Join-Path $root 'data\store.db'))) { Fail 'Kaldırırken bilgiler silinmiş (silinmemeliydi)' }
-if (Test-Path (Join-Path $desktop 'Market Kasa.lnk')) { Fail 'Masaüstü kısayolu kaldırılmadı' }
+if (Test-Path (Join-Path $desktop 'Optiva.lnk')) { Fail 'Masaüstü kısayolu kaldırılmadı' }
 
 Write-Host "`nTÜM KURULUM TESTLERİ GEÇTİ" -ForegroundColor Green

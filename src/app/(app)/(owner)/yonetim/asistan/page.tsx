@@ -3,7 +3,7 @@ import { getDb } from "@/server/db/connection";
 import { getAssistantPageData } from "@/server/services/assistant";
 import { AssistantScreen } from "./AssistantScreen";
 
-export const metadata = { title: "Yapay zekâ asistanı · Market Kasa" };
+export const metadata = { title: "Yapay zekâ asistanı · Optiva" };
 
 export default async function AssistantPage(props: PageProps<"/yonetim/asistan">) {
   await requirePageUser("owner");

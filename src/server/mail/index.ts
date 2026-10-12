@@ -24,8 +24,8 @@ export const MAIL_PROVIDERS = {
   icloud: { label: "iCloud", host: "smtp.mail.me.com", port: 587 },
   yandex: { label: "Yandex", host: "smtp.yandex.com", port: 465 },
   custom: { label: "Diğer (SMTP)", host: "", port: 465 },
-  /** Merkezi Market Kasa e-posta servisi (mail/service.ts): Gmail/şifre gerekmez */
-  service: { label: "Market Kasa e-posta servisi", host: "", port: 0 },
+  /** Merkezi Optiva e-posta servisi (mail/service.ts): Gmail/şifre gerekmez */
+  service: { label: "Optiva e-posta servisi", host: "", port: 0 },
 } as const;
 export type MailProvider = keyof typeof MAIL_PROVIDERS;
 
@@ -194,7 +194,7 @@ export async function sendMail(db: DB, msg: MailMessage): Promise<void> {
   }
   try {
     await transportFor({ host: c.host, port: c.port, user: c.user, pass }).sendMail({
-      from: { name: "Market Kasa", address: c.user },
+      from: { name: "Optiva", address: c.user },
       to: msg.to,
       subject: msg.subject,
       text: msg.text,

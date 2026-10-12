@@ -8,7 +8,7 @@ import { getOverview, isOverviewPeriod, type OverviewPeriod } from "@/server/ser
 import { cashierLabel } from "@/server/services/reports";
 import { OverviewTrend } from "./OverviewTrend";
 
-export const metadata = { title: "Yönetici Paneli · Market Kasa" };
+export const metadata = { title: "Yönetici Paneli · Optiva" };
 
 const PERIODS: { key: OverviewPeriod; label: string; vs: string }[] = [
   { key: "bugun", label: "Bugün", vs: "düne göre" },

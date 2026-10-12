@@ -75,7 +75,7 @@ beforeEach(() => {
   p = seedSample(env);
   setTestCtxFactory(() => env.ctx);
   resetLimiterForTests();
-  svcEnv = { KV: new MemKV(), RESEND_API_KEY: "test", FROM_ADDRESS: "Market Kasa <bildirim@test.local>" };
+  svcEnv = { KV: new MemKV(), RESEND_API_KEY: "test", FROM_ADDRESS: "Optiva <bildirim@test.local>" };
   outbox = [];
 });
 afterEach(() => setTestCtxFactory(undefined));

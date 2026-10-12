@@ -43,7 +43,7 @@ export function SetupForm() {
       }}
       className="w-full max-w-md space-y-3 rounded-3xl bg-white p-6 shadow-xl"
     >
-      <h1 className="text-2xl font-bold">Market Kasa&apos;ya hoş geldiniz</h1>
+      <h1 className="text-2xl font-bold">Optiva&apos;ya hoş geldiniz</h1>
       <p className="text-slate-600">
         <strong>Yönetici hesabınızı</strong> oluşturun. Bu hesapla ürünleri, fiyatları, kasiyerleri ve tüm ayarları yönetirsiniz.
       </p>

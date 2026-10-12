@@ -1,14 +1,14 @@
-﻿// Market Kasa — Windows uygulaması (Market Kasa.exe).
+// Optiva — Windows uygulaması (Optiva.exe).
 // Programı tarayıcı yerine KENDİ PENCERESİNDE açar (Microsoft Edge WebView2; Windows 10/11'de hazır gelir).
 // Windows'taki .NET Framework 4 derleyicisiyle (csc.exe, C# 5) derlenir; WebView2 DLL'leri exe'nin yanında durur.
 //
 // Çift tıklayınca: sunucu kapalıysa görünmez pencerede başlatır, sonra uygulama penceresini açar.
 // Pencere zaten açıksa öne getirir. Pencereyi kapatmak programı KAPATMAZ (telefondan takip sürer);
-// tamamen kapatmak için menü: Market Kasa → Programı tamamen kapat.
+// tamamen kapatmak için menü: Optiva → Programı tamamen kapat.
 // WebView2 bulunamazsa program varsayılan tarayıcıda açılır.
 // Komut satırı: --start (başlat ve bekle), --stop (durdur), --status (0 = çalışıyor), --selftest (pencereyi dene),
 //   --install-update (indirilmiş güncellemeyi kur; normalde Ayarlar → Güncelle düğmesi pencereden yapar).
-// Güncelleme: sayfa, sunucunun indirip doğruladığı updates\Market-Kasa-Setup.exe için "market-kasa:install-update"
+// Güncelleme: sayfa, sunucunun indirip doğruladığı updates\Optiva-Setup.exe için "market-kasa:install-update"
 // mesajı gönderir; pencere sessiz kurulumu başlatıp kapanır, kurulum bitince program yeniden açılır.
 using System;
 using System.Diagnostics;
@@ -24,8 +24,8 @@ using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
-[assembly: System.Reflection.AssemblyTitle("Market Kasa")]
-[assembly: System.Reflection.AssemblyProduct("Market Kasa")]
+[assembly: System.Reflection.AssemblyTitle("Optiva")]
+[assembly: System.Reflection.AssemblyProduct("Optiva")]
 [assembly: System.Reflection.AssemblyDescription("Barkodlu satış, stok ve kâr takibi")]
 [assembly: System.Reflection.AssemblyVersion("2.1.0.0")]
 
@@ -34,7 +34,27 @@ static class MarketKasa
     const int Port = 3000;
     const string Home = "http://localhost:3000/";
     static readonly string AppDir = Path.GetDirectoryName(Application.ExecutablePath);
-    static readonly string Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Market Kasa");
+    static readonly string Root = ResolveRoot();
+
+    // Ad değişikliği (Market Kasa → Optiva): bilgiler %LOCALAPPDATA%\Optiva'da tutulur. Eski "Market Kasa" klasörü varsa
+    // ilk açılışta bütün hâlinde yeniden adlandırılır (oturum anahtarı ve şifreli ayarlar dahil; tek adım, aynı disk).
+    // Dosyalar kullanımdaysa ya da taşınamazsa eski klasörle devam edilir; bilgi asla kaybolmaz.
+    static string ResolveRoot()
+    {
+        string local = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string root = Path.Combine(local, "Optiva");
+        string legacy = Path.Combine(local, "Market Kasa");
+        if (Directory.Exists(root) || !Directory.Exists(legacy)) return root;
+        try
+        {
+            Directory.Move(legacy, root);
+            return root;
+        }
+        catch
+        {
+            return legacy;
+        }
+    }
     static string DataDir { get { return Path.Combine(Root, "data"); } }
     static string BackupDir { get { return Path.Combine(Root, "backups"); } }
     static string LogDir { get { return Path.Combine(Root, "logs"); } }
@@ -80,7 +100,7 @@ static class MarketKasa
             {
                 LauncherLog(e.ToString());
                 MessageBox.Show("Beklenmeyen bir hata oluştu:\n\n" + e.Message + "\n\nAyrıntılar: " + LogDir,
-                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Optiva", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
         return 0;
@@ -93,14 +113,14 @@ static class MarketKasa
         {
             if (!File.Exists(NodeExe) || !File.Exists(Path.Combine(ServerDir, "kasa-server.js")))
             {
-                MessageBox.Show("Program dosyaları eksik. Lütfen Market Kasa'yı yeniden kurun.", "Market Kasa",
+                MessageBox.Show("Program dosyaları eksik. Lütfen Optiva'yı yeniden kurun.", "Optiva",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             if (!StartWithSplash())
             {
-                MessageBox.Show("Market Kasa başlatılamadı.\n\nBilgisayarı yeniden başlatıp tekrar deneyin. Sorun sürerse şu klasördeki server.log dosyasını destek için saklayın:\n" + LogDir,
-                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Optiva başlatılamadı.\n\nBilgisayarı yeniden başlatıp tekrar deneyin. Sorun sürerse şu klasördeki server.log dosyasını destek için saklayın:\n" + LogDir,
+                    "Optiva", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
         }
@@ -157,7 +177,7 @@ static class MarketKasa
         public MainForm(bool selfTest)
         {
             this.selfTest = selfTest;
-            Text = "Market Kasa";
+            Text = "Optiva";
             Icon = AppIcon();
             StartPosition = FormStartPosition.CenterScreen;
             Size = new Size(1280, 840);
@@ -178,7 +198,7 @@ static class MarketKasa
             Controls.Add(web);
 
             var menu = new MenuStrip();
-            var app = new ToolStripMenuItem("Market Kasa");
+            var app = new ToolStripMenuItem("Optiva");
             app.DropDownItems.Add(Item("Yenile  (F5)", delegate { if (web.CoreWebView2 != null) web.Reload(); }));
             app.DropDownItems.Add(Item("Yazdır…  (Ctrl+P)", delegate { if (web.CoreWebView2 != null) web.CoreWebView2.ShowPrintUI(); }));
             app.DropDownItems.Add(new ToolStripSeparator());
@@ -252,8 +272,8 @@ static class MarketKasa
                     Close();
                     return;
                 }
-                MessageBox.Show("Bu bilgisayarda Microsoft Edge WebView2 bileşeni bulunamadı; Market Kasa tarayıcıda açılacak.\n\nUygulama penceresi için Windows Update ile Microsoft Edge'i güncelleyin.",
-                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("Bu bilgisayarda Microsoft Edge WebView2 bileşeni bulunamadı; Optiva tarayıcıda açılacak.\n\nUygulama penceresi için Windows Update ile Microsoft Edge'i güncelleyin.",
+                    "Optiva", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 OpenBrowser(Home);
                 Close();
                 return;
@@ -267,7 +287,7 @@ static class MarketKasa
             core.Settings.IsStatusBarEnabled = false;
             core.DocumentTitleChanged += delegate
             {
-                Text = string.IsNullOrEmpty(core.DocumentTitle) ? "Market Kasa" : core.DocumentTitle;
+                Text = string.IsNullOrEmpty(core.DocumentTitle) ? "Optiva" : core.DocumentTitle;
             };
             // Dış bağlantılar normal tarayıcıda açılsın; uygulama sayfaları pencerede kalsın
             core.NavigationStarting += delegate (object s, CoreWebView2NavigationStartingEventArgs a)
@@ -310,7 +330,7 @@ static class MarketKasa
             else
             {
                 MessageBox.Show("Güncelleme başlatılamadı. Ayarlar → Güncelle ile tekrar deneyin.\n\nAyrıntılar: " + LogDir,
-                    "Market Kasa", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Optiva", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -326,8 +346,8 @@ static class MarketKasa
         void StopAndExit()
         {
             DialogResult r = MessageBox.Show(
-                "Program tamamen kapatılsın mı?\n\nKapatınca kasa ve panel çalışmaz, telefondan da bağlanılamaz. Tekrar açmak için Market Kasa simgesine tıklayın.",
-                "Market Kasa", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
+                "Program tamamen kapatılsın mı?\n\nKapatınca kasa ve panel çalışmaz, telefondan da bağlanılamaz. Tekrar açmak için Optiva simgesine tıklayın.",
+                "Optiva", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2);
             if (r != DialogResult.Yes) return;
             Cursor = Cursors.WaitCursor;
             Stop();
@@ -340,7 +360,7 @@ static class MarketKasa
     // Kurulum sessiz çalışır, çalışan sunucuyu kendisi durdurur, bilgilere dokunmaz ve bitince programı yeniden açar.
     static bool StartUpdateInstaller()
     {
-        string setup = Path.Combine(UpdateDir, "Market-Kasa-Setup.exe");
+        string setup = Path.Combine(UpdateDir, "Optiva-Setup.exe");
         if (!File.Exists(setup))
         {
             LauncherLog("Güncelleme dosyası yok: " + setup);
@@ -536,7 +556,7 @@ static class MarketKasa
     {
         public StartingForm()
         {
-            Text = "Market Kasa";
+            Text = "Optiva";
             Icon = AppIcon();
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
@@ -548,7 +568,7 @@ static class MarketKasa
             ControlBox = false;
 
             var title = new Label();
-            title.Text = "Market Kasa başlatılıyor…";
+            title.Text = "Optiva başlatılıyor…";
             title.Font = new Font("Segoe UI", 12f, FontStyle.Bold);
             title.AutoSize = true;
             title.Location = new Point(20, 16);

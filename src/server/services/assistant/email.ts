@@ -54,7 +54,7 @@ ${v.nextTargets.map((t) => row(METRIC_INFO[t.metric].label, formatMetric(t.metri
   const html = layout(
     `${f.monthLabel} aylık raporu${f.isPartial ? " (ara rapor)" : ""}`,
     `${ai}${kpis}${targets}${actions}${potential}${next}
-<p style="margin:18px 0 0;font-size:13px;color:#64748b">Ayrıntılı analiz, personel değerlendirmesi ve aksiyon takibi: Market Kasa → Yapay zekâ asistanı.</p>`,
+<p style="margin:18px 0 0;font-size:13px;color:#64748b">Ayrıntılı analiz, personel değerlendirmesi ve aksiyon takibi: Optiva → Yapay zekâ asistanı.</p>`,
     f.businessName,
   );
   const text = [

@@ -41,7 +41,7 @@ export function SettingsScreen({
   initial: Settings;
   initialMail: MailStatus;
   initialUpdate: UpdateInfo;
-  /** Merkezi Market Kasa e-posta servisi açık mı (açıksa e-posta bağlamak adres + kod kadar basit) */
+  /** Merkezi Optiva e-posta servisi açık mı (açıksa e-posta bağlamak adres + kod kadar basit) */
   mailService: boolean;
 }) {
   const [s, setS] = useState(initial);
@@ -515,7 +515,7 @@ function MailSection({ initial, serviceAvailable }: { initial: MailStatus; servi
       <p className="mt-1 text-sm text-slate-600">
         Bağlarsanız: şifrenizi unutunca e-postayla yenileyebilir, her akşam günlük raporu e-postayla alırsınız; şifre değişiklikleri e-posta koduyla yapılır.
         {status.provider === "service" || (serviceAvailable && !status.configured)
-          ? " Sadece e-posta adresinizi yazmanız yeter; e-postalar “Market Kasa” adına gönderilir."
+          ? " Sadece e-posta adresinizi yazmanız yeter; e-postalar “Optiva” adına gönderilir."
           : " E-postalar bu hesaptan gönderilir; alıcı, yöneticilerin Hesabım'daki e-posta adresleridir."}
       </p>
       {notice && (
@@ -582,7 +582,7 @@ function MailSection({ initial, serviceAvailable }: { initial: MailStatus; servi
       ) : !editing && status.configured ? (
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="flex-1 font-medium" data-testid="mail-status">
-            ✓ Bağlı: {status.provider === "service" ? `Market Kasa e-posta servisi → ${status.user}` : status.user}
+            ✓ Bağlı: {status.provider === "service" ? `Optiva e-posta servisi → ${status.user}` : status.user}
           </span>
           <button type="button" disabled={busy} onClick={() => void test()} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold">
             Deneme e-postası gönder
@@ -644,7 +644,7 @@ function MailSection({ initial, serviceAvailable }: { initial: MailStatus; servi
                 <li>Telefonda ya da bilgisayarda Google hesabınıza girin: <b>myaccount.google.com</b></li>
                 <li><b>Güvenlik</b> → <b>2 Adımlı Doğrulama</b>&apos;yı açın (kapalıysa).</li>
                 <li>Arama kutusuna <b>Uygulama şifreleri</b> yazın, açın.</li>
-                <li>Ad olarak <b>Market Kasa</b> yazıp <b>Oluştur</b>&apos;a basın.</li>
+                <li>Ad olarak <b>Optiva</b> yazıp <b>Oluştur</b>&apos;a basın.</li>
                 <li>Çıkan 16 harfli şifreyi yukarıdaki kutuya yazın (boşluklar önemli değil).</li>
               </ol>
               <p className="mt-1">Normal Gmail şifreniz burada çalışmaz.</p>

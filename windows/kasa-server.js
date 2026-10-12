@@ -1,5 +1,5 @@
-// Windows paketi: sunucuyu başlatan sarmalayıcı (Market Kasa.exe bunu gizli pencerede çalıştırır).
-// - Çıktıyı %LOCALAPPDATA%\Market Kasa\logs\server.log dosyasına yazar.
+// Windows paketi: sunucuyu başlatan sarmalayıcı (Optiva.exe bunu gizli pencerede çalıştırır).
+// - Çıktıyı %LOCALAPPDATA%\Optiva\logs\server.log dosyasına yazar.
 // - Kendi süreç numarasını (PID) dosyaya yazar; "Programı kapat" bununla durdurur.
 // - Sonra Next.js'in kendi kendine yeten sunucusunu (server.js) başlatır.
 "use strict";
@@ -31,7 +31,7 @@ for (const name of ["stdout", "stderr"]) {
     }
   };
 }
-console.log(`\n[${new Date().toISOString()}] Market Kasa başlatılıyor (PID ${process.pid})`);
+console.log(`\n[${new Date().toISOString()}] Optiva başlatılıyor (PID ${process.pid})`);
 
 fs.writeFileSync(pidFile, String(process.pid));
 const cleanup = () => {

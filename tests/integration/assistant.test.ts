@@ -209,7 +209,7 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
 
   it("bulut yapay zekâ başarısız olursa yerleşik yorum kalır; e-posta bulutu bekler; yeniden deneme bulut yorumu ekler", async () => {
     setTestAiRunner(async () => {
-      throw new AppError("MAIL_SERVICE_UNREACHABLE", "Market Kasa servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
+      throw new AppError("MAIL_SERVICE_UNREACHABLE", "Optiva servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
     });
     env.setNow("2026-10-01T06:00:00.000Z");
     expect(await runScheduledMonthlyReport(env.ctx)).toEqual({ month: "2026-09", status: "generated" });

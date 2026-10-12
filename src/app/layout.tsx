@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Market Kasa",
+  title: "Optiva",
   description: "Barkodlu satış, stok ve kârlılık takibi",
 };
 

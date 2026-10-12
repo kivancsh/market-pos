@@ -2,7 +2,7 @@
  * Aylık rapor yorumu: yerleşik asistan + (varsa) merkezi yapay zekâ.
  *
  * - Yerleşik asistan (narrative.ts) her zaman çalışır: bu bilgisayarda, internetsiz, hesapsız.
- * - Merkezi yapay zekâ: Market Kasa servisi (mail-service/, yazılım sahibinin tek Anthropic hesabı) Claude ile yorumu güçlendirir.
+ * - Merkezi yapay zekâ: Optiva servisi (mail-service/, yazılım sahibinin tek Anthropic hesabı) Claude ile yorumu güçlendirir.
  *   Dükkânda hesap ya da anahtar gerekmez; servis adresi tanımlıysa ve yönetici kapatmadıysa kullanılır.
  *   Servise yalnızca hesaplanmış rakamlar gider (TL/% metin, kasiyerler takma adla, işletme adı yok); istemi servis kendisi kurar.
  * - Servis yoksa, internet yoksa ya da sınır dolduysa yerleşik yorum kalır.

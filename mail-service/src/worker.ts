@@ -1,5 +1,5 @@
 /**
- * Market Kasa e-posta servisi (Cloudflare Worker).
+ * Optiva e-posta servisi (Cloudflare Worker).
  *
  * Programlar (kurulumlar) e-postayı bu servis üzerinden gönderir; müşteri Gmail/uygulama şifresi ayarlamaz.
  * Kötüye kullanımı önlemek için:
@@ -34,7 +34,7 @@ export interface Env {
   ANTHROPIC_API_KEY?: string;
   /** Resend API anahtarı (wrangler secret put RESEND_API_KEY) */
   RESEND_API_KEY: string;
-  /** Gönderen, ör. "Market Kasa <bildirim@marketkasa.com>" (wrangler.toml [vars]) */
+  /** Gönderen, ör. "Optiva <bildirim@optivaapp.com>" (wrangler.toml [vars]) */
   FROM_ADDRESS: string;
 }
 
@@ -124,13 +124,13 @@ async function auth(req: Request, env: Env): Promise<string | null> {
 const normEmail = (e: unknown) => (typeof e === "string" ? e.trim().toLowerCase() : "");
 
 function codeEmail(code: string, email: string): OutgoingEmail {
-  const text = `Market Kasa onay kodunuz: ${code}\n\nBu kod 10 dakika geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayın.`;
+  const text = `Optiva onay kodunuz: ${code}\n\nBu kod 10 dakika geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayın.`;
   const html = `<div style="font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:480px;margin:0 auto;padding:24px">
-<h1 style="font-size:18px;margin:0 0 12px">Market Kasa onay kodu</h1>
-<p style="font-size:15px;color:#334155">E-posta adresinizi Market Kasa programına bağlamak için kodunuz:</p>
+<h1 style="font-size:18px;margin:0 0 12px">Optiva onay kodu</h1>
+<p style="font-size:15px;color:#334155">E-posta adresinizi Optiva programına bağlamak için kodunuz:</p>
 <p style="font-size:32px;font-weight:800;letter-spacing:6px;margin:16px 0">${code}</p>
 <p style="font-size:13px;color:#64748b">Kod 10 dakika geçerlidir. Bu isteği siz yapmadıysanız bu e-postayı yok sayın.</p></div>`;
-  return { to: [email], subject: `Market Kasa onay kodu: ${code}`, text, html };
+  return { to: [email], subject: `Optiva onay kodu: ${code}`, text, html };
 }
 
 // ------------------------------------------------------------------ istek işleyici

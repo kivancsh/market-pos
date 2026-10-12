@@ -1,5 +1,5 @@
 /**
- * Merkezi "Market Kasa e-posta servisi" istemcisi (servisin kodu: mail-service/).
+ * Merkezi "Optiva e-posta servisi" istemcisi (servisin kodu: mail-service/).
  * Müşteri Gmail/uygulama şifresi ayarlamaz: sadece kendi e-posta adresini yazar, servis o adrese kod gönderir;
  * kod doğru girilince adres bu kurulum için doğrulanır ve rapor/kodlar servis üzerinden gider.
  *
@@ -11,7 +11,7 @@ import { readServiceCreds, writeServiceCreds } from "../db/repositories/mailConf
 import { AppError } from "../errors";
 import type { MailMessage } from "./index";
 
-/** Servis yayına alınınca buraya adresi yazılır (ör. "https://market-kasa-mail.<hesap>.workers.dev"). */
+/** Servis yayına alınınca buraya adresi yazılır (ör. "https://optiva-mail.<hesap>.workers.dev"). */
 const DEFAULT_MAIL_SERVICE_URL = "";
 const TIMEOUT_MS = 20_000;
 
@@ -36,7 +36,7 @@ async function call(path: string, body: unknown, auth?: string, timeoutMs = TIME
       signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
-    throw new AppError("MAIL_SERVICE_UNREACHABLE", "Market Kasa servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
+    throw new AppError("MAIL_SERVICE_UNREACHABLE", "Optiva servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
   }
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {

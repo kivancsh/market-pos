@@ -279,7 +279,7 @@ export function prepareForgotPassword(ctx: Ctx, username: string): { email: stri
   if (!u.email || !isMailConfigured(ctx.db)) {
     throw badRequest(
       "EMAIL_REQUIRED",
-      "Bu programda e-posta bağlı olmadığı için şifre e-postayla sıfırlanamaz. Kasa bilgisayarında 'Yönetici Şifresi Sıfırla'yı açın (Windows: Başlat menüsü → Market Kasa; Mac: market-pos klasörü).",
+      "Bu programda e-posta bağlı olmadığı için şifre e-postayla sıfırlanamaz. Kasa bilgisayarında 'Yönetici Şifresi Sıfırla'yı açın (Windows: Başlat menüsü → Optiva; Mac: market-pos klasörü).",
     );
   }
   return { email: u.email, userId: u.id, action: `${u.name} (${u.username}) için şifre sıfırlama` };

@@ -1,6 +1,6 @@
 # Yazar kasa (ÖKC) entegrasyonu — durum ve yapılacaklar
 
-Market Kasa, yeni nesil yazar kasayla (ÖKC) birlikte çalışacak şekilde hazırlandı. Bu belge, programın şu an neyi
+Optiva, yeni nesil yazar kasayla (ÖKC) birlikte çalışacak şekilde hazırlandı. Bu belge, programın şu an neyi
 yaptığını ve gerçek bir Hugin ya da Pavo cihazıyla canlı kullanım için **sizin** (yazılım sahibi olarak) yapmanız
 gerekenleri anlatır.
 
@@ -35,7 +35,7 @@ Bu akışın tamamı otomatik testlerle sınanıyor (Hugin cihazının gönderdi
 3. **Hugin'e iki bilgi verilecek:** adres ve şifre. Şifre programda: Ayarlar → Yazar kasa → Hugin → "Göster".
    Adres konusunda önemli bir nokta: Hugin'in örnek dokümanına göre yazar kasa, Hugin'in kendi sunucusu (TSM) üzerinden
    **internetten HTTPS ile** bizim programa bağlanıyor. Dükkân bilgisayarındaki program internetten doğrudan erişilebilir
-   olmadığı için bir **köprü adresi** gerekir (ör. her dükkân için güvenli bir tünel ya da Market Kasa'nın merkezi
+   olmadığı için bir **köprü adresi** gerekir (ör. her dükkân için güvenli bir tünel ya da Optiva'nın merkezi
    sunucusu üzerinden aktarma). Bunu Hugin'in teknik ekibiyle netleştirin; köprü kısmını birlikte kurarız.
 4. **Test sırasında doğrulanacak 2 ayrıntı** (Hugin'in tam alan listesi entegratöre verildiği için):
    - Perakende fiş için belge türü değeri (programda `RECEIPT`; tek satırla değiştirilir: `src/server/okc/hugin.ts`).

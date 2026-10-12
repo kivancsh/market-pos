@@ -1,7 +1,7 @@
 import { getClientSettings } from "@/server/pageData";
 import { StockCountScreen } from "./StockCountScreen";
 
-export const metadata = { title: "Stok sayımı · Market Kasa" };
+export const metadata = { title: "Stok sayımı · Optiva" };
 
 export default async function StockCountPage(props: PageProps<"/stok-sayim">) {
   const sp = await props.searchParams;

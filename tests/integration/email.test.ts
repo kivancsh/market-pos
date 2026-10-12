@@ -63,7 +63,7 @@ describe("şifremi unuttum (giriş ekranı)", () => {
     const ch = await json(st);
     expect(ch.emailMasked).toBe(maskEmail(TEST_OWNER.email));
     expect(mail.sent[0]!.to).toBe(TEST_OWNER.email);
-    expect(mail.sent[0]!.subject).toMatch(/^Market Kasa onay kodu: \d{6}$/);
+    expect(mail.sent[0]!.subject).toMatch(/^Optiva onay kodu: \d{6}$/);
 
     // kısa şifre: kod HARCANMADAN reddedilir
     const short = await forgotVerifyRoute.POST(req("/api/auth/forgot/verify", { body: { token: ch.token, code: mail.lastCode(), newPassword: "kisa", newPasswordConfirm: "kisa" } }));

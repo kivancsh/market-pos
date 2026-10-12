@@ -1,4 +1,4 @@
-"""Mac paketini (Market-Kasa-Mac.zip) denetler: gerekli dosyalar var, kişisel dosya yok,
+"""Mac paketini (Optiva-Mac.zip) denetler: gerekli dosyalar var, kişisel dosya yok,
 betikler çalıştırılabilir ve satır sonları Unix biçiminde (CRLF olursa Mac'te çalışmaz)."""
 import sys
 import zipfile

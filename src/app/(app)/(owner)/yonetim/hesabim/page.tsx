@@ -4,7 +4,7 @@ import { isMailConfigured } from "@/server/mail";
 import { secretChangeNeedsCode } from "@/server/services/users";
 import { AccountScreen } from "./AccountScreen";
 
-export const metadata = { title: "Hesabım · Market Kasa" };
+export const metadata = { title: "Hesabım · Optiva" };
 
 export default async function AccountPage() {
   const me = await requirePageUser("owner");

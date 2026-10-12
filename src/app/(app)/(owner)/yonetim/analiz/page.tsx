@@ -6,7 +6,7 @@ import { getDb } from "@/server/db/connection";
 import { COVER_TARGET_DAYS, STOCK_STATUS_LABEL, formatDailyAvg, getAnalytics, type AnalysisWindow, type StockStatus } from "@/server/services/analytics";
 import { WeeklyChart } from "./WeeklyChart";
 
-export const metadata = { title: "Analizler · Market Kasa" };
+export const metadata = { title: "Analizler · Optiva" };
 
 const DAYS = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"];
 const STATUS_STYLE: Record<StockStatus, string> = {

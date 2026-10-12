@@ -1,6 +1,6 @@
 #!/bin/bash
-# Market Kasa — Mac güncellemesi (programın içinden: Ayarlar → Güncelle).
-# Sunucu arka planda çalıştırır: scripts/mac-update.sh <Market-Kasa-Mac.zip> <sürüm>
+# Optiva — Mac güncellemesi (programın içinden: Ayarlar → Güncelle).
+# Sunucu arka planda çalıştırır: scripts/mac-update.sh <Optiva-Mac.zip> <sürüm>
 #
 #  1) Paketi açar ve denetler (henüz hiçbir şey değişmez)
 #  2) Sunucuyu durdurur, mevcut sürümü data/updates/previous'a kenara alır
@@ -125,7 +125,7 @@ log "Başlatılıyor"
 bash scripts/service.sh start >>"$LOG" 2>&1 || rollback "Yeni sürüm başlatılamadı (çıkış kodu $?)."
 
 # Uygulama penceresi (Swift) değiştiyse masaüstündeki simgeyi yenile (çalışan pencere etkilenmez)
-APP="$HOME/Desktop/Market Kasa.app"
+APP="$HOME/Desktop/Optiva.app"
 if ! cmp -s mac/bin/MarketKasa "$PREV/mac/bin/MarketKasa" && [ -f "$APP/Contents/Resources/project-path.txt" ] &&
   [ "$(cat "$APP/Contents/Resources/project-path.txt")" = "$ROOT" ]; then
   bash scripts/create-app.sh "$ROOT" "$APP" >>"$LOG" 2>&1 || log "Uygulama simgesi yenilenemedi (program yine çalışıyor)"

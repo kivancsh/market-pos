@@ -12,7 +12,7 @@ export const POST = apiRoute(["owner"], async ({ ctx }) => {
   const businessName = getSettings(ctx.db).businessName;
   await sendMail(ctx.db, {
     to: me.email,
-    subject: "Market Kasa deneme e-postası",
+    subject: "Optiva deneme e-postası",
     text: "E-posta gönderimi çalışıyor. Onay kodları ve günlük rapor bu adrese gelecek.",
     html: layout("E-posta gönderimi çalışıyor", "<p>Onay kodları ve günlük rapor bu adrese gelecek.</p>", businessName),
   });

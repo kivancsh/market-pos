@@ -1,7 +1,7 @@
 import { getClientSettings } from "@/server/pageData";
 import { PurchaseScreen } from "./PurchaseScreen";
 
-export const metadata = { title: "Mal girişi · Market Kasa" };
+export const metadata = { title: "Mal girişi · Optiva" };
 
 export default async function PurchasePage(props: PageProps<"/mal-girisi">) {
   const sp = await props.searchParams;

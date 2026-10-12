@@ -6,7 +6,7 @@
  *   boyutu ve SHA-256 parmak izi.
  * - Program açılışta ve 6 saatte bir bu bilgiye bakar; yeni sürüm varsa yöneticiye gösterir.
  * - "Güncelle": önce yedek alınır, dosya indirilir ve parmak izi doğrulanır. Sonra:
- *   - Windows: Market Kasa penceresi (başlatıcı) sessiz kurulumu başlatıp kapanır; kurulum programı yeniden açar.
+ *   - Windows: Optiva penceresi (başlatıcı) sessiz kurulumu başlatıp kapanır; kurulum programı yeniden açar.
  *   - Mac: scripts/mac-update.sh arka planda eski sürümü kenara alır, yeni dosyaları koyar, derler ve başlatır;
  *     bir adım başarısız olursa eski sürüme geri döner. Sonucu updates/last-result.json'a yazar.
  * - Proje klasörü bir geliştirme kopyasıysa (git, version.json yok) güncelleme denetlenmez.
@@ -29,8 +29,8 @@ import { z } from "../validation/zod";
 import pkg from "../../../package.json";
 
 const DEFAULT_BASE = "https://github.com/kivancsh/market-pos/releases/latest/download";
-export const SETUP_FILE = "Market-Kasa-Setup.exe";
-export const MAC_FILE = "Market-Kasa-Mac.zip";
+export const SETUP_FILE = "Optiva-Setup.exe";
+export const MAC_FILE = "Optiva-Mac.zip";
 const CHECK_TIMEOUT_MS = 15_000;
 const DOWNLOAD_TIMEOUT_MS = 10 * 60_000;
 
@@ -251,7 +251,7 @@ export interface DownloadResult {
 
 /**
  * Önce yedek alır, sonra bu kanalın dosyasını indirir; boyut ve SHA-256 tutmazsa dosyayı siler.
- * Doğrulanmış dosya updates klasörüne bırakılır (Windows: Market-Kasa-Setup.exe, Mac: Market-Kasa-Mac.zip).
+ * Doğrulanmış dosya updates klasörüne bırakılır (Windows: Optiva-Setup.exe, Mac: Optiva-Mac.zip).
  */
 export async function downloadUpdate(ctx: Ctx): Promise<DownloadResult> {
   if (g.__mkDownload) return g.__mkDownload; // çift tıklama: aynı indirme

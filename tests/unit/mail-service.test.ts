@@ -21,7 +21,7 @@ let tokenN: number;
 let deps: Deps;
 
 beforeEach(() => {
-  env = { KV: new MemKV(), RESEND_API_KEY: "test", FROM_ADDRESS: "Market Kasa <bildirim@test.local>" };
+  env = { KV: new MemKV(), RESEND_API_KEY: "test", FROM_ADDRESS: "Optiva <bildirim@test.local>" };
   sent = [];
   codeSeq = ["123456", "654321", "111111"];
   tokenN = 0;
@@ -50,7 +50,7 @@ async function install() {
   return `${r.installId}.${r.token}`;
 }
 
-describe("Market Kasa e-posta servisi", () => {
+describe("Optiva e-posta servisi", () => {
   it("kayıt → alıcı doğrulama (servis kodu) → yalnızca doğrulanmış alıcıya gönderim", async () => {
     const auth = await install();
     // doğrulanmamış adrese serbest içerik gönderilemez
@@ -58,7 +58,7 @@ describe("Market Kasa e-posta servisi", () => {
 
     const st = await call("/v1/recipients/start", { email: "Ayse@Ornek.com" }, auth);
     expect(st.status).toBe(200);
-    expect(sent[0]).toMatchObject({ to: ["ayse@ornek.com"], subject: "Market Kasa onay kodu: 123456" });
+    expect(sent[0]).toMatchObject({ to: ["ayse@ornek.com"], subject: "Optiva onay kodu: 123456" });
 
     const wrong = await json(await call("/v1/recipients/confirm", { email: "ayse@ornek.com", code: "000000" }, auth));
     expect(wrong.error.code).toBe("CODE_WRONG");

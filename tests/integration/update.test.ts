@@ -14,7 +14,7 @@ import { cleanupUpdates, compareVersions, getUpdateInfo, manifestSchema, setTest
 import { cookieForUser, ensureUsers } from "../apiHelpers";
 import { createEnv, type TestEnv } from "../helpers";
 
-// GitHub yerine yerel deneme sunucusu: latest.json + Market-Kasa-Setup.exe
+// GitHub yerine yerel deneme sunucusu: latest.json + Optiva-Setup.exe
 const SETUP = crypto.randomBytes(300_000);
 const SHA = crypto.createHash("sha256").update(SETUP).digest("hex");
 const MACZIP = crypto.randomBytes(120_000);
@@ -29,8 +29,8 @@ beforeAll(async () => {
   server = http.createServer((req, res) => {
     requests.push(req.url ?? "");
     if (req.url === "/latest.json") res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(manifest));
-    else if (req.url === "/Market-Kasa-Setup.exe") res.writeHead(200, { "content-length": setupBody.length }).end(setupBody);
-    else if (req.url === "/Market-Kasa-Mac.zip") res.writeHead(200, { "content-length": MACZIP.length }).end(MACZIP);
+    else if (req.url === "/Optiva-Setup.exe") res.writeHead(200, { "content-length": setupBody.length }).end(setupBody);
+    else if (req.url === "/Optiva-Mac.zip") res.writeHead(200, { "content-length": MACZIP.length }).end(MACZIP);
     else res.writeHead(404).end();
   });
   await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
@@ -74,7 +74,7 @@ function req(p: string, cookie: string, body?: unknown): Request {
 }
 const json = async (r: Response) => (await r.json()) as Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
 const ownerCookie = () => cookieForUser(ensureUsers(env).owner);
-const setupFile = () => path.join(tmp, "updates", "Market-Kasa-Setup.exe");
+const setupFile = () => path.join(tmp, "updates", "Optiva-Setup.exe");
 
 describe("sürüm karşılaştırma ve sürüm bilgisi", () => {
   it("sayı sayı karşılaştırır (1.1.10 > 1.1.9)", () => {
@@ -194,7 +194,7 @@ describe("güncellemeyi indirme", () => {
 });
 
 describe("Mac kurulum klasörü", () => {
-  const macZip = () => path.join(tmp, "updates", "Market-Kasa-Mac.zip");
+  const macZip = () => path.join(tmp, "updates", "Optiva-Mac.zip");
   let spawned: { script: string; args: string[] }[];
   beforeEach(() => {
     setTestAppVersion({ version: "1.1.40", channel: "mac", commit: null, builtAt: null });
@@ -216,8 +216,8 @@ describe("Mac kurulum klasörü", () => {
     expect(d.status).toBe(200);
     expect(fs.readFileSync(macZip()).equals(MACZIP)).toBe(true);
     expect(fs.existsSync(setupFile())).toBe(false);
-    expect(requests).toContain("/Market-Kasa-Mac.zip");
-    expect(requests).not.toContain("/Market-Kasa-Setup.exe");
+    expect(requests).toContain("/Optiva-Mac.zip");
+    expect(requests).not.toContain("/Optiva-Setup.exe");
 
     const r = await installRoute.POST(req("/api/update/install", cookie, {}));
     expect(r.status).toBe(200);

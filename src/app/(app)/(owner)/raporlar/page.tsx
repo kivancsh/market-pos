@@ -1,7 +1,7 @@
 import { isReportKey } from "@/server/services/reports";
 import { ReportsScreen } from "./ReportsScreen";
 
-export const metadata = { title: "Raporlar · Market Kasa" };
+export const metadata = { title: "Raporlar · Optiva" };
 
 export default async function ReportsPage(props: PageProps<"/raporlar">) {
   const sp = await props.searchParams;
