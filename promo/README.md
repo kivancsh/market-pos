@@ -2,6 +2,8 @@
 
 Hazır video: [`optiva-tanitim.mp4`](optiva-tanitim.mp4) — 52,5 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
+Müşterilere gönderilecek **kullanım demosu** (gerçek kullanım kaydı, 85 sn): [`kullanim-demosu/`](kullanim-demosu/README.md).
+
 Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Dükkânınızda hâlâ…
 VERİMSİZ SATIŞ, DAĞINIK EKİP YÖNETİMİ, PLANSIZ BÜYÜME" üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
 toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış, ciro / brüt kâr / gider / net kâr kartları; "Net kâr" kartı
