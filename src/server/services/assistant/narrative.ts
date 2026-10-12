@@ -8,6 +8,7 @@ import { ACTION_AREA_LABELS, METRIC_INFO, PACE_LABELS, monthLabel, shiftMonth, t
 import type { AiReport } from "@/lib/assistantAi";
 import { divRound, formatPermille, formatTRY, mulDivRound } from "@/lib/money";
 import { seasonalItems } from "@/lib/seasonal";
+import { withSuffix } from "@/lib/turkish";
 import { IMPACT_KIND_LABELS, type ActionPriority, type PlanAction } from "./actions";
 import type { MonthlyFacts, StaffLine } from "./facts";
 import type { TargetProposal } from "./targets";
@@ -18,6 +19,9 @@ type Week = AiReport["actions"][number]["week"];
 
 const TL = formatTRY;
 const pct = formatPermille;
+/** "%55,6'sı" (iyelik) / "%80,0'ini" (iyelik + belirtme) — ek son rakamın okunuşuna göre */
+const pctP = (p: number | null) => (p === null ? "—" : withSuffix(pct(p), "poss"));
+const pctA = (p: number | null) => (p === null ? "—" : withSuffix(pct(p), "acc"));
 /** "+%7,0" / "-%3,2" */
 const signed = (p: number | null) => (p === null ? "—" : `${p >= 0 ? "+" : ""}${pct(p)}`);
 /** binde → "1,6 puan" */
@@ -121,10 +125,10 @@ function urun(f: MonthlyFacts): Section {
   const a = f.abc.find((x) => x.cls === "A");
   const findings: string[] = [];
   if (top) findings.push(`En çok kazandıran ürün ${top.name}: ${TL(top.grossProfitKurus)} brüt kâr (${top.qty} adet).`);
-  if (a) findings.push(`Cironun ${pct(a.sharePermille)}'ini ${a.count} ürün getiriyor (A sınıfı); ${f.products.soldCount} ürün satıldı, ${f.products.activeCount} aktif ürün var.`);
+  if (a) findings.push(`Cironun ${pctA(a.sharePermille)} ${a.count} ürün getiriyor (A sınıfı); ${f.products.soldCount} ürün satıldı, ${f.products.activeCount} aktif ürün var.`);
   const topRev = f.products.topRevenue[0];
   const conc = topRev && k.revenueGrossKurus > 0 ? mulDivRound(topRev.revenueGrossKurus, 1000, k.revenueGrossKurus) : 0;
-  if (conc > 250) findings.push(`Cironun ${pct(conc)}'i tek üründen (${topRev!.name}): bu ürün biterse ciro belirgin düşer.`);
+  if (conc > 250) findings.push(`Cironun ${pctP(conc)} tek üründen (${topRev!.name}): bu ürün biterse ciro belirgin düşer.`);
   const rise = f.products.risers[0];
   const fall = f.products.fallers[0];
   if (rise) findings.push(`En çok yükselen: ${rise.name} (${rise.prevQty} → ${rise.qty} adet).`);
@@ -148,7 +152,7 @@ function kategori(f: MonthlyFacts): Section {
   const falling = [...cats].filter((c) => c.changePermille !== null && c.changePermille < -100 && (c.sharePermille ?? 0) > 50).sort((a, b) => a.changePermille! - b.changePermille!);
   const lowMargin = [...cats].filter((c) => c.marginPermille !== null && c.revenueGrossKurus > 0).sort((a, b) => a.marginPermille! - b.marginPermille!)[0];
   const findings: string[] = [];
-  if (best) findings.push(`En büyük kategori ${best.name}: cironun ${pct(best.sharePermille)}'i, marj ${pct(best.marginPermille)}.`);
+  if (best) findings.push(`En büyük kategori ${best.name}: cironun ${pctP(best.sharePermille)}, marj ${pct(best.marginPermille)}.`);
   if (growing.length) findings.push(`Büyüyen kategoriler: ${growing.slice(0, 3).map((c) => `${c.name} (${signed(c.changePermille)})`).join(", ")}.`);
   if (falling.length) findings.push(`Belirgin düşen: ${falling.slice(0, 2).map((c) => `${c.name} (${signed(c.changePermille)})`).join(", ")}.`);
   if (lowMargin && lowMargin !== best) findings.push(`En düşük marjlı kategori ${lowMargin.name} (${pct(lowMargin.marginPermille)}).`);
@@ -157,7 +161,7 @@ function kategori(f: MonthlyFacts): Section {
     area: "kategori",
     title: "Kategoriler",
     grade,
-    comment: best ? `${best.name} cironun ${pct(best.sharePermille)}'ini getiriyor.` : "Kategori verisi yok.",
+    comment: best ? `${best.name} cironun ${pctA(best.sharePermille)} getiriyor.` : "Kategori verisi yok.",
     findings: findings.length ? findings : ["Bu ay kategori bazında satış yok."],
     opportunity: lowMargin ? `${lowMargin.name} kategorisinde fiyatları gözden geçirin ya da daha kârlı ürünlerle zenginleştirin.` : "Ürünleri kategorilere ayırmak analizi güçlendirir.",
   };
@@ -229,7 +233,7 @@ function gider(f: MonthlyFacts): Section {
   const top = e.byCategory[0];
   const over = e.byCategory.filter((c) => c.avg3NetKurus !== null && c.avg3NetKurus > 0 && c.netKurus * 1000 > c.avg3NetKurus * 1200 && c.netKurus - c.avg3NetKurus >= 50_000);
   const findings = [
-    `Giderler ${TL(e.totalNetKurus)} (KDV hariç); KDV hariç cironun ${pct(e.ratioPermille)}'i.`,
+    `Giderler ${TL(e.totalNetKurus)} (KDV hariç); KDV hariç cironun ${pctP(e.ratioPermille)}.`,
     `Önceki ay ${TL(e.previousNetKurus)}${e.avg3NetKurus !== null ? `, son 3 ay ortalaması ${TL(e.avg3NetKurus)}` : ""}.`,
   ];
   if (top) findings.push(`En büyük kalem ${top.label}: ${TL(top.netKurus)}.`);
@@ -239,7 +243,7 @@ function gider(f: MonthlyFacts): Section {
     area: "gider",
     title: "Giderler",
     grade,
-    comment: e.totalNetKurus > k.grossProfitKurus ? `Giderler (${TL(e.totalNetKurus)}) brüt kârı aşıyor.` : `Giderler brüt kârın ${pct(k.grossProfitKurus > 0 ? mulDivRound(e.totalNetKurus, 1000, k.grossProfitKurus) : null)}'i.`,
+    comment: e.totalNetKurus > k.grossProfitKurus ? `Giderler (${TL(e.totalNetKurus)}) brüt kârı aşıyor.` : `Giderler brüt kârın ${pctP(k.grossProfitKurus > 0 ? mulDivRound(e.totalNetKurus, 1000, k.grossProfitKurus) : null)}.`,
     findings,
     opportunity: over.length ? `${over[0]!.label} giderini ortalamaya indirmek aylık yaklaşık ${TL(over[0]!.netKurus - over[0]!.avg3NetKurus!)} kazandırır.` : "Giderleri her ay girip ortalamayla karşılaştırın; sıçramayı erken yakalarsınız.",
   };
@@ -280,7 +284,7 @@ function sepet(f: MonthlyFacts): Section {
   const pair = f.basket.pairs.find((p) => p.liftHundredths >= 150) ?? f.basket.pairs[0];
   const findings = [
     `Ortalama sepet ${k.avgBasketKurus === null ? "—" : TL(k.avgBasketKurus)}${f.changes.avgBasket !== null ? ` (${signed(f.changes.avgBasket)})` : ""}; fiş başına ${tenths(k.itemsPerBasketTenths)} ürün.`,
-    `İndirimler satışların ${pct(k.discountRatePermille)}'i (${TL(k.discountKurus)}).`,
+    `İndirimler satışların ${pctP(k.discountRatePermille)} (${TL(k.discountKurus)}).`,
   ];
   if (pair) findings.push(`En güçlü ikili: ${pair.a} + ${pair.b} (${pair.together} fişte birlikte, beklenenin ${Math.floor(pair.liftHundredths / 100)},${String(pair.liftHundredths % 100).padStart(2, "0")} katı).`);
   const ch = f.changes.avgBasket;
@@ -298,7 +302,7 @@ function sepet(f: MonthlyFacts): Section {
 function iade(f: MonthlyFacts): Section {
   const k = f.kpi;
   const voidRate = k.saleCount + k.voidedCount > 0 ? mulDivRound(k.voidedCount, 1000, k.saleCount + k.voidedCount) : 0;
-  const findings = [`${k.returnCount} iade (${TL(k.refundsKurus)}, satışların ${pct(f.returns.ratePermille)}'i); ${k.voidedCount} satış iptali (${pct(voidRate)}).`];
+  const findings = [`${k.returnCount} iade (${TL(k.refundsKurus)}, satışların ${pctP(f.returns.ratePermille)}); ${k.voidedCount} satış iptali (${pct(voidRate)}).`];
   const top = f.returns.topProducts[0];
   if (top) findings.push(`En çok iade edilen ${top.name}: ${top.soldQty} satıştan ${top.returnedQty} iade.`);
   const rate = f.returns.ratePermille ?? 0;
@@ -358,7 +362,7 @@ function staffEval(f: MonthlyFacts): { summary: string; people: StaffEval[]; gra
     const othersDisc = othersTotal + t.discountKurus - m.discountKurus > 0 ? mulDivRound(t.discountKurus - m.discountKurus, 1000, othersTotal + t.discountKurus - m.discountKurus) : 0;
     const strengths: string[] = [];
     const improve: string[] = [];
-    if (members.length > 1 && members.every((x) => x.saleCount <= m.saleCount)) strengths.push(`En çok satışı yapan (${m.saleCount} fiş, cironun ${pct(m.sharePermille)}'i)`);
+    if (members.length > 1 && members.every((x) => x.saleCount <= m.saleCount)) strengths.push(`En çok satışı yapan (${m.saleCount} fiş, cironun ${pctP(m.sharePermille)})`);
     if (othersBasket !== null && m.avgBasketKurus !== null && m.saleCount >= 20) {
       if (m.avgBasketKurus * 1000 >= othersBasket * 1100) strengths.push(`Büyük sepet: ${TL(m.avgBasketKurus)} (ekibin geri kalanı ${TL(othersBasket)})`);
       else if (m.avgBasketKurus * 1000 < othersBasket * 850) improve.push(`Sepet ekibin geri kalanından düşük (${TL(m.avgBasketKurus)} / ${TL(othersBasket)}): kasada tek yan ürün önerisi`);

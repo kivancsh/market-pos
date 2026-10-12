@@ -5,7 +5,8 @@ Tanıtım videosu müziği + ses efektleri (tamamen burada sentezlenir; telif yo
   sorun (gerilim, kalp atışı, müzik kutusu) → logo (sinematik açılış, davul yok → davul girer) →
   satış (zıplayan house grovu, elektrikli piyano) → finans (tam enerji, supersaw, ana melodi) →
   iş takibi (yarım tempo, derin 808 bas, arp) → stok (nefes, piyano, kalp atışı → yükseliş) →
-  2. patlama (en güçlü) → bant durması → final (majöre çözülen mutlu son).
+  2. patlama: yapay zekâ asistanı (en güçlü; dijital pırıltı arpeji, her ölçüde sonik logo, tarama/daktilo/zil) →
+  karusel → bant durması → final (majöre çözülen mutlu son).
 "Sonik logo": 4 notalık Market Kasa motifi (La–Mi–Do–La). Girişte fısıltı gibi, logoda büyük, satış
 "çiling"inde, barkod biplerinde (motifin notalarına akortlu), ana melodinin her ölçüsünün başında,
 stokta piyanoda ve finalde majör olarak duyulur — tekrar ettikçe akılda kalır.
@@ -31,7 +32,9 @@ SALE = SCN["sale"][0]
 FIN = SCN["finance"][0]
 TEAM = SCN["team"][0]
 STOCK = SCN["stock"][0]
-DROP2 = SCN["montage"][0]
+AIS, AIE = SCN["ai"]  # yapay zekâ asistanı: 2. patlama (en güçlü an), karusel aynı enerjiyle devam eder
+DROP2 = AIS
+MONT = SCN["montage"][0]
 COLL = SCN["collapse"][0]
 OUTRO = SCN["outro"][0]
 FINAL = TL["sfx"]["finalHit"][0]
@@ -480,8 +483,12 @@ motif(mt[1], 69, BEAT / 2, 0.2, send=0.5, last_len=3.0)  # logo: büyük
 motif(mt[1], 57, BEAT / 2, 0.12, send=0.4, last_len=3.0)
 motif(mt[2], 81, BEAT / 4, 0.13, send=0.45)  # satış tamamlandı: "çiling"
 motif(mt[3], 69, BEAT / 2, 0.2, kind="piano", send=0.55, last_len=3.0)  # stok: piyano
-motif(mt[4], 72, BEAT / 2, 0.2, intervals=MOTIF_MAJ, send=0.6, last_len=3.4)  # final: majör
-motif(mt[4], 60, BEAT / 2, 0.12, intervals=MOTIF_MAJ, send=0.5, last_len=3.4)
+motif(mt[4], 81, BEAT / 4, 0.16, send=0.5, last_len=2.6)  # yapay zekâ: "aha" anı (fark cümlesi)
+motif(mt[5], 72, BEAT / 2, 0.2, intervals=MOTIF_MAJ, send=0.6, last_len=3.4)  # final: majör
+motif(mt[5], 60, BEAT / 2, 0.12, intervals=MOTIF_MAJ, send=0.5, last_len=3.4)
+# yapay zekâ sahnesinin her ölçüsü motifle açılır (2.–4. ölçü; 1. ölçüde patlama + "aha" motifi)
+for k in range(1, 4):
+    motif(AIS + k * BAR, 93, BEAT / 4, 0.07, kind="box", pan_spread=0.9, send=0.45, last_len=1.2)
 
 # ana melodi: her ölçü motifin şekliyle başlar
 HOOK = {
@@ -500,7 +507,7 @@ def lead_note(m, n, hold):
     return s * env(n, a=0.004, d=0.16, s=0.35, r=0.06, hold=hold)
 
 
-for (a, b), oct_, g in (((FIN, TEAM), 0, 0.11), ((DROP2, COLL), 12, 0.1)):
+for (a, b), oct_, g in (((FIN, TEAM), 0, 0.11), ((MONT, COLL), 12, 0.1)):
     for bar_t in np.arange(a, b - 1e-6, BAR):
         k = ["Am", "F", "C", "G"][int(round((bar_t - a) / BAR)) % 4]
         for j, m in enumerate(HOOK[k]):
@@ -539,7 +546,7 @@ place(riser(DROP1 - 0.6), 0.6, 0.34, send=0.3)
 place(riser(DROP2 - STOCK - 1.2), STOCK + 1.2, 0.36, send=0.3)
 for t in TL["transitions"]:
     place(reverse_swell(0.7), t - 0.7, 0.26, pan=0.1, send=0.05)
-for t in (DROP1, SALE, FIN, TEAM, DROP2, OUTRO):
+for t in (DROP1, SALE, FIN, TEAM, DROP2, MONT, OUTRO):
     place(crash(), t, 0.2, pan=0.15, send=0.3)
 
 
@@ -645,6 +652,41 @@ for t in TL["sfx"]["finalHit"]:
     place(sig, t, 0.3, send=0.6)
     place(impact(2.4), t, 0.55, send=0.45)
     place(crash(3.0), t, 0.13, send=0.4)
+
+
+# ----------------------------------------------------------------- yapay zekâ sahnesi: dijital renk
+# pırıltı arpeji: akor seslerinden 32'lik, yüksek ve parlak, ping-pong (veri akışı hissi)
+for i, t in enumerate(grid(AIS + 2 * BEAT, AIE - BEAT / 2, 0.125)):
+    _, tones = chord_at(t)
+    m = [tones[0] + 24, tones[1] + 24, tones[2] + 24, tones[1] + 36][i % 4]
+    n = int(0.09 * SR)
+    tt = t_axis(n)
+    f = midi(m)
+    s_ = (np.sin(2 * np.pi * f * tt + 1.2 * np.sin(2 * np.pi * f * 2 * tt) * np.exp(-tt / 0.02))) * np.exp(-tt / 0.03)
+    place(s_, t, 0.035 + 0.02 * (i % 8 == 0), pan=0.6 if i % 2 else -0.6, send=0.35)
+
+
+def scan_sfx(length=1.3):
+    """Tarama: yükselen dijital süpürme + basamaklı (bit) doku."""
+    n = int(length * SR)
+    tt = t_axis(n)
+    f = np.geomspace(300, 2400, n)
+    tone = np.sin(2 * np.pi * np.cumsum(f) / SR)
+    steps = np.sign(np.sin(2 * np.pi * np.cumsum(f * 0.5) / SR)) * 0.25
+    e = np.clip(tt / 0.08, 0, 1) * np.clip((length - tt) / 0.15, 0, 1)
+    return (lowpass(tone + steps, 5000, 101) + 0.15 * sweep_lp(noise(n), 800, 7000)) * e * 0.6
+
+
+for t in TL["sfx"].get("scan", []):
+    place(scan_sfx(), t, 0.16, pan=-0.2, send=0.2)
+
+for t in TL["sfx"].get("type", []):  # daktilo: her aksiyonda hızlı tuş tıkırtıları
+    for j in range(5):
+        place(key_tap(), t + j * 0.075, 0.13 - 0.012 * j, pan=0.3 - 0.12 * j)
+
+for t in TL["sfx"].get("chime", []):  # hedef: parlak majör zil
+    for j, m in enumerate([81, 85, 88, 93]):
+        place(bell(midi(m), 1.6, 0.7), t + j * 0.045, 0.07, pan=(j - 1.5) * 0.3, send=0.6)
 
 
 # ----------------------------------------------------------------- reverb

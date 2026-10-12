@@ -385,7 +385,8 @@ const ALERTS = [
 ].map(([txt, bgc, dot, col, t]) => ({ e: el("div", "alert", s5, `<span class="dotc" style="background:${dot};box-shadow:0 0 16px ${dot}"></span>${txt}`), bgc, dot, col, t }));
 ALERTS.forEach((a) => S(a.e, { background: a.bgc, border: `2px solid ${a.dot}`, color: a.col }));
 const more = el("div", "abs ca", s5); S(more, { width: "1920px", textAlign: "center", top: "390px", fontSize: "230px", fontWeight: "900", letterSpacing: "-0.03em" });
-const moreL = "VE DAHASI".split("").map((ch, i) => { const s = el("span", "wi", more, ch === " " ? "&nbsp;" : ch); if (i >= 3) s.classList.add("grad"); return s; });
+const moreL = "VE ASIL FARK".split("").map((ch, i) => { const s = el("span", "wi", more, ch === " " ? "&nbsp;" : ch); if (i >= 3) s.classList.add("grad"); return s; });
+S(more, { fontSize: "200px" });
 
 // ================================================================== SAHNE 6 · Ve dahası: 3B karusel (31,875–36,56) → toplanma (–37,5)
 const s6 = el("div", "layer");
@@ -424,6 +425,90 @@ const s6bar = el("div", "abs", s6); S(s6bar, { left: "760px", top: "1028px", wid
 const s6fill = el("div", null, s6bar); S(s6fill, { height: "100%", width: "0", background: "linear-gradient(90deg,#10b981,#34d399)" });
 const s6core = el("div", "abs", s6); S(s6core, { width: "420px", height: "420px", borderRadius: "50%", background: "radial-gradient(circle, rgba(255,255,255,.95) 0%, rgba(110,231,183,.75) 22%, rgba(16,185,129,.25) 50%, transparent 70%)" });
 
+// ================================================================== SAHNE AI · Yapay zekâ asistanı (31,875–39,375) — videonun 2. patlaması
+// Sonraki sahneler (karusel, final) eski zamanlarıyla çizilir: t ≥ AIE iken t − AID verilir.
+const AIS = 31.875, AID = 4 * BAR, AIE = AIS + AID;
+const AI = BOXES._ai || {
+  headline: "",
+  scorecard: [{ label: "Fiyat", grade: "zayif" }, { label: "Stok", grade: "orta" }, { label: "Ciro", grade: "iyi" }, { label: "Personel", grade: "iyi" }],
+  actions: [
+    { title: "Alış fiyatı artan 3 ürünün satış fiyatını güncelleyin", week: "1. hafta", impact: "₺1.250,00 – ₺2.080,00 aylık ek kâr" },
+    { title: "Satılan 1 ürün stokta yok — kaçan satış", week: "1. hafta", impact: "₺175,00 – ₺350,00 önlenecek kayıp" },
+    { title: "Sepeti büyütün: birlikte alınan ürünleri yan yana koyun", week: "Ay boyunca", impact: "₺217,00 – ₺434,00 aylık ek kâr" },
+    { title: "Mevsim hazırlığı — kış ürünlerini öne alın", week: "1. hafta", impact: "" },
+  ],
+  potential: [200000, 450000],
+  target: { actual: 4200000, target: 11400000, forecast: 10800000, expected: 4600000 },
+};
+const sAI = el("div", "layer");
+const sAIp = el("div", "persp", sAI);
+const aiGlow = el("div", "abs", sAI); S(aiGlow, { width: "1300px", height: "1300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,.5), rgba(6,182,212,.18) 38%, transparent 62%)" });
+const aiShocks = [0, 1, 2].map(() => el("div", "shock", sAI));
+const aiSparks = Array.from({ length: 110 }, () => ({ e: el("div", "spark", sAI), a: rnd() * Math.PI * 2, v: 500 + rnd() * 1200, s: 0.5 + rnd() * 1.5 }));
+// Küre: çekirdek + dönen yörüngeler + yörüngede veri noktaları
+const orb = el("div", "abs", sAI); S(orb, { width: "300px", height: "300px", transformStyle: "preserve-3d" });
+const orbCore = el("div", "abs", orb); S(orbCore, { left: "60px", top: "60px", width: "180px", height: "180px", borderRadius: "50%", background: "radial-gradient(circle at 35% 30%, #ecfdf5 0%, #6ee7b7 18%, #10b981 45%, #065f46 78%, #022c22 100%)", boxShadow: "0 0 80px rgba(52,211,153,.85), 0 0 180px rgba(16,185,129,.55), inset 0 0 40px rgba(255,255,255,.35)" });
+const orbIcon = el("div", "abs", orb, ICON.spark.replace(/width="26" height="26"/, 'width="84" height="84"').replace('stroke="#fff"', 'stroke="#022c22"'));
+S(orbIcon, { left: "108px", top: "108px", width: "84px", height: "84px" });
+const orbRings = [[0, 70], [60, 70], [-60, 70]].map(([rz, rx]) => {
+  const r = el("div", "abs", orb);
+  S(r, { left: "0px", top: "0px", width: "300px", height: "300px", borderRadius: "50%", border: "3px solid rgba(110,231,183,.75)", boxShadow: "0 0 24px rgba(52,211,153,.6)" });
+  const dot = el("div", "abs", r); S(dot, { left: "142px", top: "-8px", width: "16px", height: "16px", borderRadius: "50%", background: "#ecfdf5", boxShadow: "0 0 18px #6ee7b7" });
+  return { r, rz, rx };
+});
+const aiPill = el("div", "pill abs", sAI, '<span class="n" style="background:linear-gradient(135deg,#34d399,#06b6d4)">✦</span>YAPAY ZEKÂ ASİSTANI');
+S(aiPill, { fontSize: "20px", height: "52px" });
+const aiLineA = kinetic(sAI, "Diğer programlar rakam gösterir.", "abs ktitle", { width: "1920px", textAlign: "center", fontSize: "62px", fontWeight: "750", color: "#94a3b8" });
+const aiStrike = el("div", "strike", sAI); S(aiStrike, { height: "8px", background: "#64748b", boxShadow: "none" });
+const aiLineB = kinetic(sAI, "Market Kasa {ne} {yapacağınızı} söyler.", "abs ktitle ca", { width: "1920px", textAlign: "center", fontSize: "104px" });
+// 2. ölçü: rapor ekranı + tarama + notlar
+const AIB = makeBrowser(sAIp, 1080, "Market Kasa — Yapay zekâ asistanı", ["asistan", "asistan-plan"]);
+const aiRing = ring(AIB);
+const scanBeam = el("div", "abs", AIB.ov); S(scanBeam, { left: "0px", width: "100%", height: "160px", background: "linear-gradient(180deg, transparent, rgba(16,185,129,.16) 70%, rgba(52,211,153,.55) 96%, #ecfdf5 100%)", boxShadow: "0 12px 30px rgba(52,211,153,.55)" });
+const scanTag = el("div", "abs", AIB.ov, "Analiz ediliyor…"); S(scanTag, { left: "auto", right: "18px", padding: "8px 16px", borderRadius: "999px", background: "rgba(2,44,34,.85)", color: "#6ee7b7", fontWeight: "800", fontSize: "18px", letterSpacing: ".06em" });
+const aiCapA = caption(sAI, { pill: "YAPAY ZEKÂ ASİSTANI", n: "✦", title: "Her ay {her} {kalemi} analiz eder.", size: 74, width: 600, sub: "Ciro, kâr, fiyat, stok, gider, kasa ve personel." });
+const GRADE = { iyi: ["İyi", "#10b981", "#a7f3d0"], orta: ["Orta", "#fbbf24", "#fde68a"], zayif: ["Zayıf", "#f43f5e", "#fecdd3"] };
+const pickCards = (() => {
+  const sc = AI.scorecard || [];
+  const take = [sc.find((s) => s.grade === "zayif"), sc.find((s) => s.grade === "orta"), ...sc.filter((s) => s.grade === "iyi").slice(0, 2)].filter(Boolean);
+  for (const s of sc) if (take.length < 4 && !take.includes(s)) take.push(s);
+  return take.slice(0, 4);
+})();
+const aiGrades = pickCards.map((s, i) => {
+  const [lab, dot, col] = GRADE[s.grade] || GRADE.orta;
+  const e = el("div", "alert", sAI, `<span class="dotc" style="background:${dot};box-shadow:0 0 16px ${dot}"></span>${s.label}<span style="margin-left:auto;padding-left:26px;color:${col}">${lab}</span>`);
+  S(e, { background: "rgba(15,23,42,.82)", border: `2px solid ${dot}`, color: "#fff", width: "430px", height: "78px", fontSize: "30px" });
+  return { e, t: 34.6875 + i * (BT / 2) };
+});
+// 3. ölçü: aksiyon planı (daktilo)
+const aiCapB = caption(sAI, { pill: "YAPAY ZEKÂ ASİSTANI", n: "✦", title: "Size {aksiyon} {planı} yazar.", size: 74, width: 640 });
+const aiActs = (AI.actions || []).slice(0, 4).map((a, i) => {
+  const e = el("div", "abs", sAI);
+  S(e, { width: "860px", padding: "18px 24px", borderRadius: "20px", background: "linear-gradient(160deg, rgba(30,41,59,.95), rgba(15,23,42,.95))", border: "1px solid rgba(255,255,255,.14)", boxShadow: "0 30px 60px rgba(0,0,0,.5)" });
+  const top = el("div", null, e); S(top, { display: "flex", alignItems: "center", gap: "14px" });
+  const num = el("div", null, top, String(i + 1)); S(num, { width: "40px", height: "40px", borderRadius: "12px", background: "linear-gradient(135deg,#10b981,#047857)", display: "grid", placeItems: "center", fontWeight: "900", fontSize: "22px", flex: "none" });
+  const wk = el("div", null, top, a.week || "Ay boyunca"); S(wk, { padding: "4px 12px", borderRadius: "999px", background: "rgba(56,189,248,.16)", color: "#7dd3fc", fontWeight: "800", fontSize: "17px", whiteSpace: "nowrap" });
+  const ttl = el("div", null, e); S(ttl, { marginTop: "10px", fontSize: "29px", fontWeight: "800", lineHeight: "1.25", minHeight: "36px" });
+  const imp = el("div", null, e, a.impact && a.impact.startsWith("₺") ? `Beklenen etki: ${a.impact}` : "Haftasına göre planlandı"); S(imp, { marginTop: "8px", fontSize: "22px", fontWeight: "750", color: "#34d399" });
+  return { e, ttl, imp, full: a.title, t: 35.859375 + i * BT };
+});
+const aiPot = el("div", "chip", sAI, `<span class="ic">${ICON.trend}</span><span class="pv">+₺0</span>&nbsp;/ ay kâr potansiyeli`);
+const aiPotV = aiPot.querySelector(".pv");
+// 4. ölçü: gerçekçi hedef + gidişat
+const aiCapC = kinetic(sAI, "Gerçekçi {hedef} koyar, gidişatı izler.", "abs ktitle ca", { width: "1920px", textAlign: "center", fontSize: "84px" });
+const gauge = el("div", "abs", sAI); S(gauge, { left: "360px", width: "1200px", height: "46px", borderRadius: "999px", background: "rgba(255,255,255,.09)", border: "1px solid rgba(255,255,255,.16)", overflow: "visible" });
+const gFill = el("div", "abs", gauge); S(gFill, { height: "46px", borderRadius: "999px", background: "linear-gradient(90deg,#059669,#34d399)", boxShadow: "0 0 30px rgba(52,211,153,.6)" });
+const gFore = el("div", "abs", gauge); S(gFore, { height: "46px", borderRadius: "999px", background: "repeating-linear-gradient(135deg, rgba(110,231,183,.35) 0 14px, rgba(110,231,183,.12) 14px 28px)", border: "2px dashed rgba(110,231,183,.7)" });
+const gExp = el("div", "abs", gauge); S(gExp, { top: "-14px", width: "5px", height: "74px", borderRadius: "4px", background: "#fff", boxShadow: "0 0 14px #fff" });
+const gFlag = el("div", "abs", gauge, `<div style="font-size:20px;color:#94a3b8;font-weight:800;letter-spacing:.12em">HEDEF</div><div class="gv" style="font-size:44px;font-weight:900;color:#fbbf24">₺0</div>`); S(gFlag, { top: "-104px", right: "-10px", textAlign: "right", whiteSpace: "nowrap" });
+const gNow = el("div", "abs", gauge, `<div style="font-size:20px;color:#94a3b8;font-weight:800;letter-spacing:.12em">BU AY</div><div class="gv" style="font-size:44px;font-weight:900">₺0</div>`); S(gNow, { top: "66px", left: "0px", whiteSpace: "nowrap" });
+const gFc = el("div", "abs", gauge, `<div style="font-size:20px;color:#94a3b8;font-weight:800;letter-spacing:.12em">AY SONU TAHMİNİ</div><div class="gv" style="font-size:44px;font-weight:900;color:#6ee7b7">₺0</div>`); S(gFc, { top: "66px", whiteSpace: "nowrap" });
+const aiChips = [["Hesap gerektirmez", ICON.check], ["İnternetsiz çalışır", ICON.wifi], ["Her ay otomatik", ICON.clock]].map(([txt, icn]) => el("div", "chip", sAI, `<span class="ic">${icn.replace(/width="26" height="26"/, 'width="24" height="24"')}</span>${txt}`));
+const aiMore = el("div", "abs ca", sAI); S(aiMore, { width: "1920px", textAlign: "center", top: "390px", fontSize: "230px", fontWeight: "900", letterSpacing: "-0.03em" });
+const aiMoreL = "VE DAHASI".split("").map((ch, i) => { const s = el("span", "wi", aiMore, ch === " " ? "&nbsp;" : ch); if (i >= 3) s.classList.add("grad"); return s; });
+const TRY0 = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 });
+const fmt0 = (k) => TRY0.format(Math.round(k / 100));
+
 // ================================================================== SAHNE 7 · Final (37,5–45)
 const s7 = el("div", "layer");
 const s7glow = el("div", "abs", s7); S(s7glow, { width: "1400px", height: "1400px", borderRadius: "50%", background: "radial-gradient(circle, rgba(16,185,129,.42), transparent 60%)" });
@@ -432,12 +517,13 @@ const s7sparks = Array.from({ length: 70 }, () => ({ e: el("div", "spark", s7), 
 const s7logo = el("img", "abs", s7); s7logo.src = `${ASSETS}/icon.png`; S(s7logo, { width: "190px", height: "190px", filter: "drop-shadow(0 30px 60px rgba(0,0,0,.5))" });
 const s7title = el("div", "abs ca", s7, 'Market <span class="grad">Kasa</span>'); S(s7title, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
 const s7sweep = el("div", "sweep", s7, "Market Kasa"); S(s7sweep, { width: "1920px", textAlign: "center", fontSize: "150px", fontWeight: "900", letterSpacing: "-0.04em" });
-const s7words = ["Satış", "Stok", "Finans", "Ekip"].map((w, i) => {
-  const e = el("div", "abs", s7, w);
-  S(e, { fontSize: "60px", fontWeight: "850", color: i % 2 ? "#6ee7b7" : "#fff", whiteSpace: "nowrap", letterSpacing: "-0.01em" });
+const s7words = ["Satış", "Stok", "Finans", "Ekip", "Yapay zekâ"].map((w, i) => {
+  const e = el("div", i === 4 ? "abs grad" : "abs", s7, w);
+  S(e, { fontSize: "60px", fontWeight: "850", whiteSpace: "nowrap", letterSpacing: "-0.01em" });
+  if (i < 4) e.style.color = i % 2 ? "#6ee7b7" : "#fff";
   return { e, t: 38.90625 + i * BT };
 });
-const s7dots = [0, 1, 2].map(() => { const d = el("div", "abs"); s7.appendChild(d); S(d, { width: "14px", height: "14px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 16px #34d399" }); return d; });
+const s7dots = [0, 1, 2, 3].map(() => { const d = el("div", "abs"); s7.appendChild(d); S(d, { width: "14px", height: "14px", borderRadius: "50%", background: "#10b981", boxShadow: "0 0 16px #34d399" }); return d; });
 const s7cta = kinetic(s7, "Dükkânınızı {bugün} büyütün.", "abs ktitle ca", { width: "1920px", textAlign: "center", fontSize: "88px" });
 const s7chips = [["Windows ve Mac", ICON.win], ["İnternetsiz çalışır", ICON.wifi], ["Verileriniz sizde", ICON.lock]].map(([txt, icn]) => el("div", "chip", s7, `<span class="ic">${icn}</span>${txt}`));
 
@@ -487,7 +573,7 @@ const RAILS = [
 ];
 const WHIPS = [[18.45, 19.15, 1], [22.1, 22.85, 1], [27.75, 28.5, 1], [32.8125, 33.17, 1], [33.75, 34.11, 1], [34.6875, 35.05, 1], [35.625, 35.99, 1]];
 
-function renderBg(t) {
+function renderBg(t, ai = false) {
   const kp = kickPulse(t);
   blobs.forEach(({ b, sp, ph }, i) => {
     const x = W / 2 - 600 + Math.sin(t * sp * 2 + ph) * 560 + (i - 1) * 280;
@@ -505,8 +591,8 @@ function renderBg(t) {
     d.d.style.opacity = 0.2 + 0.4 * Math.sin(t * 2 + d.ph) ** 2;
   });
   let ws = 0, wdir = 1;
-  WHIPS.forEach(([a, b, d]) => { if (win(t, a, b)) { ws = Math.sin(((t - a) / (b - a)) * Math.PI); wdir = -d; } });
-  if (win(t, 30.5, 31.875)) ws = Math.max(ws, P(t, 30.5, 31.85) * 0.8);
+  if (!ai) WHIPS.forEach(([a, b, d]) => { if (win(t, a, b)) { ws = Math.sin(((t - a) / (b - a)) * Math.PI); wdir = -d; } });
+  if (!ai && win(t, 30.5, 31.875)) ws = Math.max(ws, P(t, 30.5, 31.85) * 0.8);
   streaks.forEach((s, i) => {
     const x = ((t * 2600 * s.sp + i * 377) % (W + s.w)) - s.w;
     S(s.s, { width: s.w + "px", transform: `translate(${wdir > 0 ? x : W - x}px,${s.y}px)`, opacity: ws * 0.7 });
@@ -730,7 +816,7 @@ function renderS4(t) {
 }
 
 function renderS5(t) {
-  if (!show(s5, win(t, 27.7, 31.9))) return;
+  if (!show(s5, win(t, 27.7, 31.875))) return;
   const set = P(t, 27.9, 28.9, E.outExpo), ex = P(t, 30.35, 30.8, E.inExpo);
   place3d(STK, 720, 200 + Math.sin(t * 0.9) * 6, { ry: -11 - (1 - set) * 16, rx: 4, s: 1 - ex * 0.4, z: -ex * 900, blur: ex * 26, op: 1 - ex });
   setCam(STK, camLerp([280, 180, 1120, 330], [280, 230, 860, 260], P(t, 29.0, 30.2, E.inOutCubic)), P(t, 28.3, 28.8, E.inOutCubic));
@@ -746,7 +832,7 @@ function renderS5(t) {
   show(more, mOn);
   if (mOn) {
     moreL.forEach((s, i) => {
-      const ti = 30.9375 + i * (BT / 2) * 0.55;
+      const ti = 30.9375 + i * 0.055;
       const a = P(t, ti, ti + 0.18, E.outExpo);
       s.style.transform = `translateY(${(1 - a) * 80}px) scale(${1.6 - a * 0.6})`;
       s.style.opacity = a;
@@ -797,6 +883,134 @@ function renderS6(t) {
   S(s6core, { left: 960 - 210 + "px", top: 430 - 210 + "px", opacity: cg, transform: `scale(${0.2 + cg * 1.4 + 0.08 * Math.sin(t * 40) * cg})` });
 }
 
+const aiKick = (t) => Math.exp(-(((t - AIS) % BT) + BT) % BT / 0.12);
+function renderAI(t) {
+  if (!show(sAI, win(t, AIS - 0.05, AIE + 0.02))) return;
+  const cx = W / 2, cy = 330, kp = aiKick(t);
+  // --- 1. ölçü: küre patlar; "Diğer programlar rakam gösterir. Market Kasa ne yapacağınızı söyler."
+  shockAt(aiShocks, t, AIS, cx, cy, 0.09, 1800);
+  burst(aiSparks, t, AIS, cx, cy, 1.4);
+  const pl = P(t, AIS, AIS + 0.5, E.outBack);
+  const toBadge = P(t, 33.5, 34.0, E.inOutExpo); // küre → sağ üstte "çalışıyor" rozeti
+  const endOut = P(t, 38.9, 39.15, E.inExpo);
+  const ox = lerp(cx, 1745, toBadge), oy = lerp(cy, 128, toBadge), os = lerp(1, 0.4, toBadge);
+  S(orb, { transform: `translate(${ox - 150}px,${oy - 150}px) scale(${(0.2 + pl * 0.8) * os * (1 + kp * 0.04)})`, opacity: (t >= AIS ? 1 : 0) * (1 - endOut) });
+  orbRings.forEach((r, i) => (r.r.style.transform = `rotateZ(${r.rz + t * 40 * (i % 2 ? -1 : 1)}deg) rotateX(${r.rx}deg) rotateZ(${t * 150 * (i + 1)}deg)`));
+  orbCore.style.transform = `scale(${1 + kp * 0.07 + 0.03 * Math.sin(t * 5)})`;
+  S(aiGlow, { transform: `translate(${ox - 650}px,${oy - 650}px) scale(${(0.4 + pl * 0.7) * lerp(1, 0.32, toBadge) + kp * 0.08})`, opacity: P(t, AIS, AIS + 0.3) * (1 - endOut) });
+  const pa = P(t, 32.0, 32.35, E.outBack), lOut = P(t, 33.45, 33.7, E.inCubic);
+  S(aiPill, { left: cx - (aiPill.offsetWidth || 420) / 2 + "px", top: "530px", opacity: Math.min(P(t, 32.0, 32.15), 1 - lOut), transform: `scale(${0.6 + pa * 0.4})` });
+  aiLineA.box.style.top = "615px";
+  animWords(aiLineA, t, 32.1, 33.45, 0.05, 0.4);
+  const st = P(t, 32.72, 32.9, E.inOutCubic);
+  aiLineA.box.style.opacity = 1 - 0.55 * st;
+  const wsA = aiLineA.words.map((w) => w.parentElement);
+  const x0 = wsA[0].offsetLeft, x1 = wsA[wsA.length - 1].offsetLeft + wsA[wsA.length - 1].offsetWidth;
+  S(aiStrike, { left: x0 - 12 + "px", top: "657px", width: x1 - x0 + 24 + "px", transform: `scaleX(${st})`, opacity: (t >= 32.72 ? 1 : 0) * (1 - lOut) });
+  aiLineB.box.style.top = "712px";
+  aiLineB.box.style.transform = `scale(${1 + (win(t, 32.8125, 33.1) ? 0.04 * (1 - (t - 32.8125) / 0.29) : 0)})`;
+  animWords(aiLineB, t, 32.8125, 33.5, 0.07, 0.42);
+  // --- 2. ölçü: gerçek rapor ekranı taranır, notlar çıkar
+  const bIn = P(t, 33.6, 34.35, E.outExpo), toSide = P(t, 35.625, 36.0, E.inOutCubic), bOut = P(t, 37.3, 37.7, E.inExpo);
+  const bOn = win(t, 33.55, 37.75);
+  show(AIB.root, bOn);
+  if (bOn) {
+    place3d(AIB, 760 + (1 - bIn) * 1500 + toSide * 330, 175 + Math.sin(t * 0.9) * 6 + toSide * 60, { ry: -12 - (1 - bIn) * 22 - toSide * 6, rx: 4, s: (1 - toSide * 0.16) * (1 - bOut * 0.4), z: -bOut * 900, blur: bOut * 24 + toSide * 1.5, op: (1 - bOut) * (1 - toSide * 0.25) });
+    const plan = t >= 35.625;
+    setShot(AIB, plan ? "asistan-plan" : "asistan");
+    if (!plan) setCam(AIB, camLerp([280, 30, 1150, 720], [300, 60, 1000, 620], P(t, 34.2, 35.5, E.inOutCubic)), 1);
+    else setCam(AIB, camLerp([300, 0, 1120, 700], [300, 90, 1120, 700], P(t, 35.625, 36.4, E.outCubic)), 1, 1 + (win(t, 35.625, 35.85) ? 0.04 * (1 - (t - 35.625) / 0.225) : 0));
+    glareAt(AIB, t, plan ? 35.7 : 34.0);
+    const sp = P(t, 33.98, 35.3, E.inOutCubic);
+    S(scanBeam, { top: lerp(-160, AIB.h, sp) + "px", opacity: win(t, 33.95, 35.35) ? 1 : 0 });
+    S(scanTag, { top: "14px", opacity: win(t, 33.98, 35.45) ? 0.55 + 0.45 * Math.abs(Math.sin(t * 7)) : 0 });
+    setRing(AIB, aiRing, R("asistan", "aiHead", [300, 90, 1100, 60]), P(t, 34.15, 34.3) * (1 - P(t, 35.1, 35.4)), 8);
+  }
+  animCaption(aiCapA, t, 33.85, 35.45, 110, 150);
+  aiGrades.forEach((g, i) => {
+    const on = win(t, g.t - 0.05, 35.75);
+    show(g.e, on);
+    if (!on) return;
+    const a = P(t, g.t, g.t + 0.35, E.outBack), o = P(t, 35.45 + i * 0.03, 35.7 + i * 0.03, E.inExpo);
+    S(g.e, { left: "110px", top: 560 + i * 98 + "px", opacity: P(t, g.t, g.t + 0.1) * (1 - o), transform: `translateX(${(1 - a) * -220 - o * 600}px) scale(${0.6 + a * 0.4})`, transformOrigin: "0 50%" });
+  });
+  // --- 3. ölçü: aksiyon planı daktiloyla yazılır
+  animCaption(aiCapB, t, 35.7, 37.35, 110, 96);
+  aiActs.forEach((a, i) => {
+    const on = win(t, a.t - 0.1, 37.75);
+    show(a.e, on);
+    if (!on) return;
+    const p = P(t, a.t - 0.1, a.t + 0.25, E.outBack), o = P(t, 37.35 + i * 0.04, 37.65 + i * 0.04, E.inExpo);
+    S(a.e, { left: "110px", top: 330 + i * 160 + "px", opacity: P(t, a.t - 0.1, a.t) * (1 - o), transform: `translateX(${(1 - p) * -260 - o * 900}px) scale(${0.85 + p * 0.15})`, transformOrigin: "0 50%" });
+    const n = Math.floor(a.full.length * P(t, a.t, a.t + 0.4, E.lin));
+    a.ttl.textContent = a.full.slice(0, n) + (n < a.full.length ? "▍" : "");
+    a.imp.style.opacity = P(t, a.t + 0.38, a.t + 0.5);
+  });
+  const potOn = win(t, 36.1, 37.75);
+  show(aiPot, potOn);
+  if (potOn) {
+    const p = P(t, 36.1, 36.45, E.outBack), o = P(t, 37.4, 37.65, E.inExpo);
+    aiPotV.textContent = `+${fmt0((AI.potential?.[1] || 0) * P(t, 36.2, 37.1, E.outExpo))}`;
+    S(aiPot, { left: "1060px", top: "940px", opacity: P(t, 36.1, 36.2) * (1 - o), transform: `translateY(${(1 - p) * 60}px) scale(${(0.6 + p * 0.4) * 0.9})`, transformOrigin: "0 50%", borderColor: "rgba(52,211,153,.7)", color: "#d1fae5" });
+  }
+  // --- 4. ölçü: gerçekçi hedef ve gidişat
+  aiCapC.box.style.top = "270px";
+  animWords(aiCapC, t, 37.55, 38.85, 0.05, 0.4);
+  const tg = AI.target;
+  const gOn = !!tg && win(t, 37.65, 39.0);
+  show(gauge, gOn);
+  if (gOn) {
+    const go = P(t, 38.85, 39.0, E.inCubic);
+    S(gauge, { top: "560px", opacity: P(t, 37.7, 37.9) * (1 - go), transform: `scale(${0.9 + 0.1 * P(t, 37.7, 38.0, E.outBack)})` });
+    const w = (v) => clamp(v / Math.max(1, tg.target)) * 1200;
+    const fp = P(t, 37.85, 38.4, E.outExpo), fc = P(t, 38.4375, 38.8, E.outExpo);
+    S(gFill, { left: "0px", width: w(tg.actual) * fp + "px" });
+    S(gFore, { left: w(tg.actual) - 4 + "px", width: Math.max(0, w(tg.forecast ?? tg.actual) - w(tg.actual)) * fc + 4 + "px", opacity: fc });
+    S(gExp, { left: w(tg.expected ?? 0) + "px", opacity: P(t, 38.1, 38.25) });
+    gNow.querySelector(".gv").textContent = fmt0(tg.actual * fp);
+    gFlag.querySelector(".gv").textContent = fmt0(tg.target * P(t, 37.75, 38.3, E.outExpo));
+    gFc.querySelector(".gv").textContent = fmt0((tg.forecast ?? tg.actual) * fc);
+    S(gFc, { left: clamp(w(tg.forecast ?? tg.actual) - 330, 380, 880) + "px", opacity: fc });
+  }
+  aiChips.forEach((c, i) => {
+    const p = P(t, 38.55 + i * 0.12, 38.85 + i * 0.12, E.outBack), o = P(t, 38.88, 39.02, E.inCubic);
+    show(c, win(t, 38.5, 39.05));
+    S(c, { transform: `translate(${[300, 790, 1270][i]}px,${800 + (1 - p) * 50}px) scale(${(0.6 + p * 0.4) * 0.82})`, opacity: P(t, 38.55 + i * 0.12, 38.7 + i * 0.12) * (1 - o) });
+  });
+  // --- "VE DAHASI" → karusel
+  const mOn = t >= 38.95;
+  show(aiMore, mOn);
+  if (mOn) {
+    aiMoreL.forEach((s, i) => {
+      const ti = 38.98 + i * 0.03, a = P(t, ti, ti + 0.15, E.outExpo);
+      s.style.transform = `translateY(${(1 - a) * 80}px) scale(${1.6 - a * 0.6})`;
+      s.style.opacity = a;
+    });
+    const g = P(t, 39.15, 39.36, E.inCubic);
+    S(aiMore, { transform: `scale(${1 + g * 0.5})`, filter: g > 0.4 ? `blur(${(g - 0.4) * 20}px)` : "none", opacity: 1 - P(t, 39.3, AIE) });
+  }
+}
+function renderFxAI(t) {
+  let f = 0;
+  for (const [ft, a, d] of [[AIS, 0.95, 0.5], [33.75, 0.12, 0.25], [35.625, 0.12, 0.25], [37.5, 0.14, 0.3]]) if (win(t, ft, ft + d)) f = Math.max(f, a * Math.pow(1 - (t - ft) / d, 1.6));
+  if (win(t, 39.1, AIE)) f = Math.max(f, P(t, 39.1, AIE, E.inCubic) * 0.9);
+  flash.style.opacity = f;
+  let x = 0, y = 0, amp = 0;
+  for (const [t0, a, d] of [[AIS, 44, 0.4], [32.8125, 9, 0.2], [33.75, 6, 0.15], [35.625, 6, 0.15], [37.5, 8, 0.2], [38.4375, 6, 0.2]]) {
+    if (t < t0 || t > t0 + d * 5) continue;
+    const k = a * Math.exp(-(t - t0) / d);
+    x += k * Math.sin((t - t0) * 87 + t0 * 3); y += k * Math.cos((t - t0) * 71 + t0 * 5); amp = Math.max(amp, k);
+  }
+  if (win(t, 38.95, AIE)) { const k = 10 * P(t, 38.95, AIE - 0.02, E.inCubic); x += k * Math.sin(t * 97); y += k * Math.cos(t * 83); amp = Math.max(amp, k); }
+  const kp = aiKick(t);
+  world.style.transform = `translate(${x}px,${y}px) scale(${1 + kp * 0.006 + (win(t, 38.95, AIE) ? P(t, 38.95, AIE) * 0.05 : 0)}) rotate(${x * 0.02}deg)`;
+  document.documentElement.style.setProperty("--ca", Math.min(16, amp * 0.5 + kp * 1.5).toFixed(2));
+  S(leak1, { transform: `translate(${-500 + Math.sin(t * 0.33) * 300}px,${-600 + Math.cos(t * 0.27) * 200}px)`, opacity: 0.45 + 0.2 * Math.sin(t * 0.7) });
+  S(leak2, { transform: `translate(${1100 + Math.cos(t * 0.29) * 300}px,${300 + Math.sin(t * 0.31) * 200}px)`, opacity: 0.4 + 0.2 * Math.cos(t * 0.6) });
+  grain.style.transform = `translate(${Math.floor(rndAt(t, 1) * 100)}px,${Math.floor(rndAt(t, 2) * 100)}px)`;
+  fade.style.opacity = 0;
+}
+
 function applyRails(t) {
   const L = { s1, s2, s3, s4, s5 };
   const P2 = { s2: s2p, s3: s3p, s4: s4p, s5: s5p };
@@ -833,12 +1047,12 @@ function renderS7(t) {
   // Satış · Stok · Finans · Ekip
   const widths = s7words.map((w) => w.e.offsetWidth || 160);
   const gap = 70;
-  const total = widths.reduce((s, w) => s + w, 0) + gap * 3;
+  const total = widths.reduce((s, w) => s + w, 0) + gap * (widths.length - 1);
   let x = cx - total / 2;
   s7words.forEach((w, i) => {
     const p = P(t, w.t, w.t + 0.3, E.outBack);
     S(w.e, { left: x + "px", top: "600px", opacity: P(t, w.t, w.t + 0.08), transform: `translateY(${(1 - p) * 50}px) scale(${0.5 + p * 0.5 + (win(t, w.t, w.t + 0.2) ? 0.08 : 0)})` });
-    if (i < 3) S(s7dots[i], { left: x + widths[i] + gap / 2 - 7 + "px", top: "634px", opacity: P(t, s7words[i + 1].t - 0.05, s7words[i + 1].t + 0.1), transform: `scale(${P(t, s7words[i + 1].t - 0.05, s7words[i + 1].t + 0.2, E.outBack)})` });
+    if (i < s7dots.length) S(s7dots[i], { left: x + widths[i] + gap / 2 - 7 + "px", top: "634px", opacity: P(t, s7words[i + 1].t - 0.05, s7words[i + 1].t + 0.1), transform: `scale(${P(t, s7words[i + 1].t - 0.05, s7words[i + 1].t + 0.2, E.outBack)})` });
     x += widths[i] + gap;
   });
   animWords(s7cta, t, 41.25, 99, 0.07, 0.4);
@@ -871,17 +1085,27 @@ function renderFX(t) {
 const rndAt = (t, k) => { const x = Math.sin(Math.floor(t * 30) * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
 
 window.renderFrame = (t) => {
-  renderBg(t);
-  renderS0(t);
-  renderS1(t);
-  renderS2(t);
-  renderS3(t);
-  renderS4(t);
-  renderS5(t);
-  renderS6(t);
-  renderS7(t);
-  applyRails(t);
-  renderFX(t);
+  if (t >= AIS && t < AIE) {
+    // Yapay zekâ sahnesi: diğer sahneler gizli
+    for (const l of [s0, s1, s2, s3, s4, s5, s6, s7]) show(l, false);
+    renderBg(t, true);
+    renderAI(t);
+    renderFxAI(t);
+    return;
+  }
+  show(sAI, false);
+  const to = t >= AIE ? t - AID : t; // yapay zekâ sahnesinden sonraki sahneler eski zamanlarıyla
+  renderBg(to);
+  renderS0(to);
+  renderS1(to);
+  renderS2(to);
+  renderS3(to);
+  renderS4(to);
+  renderS5(to);
+  renderS6(to);
+  renderS7(to);
+  applyRails(to);
+  renderFX(to);
 };
 window.ready = Promise.all([...document.images].map((i) => (i.complete ? Promise.resolve() : new Promise((r) => { i.onload = r; i.onerror = r; })))).then(() => document.fonts.ready);
 renderFrame(Number(new URLSearchParams(location.search).get("t") || 0));

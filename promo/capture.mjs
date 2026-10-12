@@ -182,6 +182,46 @@ if (!mail) throw new Error("rapor e-postası bulunamadı");
   console.log("✓ eposta");
 }
 
+// ================================================================= Yapay zekâ asistanı (bu ayın ara raporu)
+// Gerçekçi bir toptancı zammı: alış fiyatı artar, satış fiyatı aynı kalır → asistan fiyat önerisi çıkarır
+{
+  const prods = (await (await o.request.get(`${BASE}/api/products`)).json()).items;
+  const byName = (n) => prods.find((p) => p.name === n);
+  const items = [
+    ["Kola 1 L", 40, 4100],
+    ["Süt 1 L", 30, 3900],
+    ["Ayçiçek Yağı 1 L", 20, 9600],
+  ].map(([n, qty, unitCostKurus]) => ({ productId: byName(n).id, qty, unitCostKurus }));
+  const pr = await o.request.post(`${BASE}/api/purchases`, { data: { supplier: "Merkez Toptan", items } });
+  if (!pr.ok()) throw new Error(`mal girişi yapılamadı: ${await pr.text()}`);
+  const month = today.slice(0, 7);
+  const gen = await o.request.post(`${BASE}/api/assistant/reports`, { data: { month } });
+  if (!gen.ok()) throw new Error(`asistan raporu oluşturulamadı: ${await gen.text()}`);
+  const data = await (await o.request.get(`${BASE}/api/assistant?month=${month}`)).json();
+  const rep = data.report;
+  const AREA = { ciro: "Ciro", kar: "Kârlılık", urun: "Ürünler", kategori: "Kategoriler", fiyat: "Fiyat", stok: "Stok", gider: "Giderler", zaman: "Saatler", sepet: "Sepet", iade: "İade", kasa: "Kasa", personel: "Personel" };
+  const revT = data.current.targets.find((x) => x.metric === "revenue");
+  boxes._ai = {
+    headline: rep.ai.headline,
+    scorecard: rep.ai.scorecard.map((s) => ({ label: AREA[s.area] ?? s.area, grade: s.grade })),
+    // Videoda ₺ etkisi olan aksiyonlar önce (sırası korunarak)
+    actions: [...rep.plan.filter((p) => p.impact?.startsWith("₺")), ...rep.plan.filter((p) => !p.impact?.startsWith("₺"))]
+      .slice(0, 4)
+      .map((p) => ({ title: p.title, week: p.week, impact: p.impact, priority: p.priority })),
+    potential: [rep.potential.minKurus, rep.potential.maxKurus],
+    target: revT ? { actual: revT.actual, target: revT.target, forecast: revT.forecast, expected: revT.expectedToDate, status: revT.status } : null,
+    staff: rep.ai.staff.map((s) => ({ strengths: s.strengths.slice(0, 1), improve: s.improve.slice(0, 1) })),
+  };
+  await o.goto(`${BASE}/yonetim/asistan?ay=${month}`);
+  await o.getByTestId("assistant-report").waitFor();
+  await o.waitForTimeout(900);
+  await o.evaluate(() => window.scrollTo(0, document.querySelector('[data-testid="assistant-report"]').getBoundingClientRect().top + window.scrollY - 70));
+  await shot(o, "asistan", { aiHead: '[data-testid="assistant-headline"]', aiCiro: '[data-testid="area-ciro"]' });
+  await o.evaluate(() => window.scrollTo(0, document.querySelector('[data-testid="assistant-plan"]').getBoundingClientRect().top + window.scrollY - 70));
+  await shot(o, "asistan-plan", { aiPlan: '[data-testid="assistant-plan"]' });
+  await o.evaluate(() => window.scrollTo(0, 0));
+}
+
 // ================================================================= Telefon: Genel bakış
 const phoneCtx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true, hasTouch: true, locale: "tr-TR", timezoneId: "Europe/Istanbul", storageState: await ownerCtx.storageState() });
 const ph = await phoneCtx.newPage();

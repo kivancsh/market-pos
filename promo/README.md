@@ -1,15 +1,18 @@
 # Tanıtım videosu
 
-Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 45 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
+Hazır video: [`market-kasa-tanitim.mp4`](market-kasa-tanitim.mp4) — 52,5 sn, 1920×1080, 30 fps, H.264 + AAC stereo.
 
 Akış (128 BPM müziğe kare kare senkron; sahneler kesintisiz kamera hareketiyle birbirine bağlanır): **sorun** ("Dükkânınızda hâlâ…
 VERİMSİZ SATIŞ, DAĞINIK EKİP YÖNETİMİ, PLANSIZ BÜYÜME" üstü çizilir → "Artık değil.") → **1. patlama** logo → **Satış** (barkod okutma, sayaçla
 toplam, F8, para üstü, konfeti) → **Finans yönetimi** (Genel bakış, ciro / brüt kâr / gider / net kâr kartları; "Net kâr" kartı
 kâr-zarar denklemine uçar, KDV özeti) → **İş takibi** (kasiyer performansı, yoğun saatler ısı haritası) → **Stok** (bitmeden haber,
-sipariş önerisi) → **2. patlama** "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
-merkezde toplanıp logoya patlar → **final** (Satış · Stok · Finans · Ekip, "Dükkânınızı bugün büyütün.").
+sipariş önerisi; "VE ASIL FARK") → **2. patlama: Yapay zekâ asistanı** (en güçlü an; küre açılır, "Diğer programlar rakam gösterir. Market Kasa ne
+yapacağınızı söyler.", gerçek rapor ekranı taranır ve notlar çıkar, aksiyon planı haftası ve ₺ etkisiyle daktiloyla yazılır, gerçekçi hedef
+ve ay sonu tahmini çubuğu dolar; "Hesap gerektirmez · İnternetsiz çalışır · Her ay otomatik") → "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
+merkezde toplanıp logoya patlar → **final** (Satış · Stok · Finans · Ekip · Yapay zekâ, "Dükkânınızı bugün büyütün.").
 
-Müzik: her bölümün kendi rengi var (gerilim → sinematik açılış → house grovu → tam enerji → yarım tempo 808 → nefes → patlama →
+Müzik: her bölümün kendi rengi var (gerilim → sinematik açılış → house grovu → tam enerji → yarım tempo 808 → nefes → patlama
+(yapay zekâ: dijital pırıltı arpeji, her ölçüde sonik logo, tarama/daktilo/hedef zili) → karusel →
 bant durması → majöre çözülen final). 4 notalık **sonik logo** (La–Mi–Do–La) girişte, logoda, barkod biplerinde (biplerin notaları
 motifin notaları), satış "çiling"inde, ana melodide, stokta piyanoda ve finalde majör olarak tekrar eder.
 
@@ -19,7 +22,7 @@ Müzik ve ses efektleri `music.py` ile sıfırdan sentezlenir; telif hakkı soru
 | Dosya | Ne yapar |
 |---|---|
 | `timeline.json` | Sahne süreleri ve ses efekti zamanları (görüntü ve müzik buradan senkron kalır). |
-| `capture.mjs` | Demo sunucudan (port 3200) ekran görüntüleri + önemli öğelerin konumları ve rakamlar (`boxes.json`). Bu ayın örnek giderlerini ekler, gün sonu raporu e-postasını çeker. |
+| `capture.mjs` | Demo sunucudan (port 3200) ekran görüntüleri + önemli öğelerin konumları ve rakamlar (`boxes.json`). Bu ayın örnek giderlerini ekler, gün sonu raporu e-postasını çeker; örnek bir toptancı zammı girip yapay zekâ asistanının ara raporunu oluşturur (notlar, aksiyonlar, hedef `boxes._ai`'ye). |
 | `composition.html` | Animasyonlu kurgu; her kare `renderFrame(t)` ile zamana göre çizilir. |
 | `render.mjs` | Kurguyu kare kare JPEG olarak çizer (ya da seçilen anların önizlemesini alır). |
 | `music.py` | 128 BPM, bölüm bölüm değişen müzik + sonik logo + geçiş/bip/tuş/zil/darbe/bant durması efektleri → WAV (Python 3 + numpy). |

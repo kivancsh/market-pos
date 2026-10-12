@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { isMonth, monthLabel, shiftMonth, targetProgress, withStaffNames } from "@/lib/assistant";
 import { presentForAi } from "@/server/services/assistant/ai";
+import { withSuffix } from "@/lib/turkish";
 import { roundUpPrice } from "@/server/services/assistant/facts";
 
 describe("ay yardımcıları", () => {
@@ -49,5 +50,22 @@ describe("takma ad ve biçim", () => {
     expect(roundUpPrice(6020)).toBe(6050);
     expect(roundUpPrice(6000)).toBe(6000);
     expect(roundUpPrice(6001)).toBe(6050);
+  });
+});
+
+describe("Türkçe sayı ekleri", () => {
+  it("ek, sayının okunuşunun son kelimesine uyar", () => {
+    expect(withSuffix("%55,6", "poss")).toBe("%55,6'sı");
+    expect(withSuffix("%30,0", "poss")).toBe("%30,0'ı");
+    expect(withSuffix("%12,3", "poss")).toBe("%12,3'ü");
+    expect(withSuffix("%44,5", "poss")).toBe("%44,5'i");
+    expect(withSuffix("%80,9", "acc")).toBe("%80,9'unu");
+    expect(withSuffix("%70,2", "acc")).toBe("%70,2'sini");
+    expect(withSuffix("5", "loc")).toBe("5'inde");
+    expect(withSuffix("4", "loc")).toBe("4'ünde");
+    expect(withSuffix("6", "loc")).toBe("6'sında");
+    expect(withSuffix("40", "poss")).toBe("40'ı");
+    expect(withSuffix("20", "loc")).toBe("20'sinde");
+    expect(withSuffix("100", "poss")).toBe("100'ü");
   });
 });

@@ -5,6 +5,7 @@
  */
 import { type ActionArea } from "@/lib/assistant";
 import { divRound, formatPermille, formatTRY, mulDivRound } from "@/lib/money";
+import { withSuffix } from "@/lib/turkish";
 import type { MonthlyFacts, PriceLine } from "./facts";
 
 export type ActionPriority = "yuksek" | "orta" | "dusuk";
@@ -183,7 +184,7 @@ export function buildRuleActions(f: MonthlyFacts): PlanAction[] {
       key: "discount-leak",
       area: "fiyat",
       priority: k.discountRatePermille > 60 ? "orta" : "dusuk",
-      title: `İndirimler satışların ${pct(k.discountRatePermille)}'i — ${formatTRY(k.discountKurus)}`,
+      title: `İndirimler satışların ${withSuffix(pct(k.discountRatePermille), "poss")} — ${formatTRY(k.discountKurus)}`,
       why: "İndirim doğrudan kârdan gider. Planlı kampanya dışındaki indirimler kontrol edilmeli.",
       steps: ["Kasiyer performansı raporunda kimin ne kadar indirim yaptığına bakın.", "Ayarlar'da kasiyer indirim yetkisini yalnız gerekiyorsa açık tutun."],
       ...range(netDiscount, 200, 500),
@@ -316,7 +317,7 @@ export function buildRuleActions(f: MonthlyFacts): PlanAction[] {
       area: "kasa",
       priority: c.shortageKurus >= 100_000 ? "yuksek" : "orta",
       title: `Kasa açığı: ${c.shortageDays} günde toplam ${formatTRY(c.shortageKurus)}`,
-      why: `${c.countedDays} günlük sayımın ${c.shortageDays}'inde kasa eksik çıktı${c.excessKurus > 0 ? `; ${c.excessDays} gün fazla (${formatTRY(c.excessKurus)})` : ""}. Tekrarlayan açık; para üstü hatası, kayıt dışı iade ya da kayıp olabilir.`,
+      why: `${c.countedDays} günlük sayımın ${withSuffix(String(c.shortageDays), "loc")} kasa eksik çıktı${c.excessKurus > 0 ? `; ${c.excessDays} gün fazla (${formatTRY(c.excessKurus)})` : ""}. Tekrarlayan açık; para üstü hatası, kayıt dışı iade ya da kayıp olabilir.`,
       steps: ["Vardiya değişiminde kasayı birlikte sayın.", "Açık çıkan günlerde kimin kasada olduğunu ve iptal/iade işlemlerini kontrol edin.", "Nakitte 'alınan para'nın girilmesini zorunlu alışkanlık yapın."],
       ...range(c.shortageKurus, 500, 1000),
       impactKind: "risk",

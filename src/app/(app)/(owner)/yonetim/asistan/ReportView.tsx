@@ -15,6 +15,7 @@ import {
 } from "@/lib/assistant";
 import { formatBusinessDate, formatIstanbulDateTime } from "@/lib/businessDate";
 import { formatPermille, formatTRY } from "@/lib/money";
+import { withSuffix } from "@/lib/turkish";
 import type { DisplayAction, MonthlyReportView } from "@/server/services/assistant";
 import type { MonthlyFacts } from "@/server/services/assistant/facts";
 import { PACE_STYLE, fmtMetric } from "./TargetsPanel";
@@ -191,7 +192,7 @@ function AreaData({ area, f }: { area: Area; f: MonthlyFacts }) {
       return (
         <div className="flex flex-col gap-2">
           <p className="text-sm text-slate-600">
-            {k.returnCount} iade ({formatTRY(k.refundsKurus)}, satışların {formatPermille(f.returns.ratePermille)}’i) · {k.voidedCount} satış iptali.
+            {k.returnCount} iade ({formatTRY(k.refundsKurus)}, satışların {f.returns.ratePermille === null ? "—" : withSuffix(formatPermille(f.returns.ratePermille), "poss").replace("'", "’")}) · {k.voidedCount} satış iptali.
           </p>
           <Table head={["En çok iade edilen", "Satılan", "İade", "Oran"]} rows={f.returns.topProducts.map((r) => [r.name, r.soldQty, r.returnedQty, formatPermille(r.ratePermille)])} />
         </div>
