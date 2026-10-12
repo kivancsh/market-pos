@@ -137,7 +137,7 @@ function AreaData({ area, f }: { area: Area; f: MonthlyFacts }) {
           testId="facts-prices"
         />
       ) : (
-        <p className="text-sm text-slate-600">Fiyatı güncellenmesi gereken ürün görünmüyor. Bu ay {f.priceChanges} fiyat değişikliği yapıldı.</p>
+        <p className="text-sm text-slate-600">Fiyatı güncellenmesi gereken ürün görünmüyor.</p>
       );
     }
     case "stok":
@@ -329,9 +329,9 @@ export function ReportView({ report, onPlanChange }: { report: MonthlyReportView
         </a>
       </section>
 
-      {report.aiError && (
-        <p className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900" data-testid="assistant-ai-error">
-          Yapay zekâ yorumu alınamadı: {report.aiError} Rakamlar ve kural tabanlı öneriler geçerli.
+      {report.aiError && report.aiSource === "local" && (
+        <p className="text-xs text-slate-500 print:hidden" data-testid="assistant-ai-error">
+          Bulut yapay zekâ yorumu alınamadı ({report.aiError}); yerleşik asistanın yorumu gösteriliyor.
         </p>
       )}
       {f.dataQuality.notes.length > 0 && (
@@ -510,8 +510,8 @@ export function ReportView({ report, onPlanChange }: { report: MonthlyReportView
 
       <p className="text-xs text-slate-500">
         Rapor {formatIstanbulDateTime(report.updatedAt)} tarihinde hazırlandı · {formatBusinessDate(f.from)} – {formatBusinessDate(f.to)}
-        {report.aiModel ? ` · yapay zekâ yorumu: ${report.aiModel}` : " · yapay zekâ yorumu yok (kural tabanlı öneriler)"}
-        {report.emailedAt ? ` · e-postayla gönderildi` : ""}. Rakamlar programdaki kayıtlardan hesaplanır; yapay zekâ yalnızca yorumlar.
+        {report.aiSource === "cloud" ? ` · yorum: bulut yapay zekâ (${report.aiModel})` : " · yorum: Market Kasa yerleşik asistanı (bu bilgisayarda)"}
+        {report.emailedAt ? ` · e-postayla gönderildi` : ""}. Rakamlar programdaki kayıtlardan hesaplanır; asistan yalnızca yorumlar.
       </p>
     </div>
   );

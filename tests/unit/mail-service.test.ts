@@ -92,3 +92,48 @@ describe("Market Kasa e-posta servisi", () => {
     expect((await call("/v1/install", {}, undefined, "9.9.9.9")).status).toBe(429);
   });
 });
+
+describe("merkezi yapay zekâ ucu (/v1/ai/monthly)", () => {
+  const payload = {
+    monthLabel: "Eylül 2026",
+    isPartial: false,
+    rapor: { kpi: { revenueGrossTL: "₺1.000,00" } },
+    ruleActions: [],
+    toplamKarPotansiyeli: { enAzTL: "₺0,00", enCokTL: "₺0,00" },
+    nextTargets: [],
+  };
+
+  it("anahtar tanımlı değilse kapalı; kurulum anahtarı zorunlu; veri paketi denetlenir; günlük sınır", async () => {
+    const creds = await install();
+    expect((await call("/v1/ai/monthly", { payload }, creds)).status).toBe(503);
+
+    let calls = 0;
+    env = { ...env, ANTHROPIC_API_KEY: "test-key" };
+    deps = { ...deps, runAi: async (_e, p) => ({ report: { headline: `yorum: ${p.monthLabel}`, n: ++calls }, model: "claude-opus-5-5" }) };
+    expect((await call("/v1/ai/monthly", { payload })).status).toBe(401);
+    expect((await call("/v1/ai/monthly", { payload: { monthLabel: "x" } }, creds)).status).toBe(400);
+    expect((await call("/v1/ai/monthly", { payload: { ...payload, ruleActions: Array.from({ length: 41 }, () => ({})) } }, creds)).status).toBe(400);
+
+    const ok = await json(await call("/v1/ai/monthly", { payload }, creds));
+    expect(ok).toEqual({ report: { headline: "yorum: Eylül 2026", n: 1 }, model: "claude-opus-5-5" });
+    for (let i = 1; i < LIMITS.aiPerInstallPerDay; i++) expect((await call("/v1/ai/monthly", { payload }, creds)).status).toBe(200);
+    const limited = await call("/v1/ai/monthly", { payload }, creds);
+    expect(limited.status).toBe(429);
+    expect((await json(limited)).error.code).toBe("RATE_LIMIT");
+    expect(calls).toBe(LIMITS.aiPerInstallPerDay);
+  });
+
+  it("yapay zekâ hatası düzgün hata koduyla döner", async () => {
+    const creds = await install();
+    env = { ...env, ANTHROPIC_API_KEY: "test-key" };
+    deps = {
+      ...deps,
+      runAi: async () => {
+        throw new Error("beklenmedik");
+      },
+    };
+    const r = await call("/v1/ai/monthly", { payload }, creds);
+    expect(r.status).toBe(502);
+    expect((await json(r)).error.code).toBe("AI_FAILED");
+  });
+});

@@ -1,8 +1,9 @@
 /**
  * Yapay zekâ asistanı — aylık rapor akışı.
  *
- * 1) Yerel analiz (facts) + kural tabanlı aksiyonlar + gelecek ayın gerçekçi hedefleri hesaplanır ve kaydedilir.
- * 2) Yapay zekâ bağlıysa Claude bu rakamlardan yorum ve aksiyon planı yazar (rakam üretmez).
+ * 1) Yerel analiz (facts) + kural tabanlı aksiyonlar + gelecek ayın gerçekçi hedefleri hesaplanır ve kaydedilir;
+ *    yerleşik asistan (narrative.ts) bütün yorumu ve haftalık planı hemen yazar (internetsiz, hesapsız).
+ * 2) Market Kasa servisi tanımlıysa bulut yapay zekâ (Claude) bu rakamlardan yorumu güçlendirir (rakam üretmez); olmazsa yerleşik yorum kalır.
  * 3) Ay bitince (ertesi ayın ilk açılışında) rapor otomatik oluşturulur ve yöneticilere e-postayla gider.
  * Ay sürerken "ara rapor" istenebilir; ay bitince son hâliyle yenilenir.
  */
@@ -16,6 +17,7 @@ import {
   listMonthlyReports,
   listTargets,
   markMonthlyEmailed,
+  saveLocalAi,
   saveMonthlyAi,
   saveMonthlyAiError,
   setActionStatus,
@@ -30,7 +32,8 @@ import { parseInput, z } from "../../validation/zod";
 import { audit } from "../audit";
 import { todayOf } from "../dayClosing";
 import { IMPACT_KIND_LABELS, PRIORITY_LABELS, buildRuleActions, profitPotential, type ActionPriority, type PlanAction } from "./actions";
-import { aiEnabled, aiErrorMessage, generateAiReport, getAiStatus, type AiReport, type AiStatus } from "./ai";
+import { LOCAL_AI_MODEL } from "@/lib/assistantAi";
+import { aiErrorMessage, cloudAiActive, generateCloudReport, generateLocalReport, getAiStatus, type AiReport, type AiStatus } from "./ai";
 import { buildMonthlyEmail } from "./email";
 import { buildMonthlyFacts, type MonthlyFacts } from "./facts";
 import { ensureTargets, getTargetProgress, proposeTargets, saveAutoTargets, type TargetProposal } from "./targets";
@@ -75,6 +78,8 @@ export interface MonthlyReportView {
   aiModel: string | null;
   aiGeneratedAt: string | null;
   aiError: string | null;
+  /** Yorumu kim yazdı: yerleşik asistan ya da bulut yapay zekâ */
+  aiSource: "local" | "cloud" | null;
   emailedAt: string | null;
   plan: DisplayAction[];
 }
@@ -141,6 +146,7 @@ export function toView(ctx: Ctx, row: MonthlyReportRow): MonthlyReportView {
     aiModel: row.aiModel,
     aiGeneratedAt: row.aiGeneratedAt,
     aiError: row.aiError,
+    aiSource: row.aiJson ? (row.aiModel === LOCAL_AI_MODEL ? "local" : "cloud") : null,
     emailedAt: row.emailedAt,
     plan: buildPlan(stored, ai, statuses),
   };
@@ -193,6 +199,8 @@ export function computeAndStore(ctx: Ctx, month: string): StoredFacts {
   ctx.db
     .transaction(() => {
       upsertMonthlyFacts(ctx.db, month, facts.to, facts.isPartial, JSON.stringify(stored), nowIso);
+      // Yerleşik asistanın yorumu hemen yazılır (internetsiz, hesapsız); bulut yorumu gelirse üzerine yazılır
+      saveLocalAi(ctx.db, month, JSON.stringify(generateLocalReport(stored)), LOCAL_AI_MODEL, nowIso);
       // Gelecek ayın hedefleri: yalnız henüz başlamamış ya da süren ay için (geçmişin hedefi değişmez)
       if (nextTargets.length && nextMonth >= today.slice(0, 7)) saveAutoTargets(ctx, nextMonth, nextTargets);
       audit(ctx, "assistant.report", `${monthLabel(month)} ${facts.isPartial ? "ara raporu" : "raporu"} oluşturuldu`);
@@ -201,13 +209,14 @@ export function computeAndStore(ctx: Ctx, month: string): StoredFacts {
   return stored;
 }
 
-/** Kayıtlı rapora yapay zekâ yorumu ekler. Hata olursa kaydeder, fırlatmaz. */
-export async function addAiCommentary(ctx: Ctx, month: string): Promise<{ ok: boolean; error?: string }> {
+/** Kayıtlı rapora bulut yapay zekâ yorumu ekler (yerleşik yorumu taslak olarak verir). Hata olursa kaydeder, fırlatmaz. */
+export async function addCloudCommentary(ctx: Ctx, month: string): Promise<{ ok: boolean; error?: string }> {
   const row = getMonthlyReport(ctx.db, month);
   if (!row) throw notFound("NO_REPORT", "Bu ay için rapor yok.");
   const stored = JSON.parse(row.factsJson) as StoredFacts;
+  const draft = row.aiJson && row.aiModel === LOCAL_AI_MODEL ? (JSON.parse(row.aiJson) as AiReport) : generateLocalReport(stored);
   try {
-    const { report, model } = await generateAiReport(ctx.db, stored);
+    const { report, model } = await generateCloudReport(ctx.db, stored, draft);
     ctx.db.transaction(() => saveMonthlyAi(ctx.db, month, JSON.stringify(report), model, ctx.now().toISOString())).immediate();
     return { ok: true };
   } catch (e) {
@@ -225,15 +234,15 @@ export async function generateMonthlyReport(ctx: Ctx, input: unknown): Promise<M
   const data = parseInput(generateSchema, input);
   return withLock(data.month, async () => {
     computeAndStore(ctx, data.month);
-    if (data.ai !== false && aiEnabled(ctx.db)) await addAiCommentary(ctx, data.month);
+    if (data.ai !== false && cloudAiActive(ctx.db)) await addCloudCommentary(ctx, data.month);
     return getMonthlyReportView(ctx, data.month)!;
   });
 }
 
 export async function retryAi(ctx: Ctx, month: string): Promise<MonthlyReportView> {
-  if (!aiEnabled(ctx.db)) throw badRequest("AI_OFF", "Yapay zekâ bağlantısı kurulmamış ya da kapalı.");
+  if (!cloudAiActive(ctx.db)) throw badRequest("AI_OFF", "Bulut yapay zekâ bu kurulumda kapalı; yerleşik asistanın yorumu geçerli.");
   return withLock(month, async () => {
-    await addAiCommentary(ctx, month);
+    await addCloudCommentary(ctx, month);
     return getMonthlyReportView(ctx, month)!;
   });
 }
@@ -287,23 +296,23 @@ export async function runScheduledMonthlyReport(ctx: Ctx): Promise<{ month: stri
     ensureTargets(ctx, today.slice(0, 7));
     return null;
   }
-  const ai = aiEnabled(ctx.db);
+  const ai = cloudAiActive(ctx.db);
   let row = getMonthlyReport(ctx.db, month);
   let status = "unchanged";
   if (!row || row.isPartial) {
     await withLock(month, async () => {
       computeAndStore(ctx, month);
-      if (ai) await addAiCommentary(ctx, month);
+      if (ai) await addCloudCommentary(ctx, month);
     });
     row = getMonthlyReport(ctx.db, month)!;
     status = "generated";
-  } else if (ai && !row.aiJson && row.aiAttempts < AI_MAX_ATTEMPTS && Date.now() - Date.parse(row.aiLastAttemptAt ?? "1970-01-01") >= AI_RETRY_MS) {
-    await withLock(month, () => addAiCommentary(ctx, month));
+  } else if (ai && row.aiModel === LOCAL_AI_MODEL && row.aiAttempts < AI_MAX_ATTEMPTS && Date.now() - Date.parse(row.aiLastAttemptAt ?? "1970-01-01") >= AI_RETRY_MS) {
+    await withLock(month, () => addCloudCommentary(ctx, month));
     row = getMonthlyReport(ctx.db, month)!;
     status = "ai_retried";
   }
   ensureTargets(ctx, today.slice(0, 7));
-  const aiSettled = !ai || !!row.aiJson || row.aiAttempts >= AI_MAX_ATTEMPTS;
+  const aiSettled = !ai || row.aiModel !== LOCAL_AI_MODEL || row.aiAttempts >= AI_MAX_ATTEMPTS;
   if (!row.emailedAt && aiSettled && isMailConfigured(ctx.db) && listActiveOwnerEmails(ctx.db).length > 0) {
     try {
       await emailMonthlyReport(ctx, month);

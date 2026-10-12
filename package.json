@@ -18,7 +18,6 @@
     "start:shop": "next start -H 0.0.0.0 -p 3000"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.128.0",
     "better-sqlite3": "^13.0.3",
     "bwip-js": "^4.11.4",
     "exceljs": "^4.4.0",
@@ -31,6 +30,7 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "0.128.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/turbopack": "^4",
     "@types/better-sqlite3": "^9.6.0",

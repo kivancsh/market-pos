@@ -7,14 +7,19 @@
  * - Serbest içerikli e-posta (rapor, onay kodu) YALNIZCA bu kurulum için doğrulanmış alıcılara gider.
  * - Alıcı doğrulama kodunu servis kendisi üretir ve gönderir (sabit şablon); kod doğru girilmeden adres doğrulanmaz.
  * - Kurulum / alıcı / gün başına sınırlar; ek boyutu sınırı.
+ * - Yapay zekâ ucu yalnız aylık rapor yorumu üretir: istem sabittir (src/lib/assistantAi.ts), programdan yalnız veri paketi alınır;
+ *   kurulum başına günlük/aylık ve servis geneli günlük sınır maliyeti sınırlar.
  *
  * Uç noktalar (JSON):
  *   POST /v1/install                         → { installId, token }
  *   POST /v1/recipients/start   {email}      → { ok, expiresInSec }       (Authorization: Bearer <installId>.<token>)
  *   POST /v1/recipients/confirm {email,code} → { ok }
  *   POST /v1/send {to[],subject,text,html,attachments[]} → { sent[], skipped[] }
+ *   POST /v1/ai/monthly {payload}             → { report, model }   (aylık rapor yorumu; ANTHROPIC_API_KEY tanımlıysa)
  *   GET  /v1/health                          → { ok }
  */
+import { AI_PAYLOAD_MAX_BYTES, AiPayloadSchema, type AiPayload } from "../../src/lib/assistantAi";
+import { AiFailure, runClaudeMonthly } from "./ai";
 
 // ------------------------------------------------------------------ ortam (Cloudflare tipleri olmadan, en küçük arayüz)
 export interface KV {
@@ -25,6 +30,8 @@ export interface KV {
 
 export interface Env {
   KV: KV;
+  /** Anthropic API anahtarı (wrangler secret put ANTHROPIC_API_KEY); yoksa yapay zekâ ucu kapalı */
+  ANTHROPIC_API_KEY?: string;
   /** Resend API anahtarı (wrangler secret put RESEND_API_KEY) */
   RESEND_API_KEY: string;
   /** Gönderen, ör. "Market Kasa <bildirim@marketkasa.com>" (wrangler.toml [vars]) */
@@ -41,6 +48,8 @@ export interface OutgoingEmail {
 
 export interface Deps {
   sendEmail(env: Env, email: OutgoingEmail): Promise<void>;
+  /** Aylık rapor yorumu (gerçekte Claude; testlerde sahte) */
+  runAi?(env: Env, payload: AiPayload): Promise<{ report: unknown; model: string }>;
   now(): number;
   randomCode(): string;
   randomToken(): string;
@@ -56,6 +65,9 @@ export const LIMITS = {
   sendsPerInstallPerDay: 60,
   recipientsPerSend: 10,
   maxPayloadBytes: 6 * 1024 * 1024,
+  aiPerInstallPerDay: 4,
+  aiPerInstallPer30Days: 12,
+  aiGlobalPerDay: 300,
 };
 
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,}$/;
@@ -85,6 +97,7 @@ const defaultDeps: Deps = {
     });
     if (!res.ok) throw new Error(`Resend ${res.status}: ${(await res.text()).slice(0, 200)}`);
   },
+  runAi: (env, payload) => runClaudeMonthly(env.ANTHROPIC_API_KEY!, payload),
   now: () => Date.now(),
   randomCode: () => String(crypto.getRandomValues(new Uint32Array(1))[0]! % 1_000_000).padStart(6, "0"),
   randomToken: () => hex(32),
@@ -206,6 +219,26 @@ export async function handle(req: Request, env: Env, deps: Deps = defaultDeps): 
       return fail(502, "SEND_FAILED", "E-posta gönderilemedi. Biraz sonra tekrar deneyin.");
     }
     return json(200, { sent, skipped });
+  }
+
+  if (url.pathname === "/v1/ai/monthly") {
+    const installId = await auth(req, env);
+    if (!installId) return fail(401, "UNAUTHORIZED", "Kurulum anahtarı geçersiz.");
+    if (!env.ANTHROPIC_API_KEY || !deps.runAi) return fail(503, "AI_DISABLED", "Bulut yapay zekâ şu an kapalı; yerleşik asistanın yorumu geçerli.");
+    if (len > AI_PAYLOAD_MAX_BYTES) return fail(413, "TOO_LARGE", "Rapor verisi çok büyük.");
+    const parsed = AiPayloadSchema.safeParse(body.payload);
+    if (!parsed.success) return fail(400, "BAD_PAYLOAD", "Rapor verisi hatalı.");
+    if (JSON.stringify(parsed.data).length > AI_PAYLOAD_MAX_BYTES) return fail(413, "TOO_LARGE", "Rapor verisi çok büyük.");
+    if (!(await bump(env, `ai:${installId}`, LIMITS.aiPerInstallPerDay, 86400, now))) return fail(429, "RATE_LIMIT", "Bugünkü yapay zekâ hakkı doldu; yarın yeniden denenecek.");
+    if (!(await bump(env, `ai30:${installId}`, LIMITS.aiPerInstallPer30Days, 30 * 86400, now))) return fail(429, "RATE_LIMIT", "Bu ayki yapay zekâ hakkı doldu.");
+    if (!(await bump(env, "ai-global", LIMITS.aiGlobalPerDay, 86400, now))) return fail(429, "RATE_LIMIT", "Servis bugün yoğun; yarın yeniden denenecek.");
+    try {
+      const r = await deps.runAi(env, parsed.data);
+      return json(200, { report: r.report, model: r.model });
+    } catch (e) {
+      if (e instanceof AiFailure) return fail(e.status, e.code, e.message);
+      return fail(502, "AI_FAILED", "Yapay zekâ yorumu alınamadı.");
+    }
   }
 
   return fail(404, "NOT_FOUND", "Bulunamadı.");

@@ -56,6 +56,11 @@ export function saveMonthlyAi(db: DB, month: string, aiJson: string, model: stri
   ).run(aiJson, model, nowIso, nowIso, nowIso, month);
 }
 
+/** Yerleşik asistanın yorumu (deneme sayısını değiştirmez; bulut yorumu gelince üzerine yazılır). */
+export function saveLocalAi(db: DB, month: string, aiJson: string, model: string, nowIso: string): void {
+  db.prepare("UPDATE monthly_reports SET ai_json = ?, ai_model = ?, ai_generated_at = ? WHERE month = ?").run(aiJson, model, nowIso, month);
+}
+
 export function saveMonthlyAiError(db: DB, month: string, message: string, nowIso: string): void {
   db.prepare("UPDATE monthly_reports SET ai_error = ?, ai_attempts = ai_attempts + 1, ai_last_attempt_at = ? WHERE month = ?").run(message, nowIso, month);
 }

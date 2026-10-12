@@ -115,11 +115,17 @@ Her aşama sonunda lint + typecheck + test yeşil olmadan ilerleme.
   günü ağırlıklı), `ai.ts` (Claude), `index.ts` (akış, zamanlayıcı, e-posta), `email.ts`. Tablolar `monthly_reports`, `monthly_targets`,
   `monthly_action_status` (migration 007). Ekran `/yonetim/asistan`. Ay bitince zamanlayıcı (5 dk'da bir) geçen ayın raporunu üretir,
   gelecek ayın otomatik hedeflerini yazar (yöneticinin girdiği hedefe dokunmaz), yorum hazır olunca (ya da 4 başarısız denemeden sonra) e-postalar.
-  Ay sürerken "ara rapor" (is_partial) alınabilir; ay bitince son hâliyle değişir. Yapay zekâ isteğe bağlı: yönetici kendi Anthropic anahtarını
-  ekranda girer (`ai_api_key_enc`, mail ile aynı AES-GCM), `.env`'de anahtar yok, sohbette anahtar istenmez. Model `claude-opus-5-5`, adaptive thinking,
-  effort high, yapılandırılmış çıktı (Zod), sunucu tarafı yedek `fallbacks: "default"` (beta `server-side-fallback-2026-07-01`), stream + finalMessage.
-  Yapay zekâya yalnız hesaplanmış rakamlar (TL/% metin) gider; kasiyerler takma adla ("Kasiyer 1001", "Yönetici"), işletme adı gitmez; yapay zekâ
-  rakam üretmez, uydurma takma ad / kural anahtarı temizlenir. Testlerde `setTestAiRunner` (gerçek API çağrılmaz).
+  Ay sürerken "ara rapor" (is_partial) alınabilir; ay bitince son hâliyle değişir.
+  Kullanıcı kararı 12.10.2026 ("kurulacak bilgisayarda Claude/yapay zekâ hesabı yok, sıfır bilgisayar gibi düşün"): dükkânda anahtar/hesap YOK.
+  (1) Yerleşik asistan `narrative.ts` her raporda bütün yorumu yazar (internetsiz; notlar, bulgular, personel, haftalık plan, mevsim
+  takvimi `src/lib/seasonal.ts`, riskler, odak) → `ai_model = "market-kasa-yerel"`. (2) Bulut yapay zekâ isteğe bağlı ve merkezi:
+  program `/v1/ai/monthly`'ye (Market Kasa servisi, `mail-service/`, kurulum kimliğiyle) yalnız veri paketini yollar; servis yazılım
+  sahibinin tek `ANTHROPIC_API_KEY`'iyle sabit istemle Claude'u çağırır (`mail-service/src/ai.ts`: claude-opus-5-5, adaptive thinking,
+  effort high, Zod çıktı, `fallbacks: "default"` + beta `server-side-fallback-2026-07-01`). Şema/istem/paket ortak: `src/lib/assistantAi.ts`.
+  Sınırlar: kurulum başına günde 4 / 30 günde 12, servis geneli günde 300. Servis adresi boşsa ya da yönetici kapattıysa (`ai_cloud_enabled`)
+  bulut denenmez; bulut başarısızsa yerleşik yorum kalır, zamanlayıcı 2 saatte bir (en çok 4) yeniden dener, e-posta buluta kadar bekler.
+  Pakete yalnız hesaplanmış rakamlar (TL/% metin) gider; kasiyerler takma adla ("Kasiyer 1001", "Yönetici"), işletme adı gitmez;
+  uydurma takma ad / kural anahtarı temizlenir. `@anthropic-ai/sdk` yalnız servis için (devDependency). Testlerde `setTestAiRunner`.
   Canlı kullanım için yazılım firmasının Hugin/Pavo ile entegrasyon anlaşması gerekir; ayrıntı `docs/yazar-kasa-entegrasyonu.md`.
 - Merkezi e-posta servisi (kullanıcı kararı 11.10.2026, "Merkezi servis"): `mail-service/` Cloudflare Worker + Resend; kurulumu
   kullanıcı yapar (`mail-service/README.md`). Program kurulumu kayıt olur (installId.token, `settings.mail_service_creds` şifreli),

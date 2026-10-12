@@ -1,6 +1,7 @@
-# Market Kasa e-posta servisi — kurulum rehberi
+# Market Kasa servisi (e-posta + bulut yapay zekâ) — kurulum rehberi
 
-Bu klasör, programların (müşteri bilgisayarlarındaki Market Kasa'ların) e-posta gönderdiği **merkezi servistir**.
+Bu klasör, programların (müşteri bilgisayarlarındaki Market Kasa'ların) e-posta gönderdiği ve isteğe bağlı olarak aylık raporlarını
+**bulut yapay zekâ (Claude)** ile yorumlattığı **merkezi servistir**. Dükkânlar hiçbir hesap açmaz; tek hesap sizdedir (bkz. 7. bölüm).
 Müşteri Gmail ayarı, uygulama şifresi vb. ile uğraşmaz: Ayarlar → **E-posta bağla**'ya sadece kendi adresini yazar,
 gelen 6 haneli kodu girer; gün sonu raporu ve şifre kodları bundan sonra "Market Kasa" adına bu servisten gider.
 
@@ -100,16 +101,43 @@ Tarayıcıda bu adresin sonuna `/v1/health` ekleyip açın: `{"ok":true}` görme
 İsterseniz ilk denemeyi kendi programınızda yapın: Ayarlar → E-posta bağla → kendi adresiniz → gelen kod →
 **Bugünün raporunu şimdi gönder**.
 
+## 7. Bulut yapay zekâ (isteğe bağlı)
+
+Market Kasa'nın **yerleşik asistanı** aylık raporu her bilgisayarda hesapsız ve internetsiz yazar. Bu adımı yaparsanız, servis adresi
+tanımlı bütün programlar raporlarını ayrıca Claude'a yorumlatır (dükkânlarda hesap ya da anahtar gerekmez; yönetici asistan ekranından
+kapatabilir). Ücret sizin Anthropic hesabınızdan düşer.
+
+1. https://console.anthropic.com adresinde hesap açın. **Billing** bölümünden kredi yükleyin.
+2. **Limits** bölümünden aylık harcama üst sınırı koyun (ör. 20 $). Sınır dolarsa programlar yerleşik yorumla devam eder.
+3. **API Keys → Create Key** (ad: `market-kasa-servis`). Anahtarı (`sk-ant-...`) kopyalayın; hiçbir dosyaya, sohbete ya da GitHub'a yazmayın.
+4. Terminalde:
+
+```bash
+cd ~/market-pos/mail-service
+npx wrangler secret put ANTHROPIC_API_KEY
+npx wrangler deploy
+```
+
+(İlk komut anahtarı sorar; yapıştırıp Enter'a basın.)
+
+**Maliyeti sınırlayan kurallar** (`src/worker.ts` → `LIMITS`): kurulum başına günde 4, 30 günde 12 yorum; bütün servis için günde 300 yorum.
+Her dükkân normalde ayda 1 (en çok birkaç) rapor ister. Servis yalnız aylık rapor yorumu üretir: istem sabittir, programdan sadece
+hesaplanmış rakamlar gelir (kasiyer adları ve işletme adı gelmez); servis başka bir iş için kullanılamaz.
+
+Kapatmak için: `npx wrangler secret delete ANTHROPIC_API_KEY` (programlar yerleşik asistanla devam eder).
+
 ## Bakım
 
 - Gönderilen e-postalar ve hatalar: Resend → **Emails / Logs**.
 - Servis hataları: `npx wrangler tail` (canlı kayıt) ya da Cloudflare → Workers → market-kasa-mail → **Logs**.
 - Servis kodunu değiştirdikten sonra: `cd ~/market-pos/mail-service` ve `npx wrangler deploy`.
 - Resend anahtarı sızdıysa: Resend'de anahtarı silin, yenisini oluşturup `npx wrangler secret put RESEND_API_KEY` ile değiştirin.
+- Anthropic anahtarı sızdıysa: Console'da silin, yenisini `npx wrangler secret put ANTHROPIC_API_KEY` ile girin. Harcama: Console → **Usage**.
 
 ## Geliştirici notu
 
-Servis kodu `src/worker.ts` (Cloudflare tipleri olmadan, en küçük arayüzle). Testleri ana projede:
+Servis kodu `src/worker.ts` (Cloudflare tipleri olmadan, en küçük arayüzle); yapay zekâ çağrısı `src/ai.ts`, rapor şeması ve sabit
+istem programla ortak `../src/lib/assistantAi.ts` (wrangler bunu ve `@anthropic-ai/sdk`'yı ana projenin node_modules'undan paketler). Testleri ana projede:
 `tests/unit/mail-service.test.ts` (servis kuralları) ve `tests/integration/mail-service-app.test.ts`
 (program ↔ servis uçtan uca, yerel HTTP sunucusuyla; gerçek e-posta gönderilmez). Program tarafı `src/server/mail/service.ts`.
 `MARKET_KASA_MAIL_SERVICE` ortam değişkeni sadece test içindir; kurulum paketleri bunu ayarlamaz.

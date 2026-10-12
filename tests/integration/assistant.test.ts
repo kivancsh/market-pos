@@ -1,4 +1,3 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { afterAll, afterEach, beforeEach, describe, expect, it } from "vitest";
 import * as assistantRoute from "@/app/api/assistant/route";
 import * as actionsRoute from "@/app/api/assistant/actions/route";
@@ -9,7 +8,9 @@ import * as targetsRoute from "@/app/api/assistant/targets/route";
 import type { User } from "@/server/db/repositories/users";
 import { setTestCtxFactory } from "@/server/http/api";
 import { getMonthlyReportView, runScheduledMonthlyReport, type AssistantPageData, type MonthlyReportView } from "@/server/services/assistant";
-import { aiErrorMessage, setTestAiRunner, type AiReport, type AiRunInput } from "@/server/services/assistant/ai";
+import type { AiPayload, AiReport } from "@/lib/assistantAi";
+import { AppError } from "@/server/errors";
+import { aiErrorMessage, setTestAiRunner } from "@/server/services/assistant/ai";
 import { getTargetProgress } from "@/server/services/assistant/targets";
 import { closeDay, getDayClosingView } from "@/server/services/dayClosing";
 import { createExpense } from "@/server/services/expenses";
@@ -23,7 +24,7 @@ import { createEnv, expectIntegrity, uuid, type TestEnv } from "../helpers";
 let env: TestEnv;
 let owner: User;
 let cashier: User;
-let prompts: AiRunInput[];
+let prompts: AiPayload[];
 let mail: ReturnType<typeof captureMail>;
 
 const days = (from: string, to: string) => {
@@ -35,8 +36,8 @@ const as = (u: User) => ({ ...env.ctx, actor: { userId: u.id, name: u.name, role
 const sell = (u: User, items: { productId: number; qty: number }[], payment: "cash" | "card" = "cash") =>
   completeSale(as(u), { clientRequestId: uuid(), items, paymentMethod: payment }, { role: u.role });
 
-function fakeReport(input: AiRunInput): AiReport {
-  const keys = [...input.user.matchAll(/"key": "([^"]+)"/g)].map((m) => m[1]!);
+function fakeReport(input: AiPayload): AiReport {
+  const keys = (input.ruleActions as { key: string }[]).map((a) => a.key);
   return {
     headline: "Eylül iyi geçti; Kola fiyatı güncellenmeli",
     summary: "Ciro arttı. Kasiyer 1001 iptallere dikkat etmeli.",
@@ -120,9 +121,9 @@ beforeEach(() => {
   products = seedTwoMonths();
   setTestCtxFactory(() => env.ctx);
   prompts = [];
-  setTestAiRunner(async (input) => {
-    prompts.push(input);
-    return { report: fakeReport(input), model: "claude-opus-5-5" };
+  setTestAiRunner(async (payload) => {
+    prompts.push(payload);
+    return { report: fakeReport(payload), model: "claude-opus-5-5" };
   });
   mail = captureMail();
 });
@@ -175,9 +176,13 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
 
     // Yapay zekâ: gerçek kasiyer adı gitmez, takma ad gider; uydurma takma ad ve kural anahtarı temizlenir
     expect(prompts).toHaveLength(1);
-    expect(prompts[0]!.user).not.toContain(TEST_CASHIER.name);
-    expect(prompts[0]!.user).toContain("Kasiyer 1001");
-    expect(prompts[0]!.user).toContain("₺60,50");
+    const sent = JSON.stringify(prompts[0]);
+    expect(sent).not.toContain(TEST_CASHIER.name);
+    expect(sent).not.toContain("Dükkânım"); // işletme adı gitmez
+    expect(sent).toContain("Kasiyer 1001");
+    expect(sent).toContain("₺60,50");
+    expect(prompts[0]!.taslak).toBeTruthy(); // yerleşik asistanın taslağı da gider
+    expect(v.aiSource).toBe("cloud");
     expect(v.ai!.staff.map((s) => s.alias)).toEqual(["Kasiyer 1001"]);
     expect(v.ai!.actions[1]!.ruleKey).toBeNull();
     expect(v.aiModel).toBe("claude-opus-5-5");
@@ -202,25 +207,64 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
     expectIntegrity(env);
   });
 
-  it("yapay zekâ başarısız olursa rapor yine oluşur; e-posta yorumu bekler; yeniden deneme yorumu ekler", async () => {
+  it("bulut yapay zekâ başarısız olursa yerleşik yorum kalır; e-posta bulutu bekler; yeniden deneme bulut yorumu ekler", async () => {
     setTestAiRunner(async () => {
-      throw new Anthropic.APIConnectionError({ message: "bağlantı yok" });
+      throw new AppError("MAIL_SERVICE_UNREACHABLE", "Market Kasa servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
     });
     env.setNow("2026-10-01T06:00:00.000Z");
     expect(await runScheduledMonthlyReport(env.ctx)).toEqual({ month: "2026-09", status: "generated" });
     const v = getMonthlyReportView(env.ctx, "2026-09")!;
-    expect(v.ai).toBeNull();
-    expect(v.aiError).toMatch(/İnternet bağlantısı yok/);
-    expect(v.plan[0]!.source).toBe("rule"); // kural tabanlı plan
-    expect(mail.sent).toHaveLength(0);
+    expect(v.aiSource).toBe("local");
+    expect(v.ai!.headline).toContain("Eylül 2026");
+    expect(v.aiError).toMatch(/İnternet/);
+    expect(mail.sent).toHaveLength(0); // bulut yeniden denenecek; e-posta onu bekler
 
     setTestAiRunner(async (input) => ({ report: fakeReport(input), model: "claude-opus-5-5" }));
     const cookie = await cookieForUser(owner);
     const res = await aiRetryRoute.POST(req("/api/assistant/reports/2026-09/ai", cookie, "POST", {}), params({ month: "2026-09" }));
     expect(res.status).toBe(200);
     const view = (await json(res)).report as MonthlyReportView;
-    expect(view.ai?.headline).toContain("Eylül");
+    expect(view.aiSource).toBe("cloud");
+    expect(view.ai?.headline).toBe("Eylül iyi geçti; Kola fiyatı güncellenmeli");
     expect(view.aiError).toBeNull();
+
+    // Bulut yanıtı şemaya uymazsa yerleşik yorum korunur
+    setTestAiRunner(async () => ({ report: { headline: 1 }, model: "x" }));
+    await reportsRoute.POST(req("/api/assistant/reports", cookie, "POST", { month: "2026-09" }));
+    const after = getMonthlyReportView(env.ctx, "2026-09")!;
+    expect(after.aiSource).toBe("local");
+    expect(after.aiError).toMatch(/biçim/);
+  });
+
+  it("hesapsız sıfır bilgisayar: yerleşik asistan raporun bütün yorumunu yazar ve e-posta hemen gider", async () => {
+    setTestAiRunner(null); // servis adresi yok, bulut yok
+    env.setNow("2026-10-01T06:00:00.000Z");
+    expect(await runScheduledMonthlyReport(env.ctx)).toEqual({ month: "2026-09", status: "emailed" });
+    const v = getMonthlyReportView(env.ctx, "2026-09")!;
+    expect(v.aiSource).toBe("local");
+    expect(v.aiError).toBeNull();
+    const ai = v.ai!;
+    expect(ai.headline).toMatch(/^Eylül 2026: ciro/);
+    expect(ai.summary).toContain("₺");
+    // Her alana not; fiyat ve kasa zayıf (zam yansımadı, zararına ürün, kasa açığı)
+    expect(ai.scorecard.map((x) => x.area)).toEqual(["ciro", "kar", "urun", "kategori", "fiyat", "stok", "gider", "zaman", "sepet", "iade", "kasa", "personel"]);
+    expect(ai.scorecard.find((x) => x.area === "fiyat")!.grade).toBe("zayif");
+    expect(ai.sections.find((x) => x.area === "fiyat")!.findings.join(" ")).toContain("Kola 1 L");
+    expect(ai.sections.find((x) => x.area === "stok")!.findings.join(" ")).toContain("Ekmek");
+    // Personel: Kasiyer 1001'in iptalleri gelişim alanı
+    const k1001 = ai.staff.find((x) => x.alias === "Kasiyer 1001")!;
+    expect(k1001.improve.join(" ")).toMatch(/İptal oranı/);
+    expect(ai.staffSummary).toContain("Kasiyer 1001");
+    // Plan: kural önerileri haftalara dağıtıldı + Ekim mevsim hazırlığı
+    expect(ai.actions[0]).toMatchObject({ priority: "yuksek", week: "1. hafta" });
+    expect(ai.actions.some((a) => a.ruleKey === "price-erosion" && a.expectedImpact.includes("aylık ek kâr"))).toBe(true);
+    expect(ai.actions.some((a) => a.title.startsWith("Mevsim hazırlığı — Ekim"))).toBe(true);
+    expect(ai.risks.length).toBeGreaterThan(0);
+    expect(ai.nextMonthFocus.length).toBeGreaterThan(10);
+    expect(v.plan.find((p) => p.key === "price-erosion")!.impact).toMatch(/aylık ek kâr/);
+    // Bulut beklenmez: e-posta hemen gider
+    expect(mail.sent).toHaveLength(1);
+    expect(mail.sent[0]!.html).toContain(ai.headline.replace(/&/g, "&amp;").slice(0, 20));
   });
 
   it("ara rapor (ay sürerken) ay bitince son hâliyle yenilenir; aksiyon durumları sonraki aya taşınır", async () => {
@@ -252,7 +296,7 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
     const oct = (await json(r2)).report as MonthlyReportView;
     expect(oct.facts.priorActions?.month).toBe("2026-09");
     expect(oct.facts.priorActions?.items.find((i) => i.key === "price-erosion")?.status).toBe("done");
-    expect(oct.ai).toBeNull();
+    expect(oct.aiSource).toBe("local"); // ai: false → yalnız yerleşik asistan
     // Ekim hedefleri (Eylül raporunda kondu) ve gidişat
     expect(oct.facts.targets.map((t) => t.metric)).toContain("revenue");
   });
@@ -292,34 +336,23 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
     expect((await aiSettingsRoute.GET(req("/api/assistant/ai-settings", cashierCookie))).status).toBe(403);
   });
 
-  it("anahtar: biçim denetimi, şifreli saklama, yanıtta asla dönmez", async () => {
-    setTestAiRunner(null);
+  it("bulut yapay zekâ ayarı: yönetici kapatırsa veri servise gitmez", async () => {
     const cookie = await cookieForUser(owner);
-    const bad = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { apiKey: "yanlis" }));
+    const st = await aiSettingsRoute.GET(req("/api/assistant/ai-settings", cookie));
+    expect(await json(st)).toEqual({ cloudAvailable: true, cloudEnabled: true });
+    const off = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { cloudEnabled: false }));
+    expect(await json(off)).toEqual({ cloudAvailable: true, cloudEnabled: false });
+    env.setNow("2026-10-01T06:00:00.000Z");
+    await runScheduledMonthlyReport(env.ctx);
+    expect(prompts).toHaveLength(0);
+    expect(getMonthlyReportView(env.ctx, "2026-09")!.aiSource).toBe("local");
+    expect(mail.sent).toHaveLength(1);
+    const bad = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { apiKey: "sk-ant-x" }));
     expect(bad.status).toBe(400);
-    expect((await json(bad)).error.code).toBe("BAD_KEY");
-    // Gerçek anahtar denemesi yapılmaz (test çalıştırıcısı varken)
-    setTestAiRunner(async (input) => ({ report: fakeReport(input), model: "claude-opus-5-5" }));
-    const key = "sk-ant-test-0123456789abcdefghijKLMN";
-    const ok = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { apiKey: key }));
-    expect(ok.status).toBe(200);
-    const body = await ok.text();
-    expect(body).not.toContain(key);
-    expect(JSON.parse(body)).toMatchObject({ configured: true, enabled: true, keyHint: "…KLMN", model: "claude-opus-5-5" });
-    const stored = (env.db.prepare("SELECT value FROM settings WHERE key = 'ai_api_key_enc'").get() as { value: string }).value;
-    expect(stored).not.toContain(key);
-    const off = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { enabled: false }));
-    expect((await json(off)).enabled).toBe(false);
-    const removed = await aiSettingsRoute.PUT(req("/api/assistant/ai-settings", cookie, "PUT", { remove: true }));
-    expect((await json(removed)).configured).toBe(false);
   });
 
-  it("Anthropic hataları Türkçe ve anlaşılır mesaja çevrilir", () => {
-    expect(aiErrorMessage(new Anthropic.APIConnectionError({ message: "x" }))).toMatch(/İnternet/);
-    expect(aiErrorMessage(new Error("x"))).toBe("Yapay zekâ yorumu alınamadı.");
-    // Paketin başka bir kopyasından gelen hata: durum koduna göre tanınır
-    expect(aiErrorMessage(Object.assign(new Error("401 invalid x-api-key"), { status: 401 }))).toMatch(/anahtarı geçersiz/);
-    expect(aiErrorMessage(Object.assign(new Error("credit balance is too low"), { status: 400 }))).toMatch(/kredi/);
-    expect(aiErrorMessage(Object.assign(new Error("overloaded"), { status: 529 }))).toMatch(/yoğun/);
+  it("hata mesajları Türkçe", () => {
+    expect(aiErrorMessage(new AppError("RATE_LIMIT", "Bugünkü yapay zekâ hakkı doldu; yarın yeniden denenecek.", 429))).toMatch(/hakkı doldu/);
+    expect(aiErrorMessage(new Error("x"))).toBe("Bulut yapay zekâ yorumu alınamadı.");
   });
 });

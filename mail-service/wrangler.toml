@@ -13,4 +13,5 @@ FROM_ADDRESS = "Market Kasa <bildirim@ALAN-ADINIZ.com>"
 binding = "KV"
 id = "KV_NAMESPACE_ID"
 
-# Gizli anahtar (buraya YAZILMAZ): npx wrangler secret put RESEND_API_KEY
+# Gizli anahtarlar (buraya YAZILMAZ): npx wrangler secret put RESEND_API_KEY
+# İsteğe bağlı bulut yapay zekâ: npx wrangler secret put ANTHROPIC_API_KEY

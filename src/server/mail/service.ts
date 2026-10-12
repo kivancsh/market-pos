@@ -25,7 +25,7 @@ export function mailServiceAvailable(): boolean {
 
 type Crypto = { encrypt(s: string): string; decrypt(s: string): string | null };
 
-async function call(path: string, body: unknown, auth?: string): Promise<Record<string, unknown>> {
+async function call(path: string, body: unknown, auth?: string, timeoutMs = TIMEOUT_MS): Promise<Record<string, unknown>> {
   let res: Response;
   try {
     res = await fetch(`${mailServiceUrl()}${path}`, {
@@ -33,10 +33,10 @@ async function call(path: string, body: unknown, auth?: string): Promise<Record<
       headers: { "content-type": "application/json", ...(auth ? { authorization: `Bearer ${auth}` } : {}) },
       body: JSON.stringify(body),
       cache: "no-store",
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
   } catch {
-    throw new AppError("MAIL_SERVICE_UNREACHABLE", "E-posta servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
+    throw new AppError("MAIL_SERVICE_UNREACHABLE", "Market Kasa servisine bağlanılamadı. İnternet bağlantısını kontrol edin.", 502);
   }
   const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok) {
@@ -78,4 +78,13 @@ export async function serviceSend(creds: string, msg: MailMessage): Promise<{ se
     creds,
   );
   return { sent: (r.sent as string[]) ?? [], skipped: (r.skipped as string[]) ?? [] };
+}
+
+/**
+ * Aylık rapor yorumu (merkezi yapay zekâ). Servis Claude'u kendi anahtarıyla, sabit istemle çağırır; programdan yalnız
+ * hesaplanmış rakamlar (veri paketi) gider. Yanıt birkaç dakika sürebilir.
+ */
+export async function serviceAiMonthly(creds: string, payload: unknown): Promise<{ report: unknown; model: string }> {
+  const r = await call("/v1/ai/monthly", { payload }, creds, 6 * 60_000);
+  return { report: r.report, model: String(r.model ?? "") };
 }

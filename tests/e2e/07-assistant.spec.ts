@@ -8,10 +8,9 @@ test("yapay zekâ asistanı: hedefler, ara rapor, aksiyon takibi", async ({ page
   await expect(page.getByTestId("assistant-screen")).toBeVisible();
   await expect(page.getByTestId("assistant-targets")).toBeVisible();
   await expect(page.getByTestId("target-revenue")).toBeVisible();
-  await expect(page.getByTestId("ai-status")).toContainText("bağlı değil"); // anahtar yok: yalnız küçük bağlantı
-  await page.getByTestId("ai-settings-open").click();
-  await expect(page.getByTestId("ai-key")).toBeVisible();
-  await page.keyboard.press("Escape");
+  // Hesapsız kurulum: yerleşik asistan çalışır, anahtar/hesap sorulmaz
+  await expect(page.getByTestId("ai-status")).toContainText("yerleşik");
+  await expect(page.getByTestId("ai-settings-open")).toHaveCount(0);
 
   // Bu ayın ara raporu
   const month = await page.getByTestId("assistant-month").inputValue();
@@ -22,6 +21,8 @@ test("yapay zekâ asistanı: hedefler, ara rapor, aksiyon takibi", async ({ page
   await expect(page.getByTestId("assistant-analysis")).toBeVisible();
   await expect(page.getByTestId("assistant-staff")).toBeVisible();
   await expect(page.getByTestId("assistant-summary")).toBeVisible();
+  await expect(page.getByTestId("assistant-headline")).toContainText("ciro");
+  await expect(page.getByTestId("area-fiyat")).toBeVisible();
   await expect(page.getByTestId("assistant-plan").getByRole("heading", { name: "Aylık alınabilecek aksiyonlar" })).toBeVisible();
 
   const first = page.getByTestId("plan-action").first();

@@ -1176,7 +1176,7 @@ Devam etmek için bir tuşa basın . . .</pre></div>
       <li><i>2</i><span><b>Hedef kartı:</b> Gerçekleşen / hedef. Siyah çizgi bugüne kadar olması gerekeni gösterir (haftanın günlerine göre: Cumartesi çok satıyorsanız Cumartesi daha çok beklenir). Altında <b>ay sonu tahmini</b>. Durum: Hedefin önünde, Yolunda, Geride.</span></li>
       <li><i>3</i><span><span class="ui">Hedefleri düzenle</span>: Önerilen hedefleri kendiniz değiştirebilirsiniz (ör. ciro ₺150.000). Sizin girdiğiniz hedefe program dokunmaz.</span></li>
       <li><i>4</i><span><span class="ui">Raporu oluştur</span>: Ay bitmeden de bir <b>ara rapor</b> alabilirsiniz. Ay bitince rapor kendiliğinden son hâlini alır.</span></li>
-      <li><i>5</i><span><b>Yapay zekâ durumu</b> (bağlı değil / açık / kapalı) ve <span class="ui">bağlantı ayarları</span> (isteğe bağlı; aşağıdaki "Yapay zekâyı bağlamak" kutusuna bakın).</span></li>
+      <li><i>5</i><span><b>Asistan durumu:</b> Yorumu yerleşik asistan bu bilgisayarda yazar; hesap ya da internet gerekmez. Bulut yapay zekâ sunuluyorsa burada <span class="ui">ayarlar</span> bağlantısı da görünür.</span></li>
     </ul>
   </div>
   <div class="box tip"><span class="t">Rapor ne zaman gelir?</span><p>Ay bittikten sonra program ilk açıldığında (genelde ayın 1'i sabahı) geçen ayın raporu <b>kendiliğinden</b> hazırlanır, gelecek ayın hedefleri konur ve rapor yöneticilerin e-postasına gider (e-posta bağlıysa, Bölüm 23.2).</p></div>
@@ -1212,9 +1212,8 @@ Devam etmek için bir tuşa basın . . .</pre></div>
       <li><i>4</i><span>Yaptıklarınızı <span class="ui">Yapıldı</span> ile işaretleyin. Gelecek ayın raporu "geçen ayın aksiyonları ne oldu?" bölümünde bunları değerlendirir.</span></li>
     </ul>
   </div>
-  <div class="box"><span class="t">Yapay zekâyı bağlamak (isteğe bağlı)</span><p>Rapor yapay zekâ olmadan da çalışır: bütün rakamlar ve öneriler bilgisayarınızda hesaplanır. <b>Anthropic Claude</b> bağlanırsa bu rakamları bir danışman gibi yorumlar: her alana not verir (İyi / Orta / Zayıf), personeli tek tek değerlendirir, önerileri birleştirip haftalara böler (1. hafta, 2. hafta…), riskleri ve gelecek ayın odağını yazar.<br>
-  1) <b>console.anthropic.com</b>'da hesap açın ve Billing'den kredi yükleyin (kullandıkça ödenir; ayda bir rapor düşük tutardadır). 2) API Keys → <b>Create Key</b>. 3) Yapay zekâ asistanı ekranında <span class="ui">bağlantı ayarları</span>'na tıklayın, anahtarı kutuya yapıştırıp <span class="ui">Bağla</span>'ya basın. Program anahtarı dener ve bilgisayarda şifreli saklar.</p></div>
-  <div class="box warn"><span class="t">Gizlilik ve rakamlar</span><p>Yapay zekâya yalnızca hesaplanmış rakamlar ve ürün adları gider; kasiyer adları gitmez ("Kasiyer 1001" olarak geçer, ekranda yine adıyla görürsünüz). Yapay zekâ rakam üretmez; bütün rakamlar programdaki kayıtlardan gelir. İnternet yoksa ya da anahtar geçersizse rapor yine hazırlanır, yorum sonra eklenir.</p></div>
+  <div class="box tip"><span class="t">Akıllı asistan hesap istemez</span><p>Raporun bütün yorumunu programın <b>yerleşik asistanı</b> yazar: her alana not verir (İyi / Orta / Zayıf), bulguları rakamlarla anlatır, her çalışanı ekibin geri kalanıyla karşılaştırıp güçlü yönlerini ve gelişim alanlarını yazar, önerileri haftalara böler (1. hafta, 2. hafta…), geçen ayın yapılmayan aksiyonlarını hatırlatır, gelecek ayın mevsim ve özel günlerine (okul açılışı, bayramlar, yılbaşı…) göre hazırlık önerir, riskleri ve ayın odağını belirler. Bunun için hiçbir hesap, anahtar ya da internet gerekmez.</p></div>
+  <div class="box"><span class="t">Bulut yapay zekâ (varsa)</span><p>Market Kasa servisinde bulut yapay zekâ açıksa rapor ayrıca yapay zekâyla (Claude) daha derin yorumlanır; sizin hesap açmanız gerekmez. Servise yalnızca hesaplanmış rakamlar ve ürün adları gider; kasiyer adları gitmez ("Kasiyer 1001" olarak geçer), işletme adı gitmez. İstemezseniz <span class="ui">ayarlar</span> → <span class="ui">Bulut yapay zekâyı kapat</span>. İnternet yoksa yerleşik yorum geçerlidir.</p></div>
 </section>
 
 <section class="flow-sec">

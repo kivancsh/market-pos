@@ -16,6 +16,7 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
   const report = data.report;
   const month = data.selectedMonth;
   const isCurrent = month === data.currentMonth;
+  const cloudOn = data.ai.cloudAvailable && data.ai.cloudEnabled;
 
   async function reload(m = month) {
     const d = await api<AssistantPageData>(`/api/assistant?month=${m}`);
@@ -37,8 +38,8 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
           ? await api<{ report: MonthlyReportView }>("/api/assistant/reports", { method: "POST", body: { month } })
           : await api<{ report: MonthlyReportView }>(`/api/assistant/reports/${month}/ai`, { method: "POST", body: {} });
       await reload();
-      if (r.report.aiError) setNotice({ kind: "warn", text: `Rapor hazır, ancak yapay zekâ yorumu alınamadı: ${r.report.aiError}` });
-      else setNotice({ kind: "success", text: r.report.ai ? "Rapor ve yapay zekâ yorumu hazır." : "Rapor hazır." });
+      if (cloudOn && r.report.aiSource === "local" && r.report.aiError) setNotice({ kind: "info", text: `Rapor hazır (yerleşik asistan). Bulut yorumu alınamadı: ${r.report.aiError}` });
+      else setNotice({ kind: "success", text: r.report.aiSource === "cloud" ? "Rapor hazır: bulut yapay zekâ yorumuyla." : "Rapor hazır." });
     } catch (e) {
       setNotice({ kind: "error", text: e instanceof ApiError ? e.message : "İşlem yapılamadı." });
     } finally {
@@ -89,9 +90,9 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
         >
           {busy === "generate" ? "Hazırlanıyor…" : report ? (isCurrent ? "Ara raporu yenile" : "Raporu yeniden oluştur") : isCurrent ? "Bu ayın ara raporunu oluştur" : "Raporu oluştur"}
         </button>
-        {report && data.ai.enabled && (!report.ai || report.aiError) && (
+        {report && cloudOn && report.aiSource !== "cloud" && (
           <button type="button" disabled={busy !== null} onClick={() => void run("ai")} className="rounded-xl border-2 border-emerald-600 px-4 py-2 font-semibold text-emerald-800 disabled:opacity-50" data-testid="assistant-ai-retry">
-            {busy === "ai" ? "Yapay zekâ yazıyor…" : "Yapay zekâ yorumunu al"}
+            {busy === "ai" ? "Yapay zekâ yazıyor…" : "Bulut yapay zekâ ile güçlendir"}
           </button>
         )}
         {report && (
@@ -105,8 +106,13 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
           </button>
         )}
         <span className="text-sm text-slate-500 print:hidden" data-testid="ai-status">
-          Yapay zekâ: {!data.ai.configured ? "bağlı değil" : data.ai.enabled ? "açık" : "kapalı"} ·{" "}
-          <AiConnect status={data.ai} onChange={() => void reload()} />
+          Asistan: yerleşik{data.ai.cloudAvailable ? (cloudOn ? " + bulut yapay zekâ" : " (bulut kapalı)") : " (bu bilgisayarda çalışır)"}
+          {data.ai.cloudAvailable && (
+            <>
+              {" "}
+              · <AiConnect status={data.ai} onChange={() => void reload()} />
+            </>
+          )}
         </span>
       </div>
 
@@ -114,9 +120,9 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
         <div className="flex items-center gap-3 rounded-2xl bg-emerald-50 p-4 text-emerald-900" role="status" data-testid="assistant-busy">
           <span className="h-5 w-5 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" aria-hidden />
           <span>
-            {data.ai.enabled
-              ? "Rakamlar hesaplandı; yapay zekâ işletmenizi inceleyip planı yazıyor. Bu 1–3 dakika sürebilir, sayfadan ayrılmayın."
-              : "Rakamlar hesaplanıyor…"}
+            {cloudOn
+              ? "Rakamlar ve yerleşik yorum hazır; bulut yapay zekâ işletmenizi inceleyip planı güçlendiriyor. Bu 1–3 dakika sürebilir, sayfadan ayrılmayın."
+              : "Rakamlar hesaplanıyor ve asistan raporu yazıyor…"}
           </span>
         </div>
       )}
