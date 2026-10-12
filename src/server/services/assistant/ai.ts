@@ -156,18 +156,23 @@ async function testAiKey(apiKey: string): Promise<void> {
 
 /** Anthropic hatalarını yöneticinin anlayacağı Türkçe mesaja çevirir. */
 export function aiErrorMessage(e: unknown): string {
-  if (e instanceof Anthropic.AuthenticationError) return "API anahtarı geçersiz ya da silinmiş. Yapay zekâ ayarlarından yeniden girin.";
-  if (e instanceof Anthropic.PermissionDeniedError) return "Bu anahtarın modele erişim izni yok (Anthropic Console → hesap ayarlarını kontrol edin).";
-  if (e instanceof Anthropic.NotFoundError) return "Model bulunamadı; programı güncelleyin.";
-  if (e instanceof Anthropic.RateLimitError) return "Anthropic kullanım sınırına ulaşıldı; biraz sonra yeniden denenecek.";
-  if (e instanceof Anthropic.APIConnectionError) return "İnternet bağlantısı yok ya da Anthropic'e ulaşılamadı; bağlantı gelince yeniden denenecek.";
-  if (e instanceof Anthropic.BadRequestError) {
-    return /credit|balance|billing/i.test(e.message)
+  if (e instanceof AiOutputError) return e.message;
+  // Sınıfla birlikte HTTP durum koduna da bakılır (paket iki kopya yüklenirse instanceof tutmayabilir)
+  const status = e instanceof Anthropic.APIError ? e.status : typeof (e as { status?: unknown })?.status === "number" ? (e as { status: number }).status : undefined;
+  const message = e instanceof Error ? e.message : "";
+  if (e instanceof Anthropic.AuthenticationError || status === 401) return "API anahtarı geçersiz ya da silinmiş. Yapay zekâ ayarlarından yeniden girin.";
+  if (e instanceof Anthropic.PermissionDeniedError || status === 403) return "Bu anahtarın modele erişim izni yok (Anthropic Console → hesap ayarlarını kontrol edin).";
+  if (e instanceof Anthropic.NotFoundError || status === 404) return "Model bulunamadı; programı güncelleyin.";
+  if (e instanceof Anthropic.RateLimitError || status === 429) return "Anthropic kullanım sınırına ulaşıldı; biraz sonra yeniden denenecek.";
+  if (e instanceof Anthropic.BadRequestError || status === 400) {
+    return /credit|balance|billing/i.test(message)
       ? "Anthropic hesabında kredi kalmamış. Console → Billing'den yükleme yapın."
       : "İstek reddedildi. Programı güncelleyip yeniden deneyin.";
   }
-  if (e instanceof Anthropic.InternalServerError) return "Anthropic servisi şu an yoğun; biraz sonra yeniden denenecek.";
-  if (e instanceof AiOutputError) return e.message;
+  if (e instanceof Anthropic.InternalServerError || (status !== undefined && status >= 500)) return "Anthropic servisi şu an yoğun; biraz sonra yeniden denenecek.";
+  if (e instanceof Anthropic.APIConnectionError || (e instanceof Error && /APIConnection|fetch failed|ENOTFOUND|ECONNREFUSED|ETIMEDOUT|timed out/i.test(`${e.name} ${message}`))) {
+    return "İnternet bağlantısı yok ya da Anthropic'e ulaşılamadı; bağlantı gelince yeniden denenecek.";
+  }
   return "Yapay zekâ yorumu alınamadı.";
 }
 

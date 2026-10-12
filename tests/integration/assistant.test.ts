@@ -317,5 +317,9 @@ describe("yapay zekâ asistanı — aylık rapor", () => {
   it("Anthropic hataları Türkçe ve anlaşılır mesaja çevrilir", () => {
     expect(aiErrorMessage(new Anthropic.APIConnectionError({ message: "x" }))).toMatch(/İnternet/);
     expect(aiErrorMessage(new Error("x"))).toBe("Yapay zekâ yorumu alınamadı.");
+    // Paketin başka bir kopyasından gelen hata: durum koduna göre tanınır
+    expect(aiErrorMessage(Object.assign(new Error("401 invalid x-api-key"), { status: 401 }))).toMatch(/anahtarı geçersiz/);
+    expect(aiErrorMessage(Object.assign(new Error("credit balance is too low"), { status: 400 }))).toMatch(/kredi/);
+    expect(aiErrorMessage(Object.assign(new Error("overloaded"), { status: 529 }))).toMatch(/yoğun/);
   });
 });
