@@ -11,10 +11,11 @@ yapacağınızı söyler.", gerçek rapor ekranı taranır ve notlar çıkar, ak
 ve ay sonu tahmini çubuğu dolar; "Hesap gerektirmez · İnternetsiz çalışır · Her ay otomatik") → "Ve dahası" 3B karusel: etiket, Excel, telefon, gün sonu e-postası, işlem geçmişi → kartlar
 merkezde toplanıp logoya patlar → **final** (Satış · Stok · Finans · Ekip · Yapay zekâ, "Dükkânınızı bugün büyütün.").
 
-Müzik: her bölümün kendi rengi var (gerilim → sinematik açılış → house grovu → tam enerji → yarım tempo 808 → nefes → patlama
-(yapay zekâ: dijital pırıltı arpeji, her ölçüde sonik logo, tarama/daktilo/hedef zili) → karusel →
-bant durması → majöre çözülen final). 4 notalık **sonik logo** (La–Mi–Do–La) girişte, logoda, barkod biplerinde (biplerin notaları
-motifin notaları), satış "çiling"inde, ana melodide, stokta piyanoda ve finalde majör olarak tekrar eder.
+Müzik: parlak ve pozitif — Re majör, yapay zekâ sahnesinden itibaren Mi majöre yükselir. Tekrara düşmemesi için her bölümün kendi
+akor yürüyüşü ve çalgı rengi var, melodi her ölçüde yeniden üretilir: umutlu gerilim → Re majör açılış → disko-funk satış (gitar,
+oktav bas, e-piyano) → piyano-house finans (tef, ana melodi) → yarım tempo ekip (kayan 808, arpej) → stok (piyano, büyük yükseliş) →
+yapay zekâ (nefesli vuruşları, koro, dijital pırıltı; en güçlü an) → karusel (yay koşuları) → bant durması → A–B–E coşkulu final.
+4 notalık **sonik logo** (Re–Fa♯–La–Re, majör) logoda, barkod biplerinde, satış "çiling"inde, stokta, yapay zekâda ve finalde duyulur.
 
 Ekranlar uygulamanın gerçek ekranlarıdır (ayrı demo veritabanı, "Köşe Market"); sayaçlardaki rakamlar o ekranlardan okunur.
 Müzik ve ses efektleri `music.py` ile sıfırdan sentezlenir; telif hakkı sorunu yoktur.
