@@ -8,7 +8,10 @@ test("yapay zekâ asistanı: hedefler, ara rapor, aksiyon takibi", async ({ page
   await expect(page.getByTestId("assistant-screen")).toBeVisible();
   await expect(page.getByTestId("assistant-targets")).toBeVisible();
   await expect(page.getByTestId("target-revenue")).toBeVisible();
-  await expect(page.getByTestId("ai-connect")).toBeVisible(); // anahtar yok: bağlama kartı
+  await expect(page.getByTestId("ai-status")).toContainText("bağlı değil"); // anahtar yok: yalnız küçük bağlantı
+  await page.getByTestId("ai-settings-open").click();
+  await expect(page.getByTestId("ai-key")).toBeVisible();
+  await page.keyboard.press("Escape");
 
   // Bu ayın ara raporu
   const month = await page.getByTestId("assistant-month").inputValue();

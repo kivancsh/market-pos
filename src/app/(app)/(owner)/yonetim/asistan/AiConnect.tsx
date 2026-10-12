@@ -6,34 +6,26 @@ import { Modal } from "@/client/components/Modal";
 import type { AiStatus } from "@/server/services/assistant/ai";
 
 /**
- * Yapay zekâ bağlantısı: yönetici kendi Anthropic API anahtarını girer (şifreli saklanır, ekranda bir daha gösterilmez).
- * `compact`: bağlıyken küçük "Ayarlar" bağlantısı; açılır pencerede aç/kapat ve kaldır.
+ * Yapay zekâ bağlantısı: küçük "bağlantı ayarları" bağlantısı; açılır pencerede yönetici kendi Anthropic API anahtarını girer
+ * (şifreli saklanır, ekranda bir daha gösterilmez), yorumu açıp kapatır ya da bağlantıyı kaldırır.
  */
-export function AiConnect({ status, onChange, compact = false }: { status: AiStatus; onChange: () => void; compact?: boolean }) {
+export function AiConnect({ status, onChange }: { status: AiStatus; onChange: () => void }) {
   const [open, setOpen] = useState(false);
-  if (compact) {
-    return (
-      <>
-        <button type="button" className="font-semibold text-emerald-800 underline" onClick={() => setOpen(true)} data-testid="ai-settings-open">
-          bağlantı ayarları
-        </button>
-        {open && (
-          <Modal title="Yapay zekâ bağlantısı" onClose={() => setOpen(false)}>
-            <Form status={status} onDone={() => (setOpen(false), onChange())} />
-          </Modal>
-        )}
-      </>
-    );
-  }
   return (
-    <section className="rounded-2xl border-2 border-dashed border-emerald-300 bg-emerald-50/60 p-4 print:hidden" aria-label="Yapay zekâyı bağlayın" data-testid="ai-connect">
-      <h2 className="text-lg font-semibold">Yapay zekâyı bağlayın (isteğe bağlı)</h2>
-      <p className="mt-1 text-sm text-slate-700">
-        Rapor yapay zekâ olmadan da hazırlanır: bütün rakamlar, hedefler ve kural tabanlı öneriler bu bilgisayarda hesaplanır. Yapay zekâ
-        (Anthropic Claude) bağlanırsa bu rakamları bir danışman gibi yorumlar, personeli değerlendirir ve haftalara bölünmüş bir aksiyon planı yazar.
-      </p>
-      <Form status={status} onDone={onChange} />
-    </section>
+    <>
+      <button type="button" className="font-semibold text-emerald-800 underline" onClick={() => setOpen(true)} data-testid="ai-settings-open">
+        bağlantı ayarları
+      </button>
+      {open && (
+        <Modal title="Yapay zekâ bağlantısı" onClose={() => setOpen(false)}>
+          <p className="text-sm text-slate-700">
+            Rapor yapay zekâ olmadan da hazırlanır. Anthropic Claude bağlanırsa rakamları bir danışman gibi yorumlar, personeli değerlendirir ve
+            haftalara bölünmüş bir aksiyon planı yazar.
+          </p>
+          <Form status={status} onDone={() => (setOpen(false), onChange())} />
+        </Modal>
+      )}
+    </>
   );
 }
 

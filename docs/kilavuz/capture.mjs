@@ -392,7 +392,7 @@ await shot(p, "analiz-ust", { clip: { x: 0, y: 0, width: 1280, height: 1100 }, p
     clip: { x: 0, y: 0, width: 1280, height: gen.y + gen.height + 16 },
     pad: 0,
     full: true,
-    notes: ['[data-testid="assistant-month"]', '[data-testid="target-revenue"]', '[data-testid="targets-edit"]', '[data-testid="ai-connect"]', '[data-testid="assistant-generate"]'],
+    notes: ['[data-testid="assistant-month"]', '[data-testid="target-revenue"]', '[data-testid="targets-edit"]', '[data-testid="assistant-generate"]', '[data-testid="ai-status"]'],
   });
   const rep = await p.getByTestId("assistant-report").boundingBox();
   const ana = await p.getByTestId("area-fiyat").boundingBox();

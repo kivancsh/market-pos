@@ -79,8 +79,6 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
 
       <TargetsPanel current={data.current} onSaved={() => void reload()} />
 
-      {!data.ai.configured && <AiConnect status={data.ai} onChange={() => void reload()} />}
-
       <div className="flex flex-wrap items-center gap-2 print:hidden">
         <button
           type="button"
@@ -106,11 +104,10 @@ export function AssistantScreen({ initial }: { initial: AssistantPageData }) {
             Yazdır
           </button>
         )}
-        {data.ai.configured && (
-          <span className="text-sm text-slate-500">
-            Yapay zekâ: {data.ai.enabled ? "açık" : "kapalı"} · <AiConnect status={data.ai} onChange={() => void reload()} compact />
-          </span>
-        )}
+        <span className="text-sm text-slate-500 print:hidden" data-testid="ai-status">
+          Yapay zekâ: {!data.ai.configured ? "bağlı değil" : data.ai.enabled ? "açık" : "kapalı"} ·{" "}
+          <AiConnect status={data.ai} onChange={() => void reload()} />
+        </span>
       </div>
 
       {(busy === "generate" || busy === "ai" || data.generating) && (
